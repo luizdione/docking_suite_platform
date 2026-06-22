@@ -1,0 +1,12 @@
+{
+  "updated": "2026-06-12 12:28:47",
+  "vram_used_mb": 11834,
+  "util_pct": 96,
+  "lilo_present": true,
+  "free": false,
+  "idle_streak": 0,
+  "need": 3,
+  "elapsed_h": 12.84,
+  "fired": false,
+  "driver_pid": null
+}

@@ -1,0 +1,13 @@
+{
+  "name": "2-SCN-NQ",
+  "display_name": "2-Thiocyanato-1,4-naphthoquinone",
+  "smiles": "O=C1C=C(SC#N)C(=O)c2ccccc21",
+  "formula": "C11H5NO2S",
+  "mw": 215.23,
+  "heavy_atoms": 15,
+  "rotatable_bonds": 1,
+  "charge": 0,
+  "optimization": "MMFF94 (1000 steps conjugate gradients)",
+  "date_added": "2024-01-01",
+  "notes": "Base compound of the Santos et al. antiparasitic study."
+}

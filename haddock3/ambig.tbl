@@ -1,0 +1,90 @@
+! AIRs HADDOCK3 - 2-SCN-NQ no sitio do substrato (trypanothione) da TcTR (1BZL)
+! Sitio ancorado na glutationa co-cristalizada (GCG); cisteinas catalíticas
+! CYS53/CYS58 (numeracao 1BZL = Cys52/Cys57 canonicas) + HIS461.
+
+assign ( resid 53 and segid A )
+       (
+        ( resid 1 and segid C )
+       )  2.0 2.0 0.0
+
+assign ( resid 58 and segid A )
+       (
+        ( resid 1 and segid C )
+       )  2.0 2.0 0.0
+
+assign ( resid 461 and segid A )
+       (
+        ( resid 1 and segid C )
+       )  2.0 2.0 0.0
+
+assign ( resid 19 and segid A )
+       (
+        ( resid 1 and segid C )
+       )  2.0 2.0 0.0
+
+assign ( resid 111 and segid A )
+       (
+        ( resid 1 and segid C )
+       )  2.0 2.0 0.0
+
+assign ( resid 114 and segid A )
+       (
+        ( resid 1 and segid C )
+       )  2.0 2.0 0.0
+
+assign ( resid 62 and segid A )
+       (
+        ( resid 1 and segid C )
+       )  2.0 2.0 0.0
+
+assign ( resid 464 and segid A )
+       (
+        ( resid 1 and segid C )
+       )  2.0 2.0 0.0
+
+assign ( resid 466 and segid A )
+       (
+        ( resid 1 and segid C )
+       )  2.0 2.0 0.0
+
+assign ( resid 461 and segid B )
+       (
+        ( resid 1 and segid C )
+       )  2.0 2.0 0.0
+
+assign ( resid 58 and segid B )
+       (
+        ( resid 1 and segid C )
+       )  2.0 2.0 0.0
+
+assign ( resid 53 and segid B )
+       (
+        ( resid 1 and segid C )
+       )  2.0 2.0 0.0
+
+assign ( resid 1 and segid C )
+       (
+        ( resid 53 and segid A )
+        or
+        ( resid 58 and segid A )
+        or
+        ( resid 461 and segid A )
+        or
+        ( resid 19 and segid A )
+        or
+        ( resid 111 and segid A )
+        or
+        ( resid 114 and segid A )
+        or
+        ( resid 62 and segid A )
+        or
+        ( resid 464 and segid A )
+        or
+        ( resid 466 and segid A )
+        or
+        ( resid 461 and segid B )
+        or
+        ( resid 58 and segid B )
+        or
+        ( resid 53 and segid B )
+       )  2.0 2.0 0.0

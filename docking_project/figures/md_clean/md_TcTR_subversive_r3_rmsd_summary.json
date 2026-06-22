@@ -1,0 +1,13 @@
+{
+  "tag": "TcTR_subversive_r3",
+  "n_frames": 4857,
+  "t_total_ns": 48.57,
+  "rmsd_prot_final_A": 5.321020603179932,
+  "rmsd_prot_equil_mean_A": 25.429548263549805,
+  "rmsd_prot_equil_std_A": 8.795814514160156,
+  "rmsd_lig_pocket_final_A": 4.780459880828857,
+  "rmsd_lig_pocket_max_A": 22.872055053710938,
+  "rmsd_lig_intra_final_A": 1.0253186225891113,
+  "rmsf_mean_A": 13.943746566772461,
+  "rmsf_max_A": 27.987260818481445
+}

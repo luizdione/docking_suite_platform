@@ -1,0 +1,13 @@
+{
+  "tag": "prod_v5_smoke",
+  "n_frames": 500,
+  "t_total_ns": 5.0,
+  "rmsd_prot_final_A": 1.5594978332519531,
+  "rmsd_prot_equil_mean_A": 2.175809144973755,
+  "rmsd_prot_equil_std_A": 0.49623095989227295,
+  "rmsd_lig_pocket_final_A": 5.6925048828125,
+  "rmsd_lig_pocket_max_A": 5.844574451446533,
+  "rmsd_lig_intra_final_A": 0.33621278405189514,
+  "rmsf_mean_A": 1.521614670753479,
+  "rmsf_max_A": 3.892319679260254
+}

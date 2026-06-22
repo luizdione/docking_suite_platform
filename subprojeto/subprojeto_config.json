@@ -1,0 +1,66 @@
+{
+  "_meta": {
+    "programa": "NQ-Antiparasitarios",
+    "nome_geral": "Descoberta computacional de naftoquinonas antiparasitarias (docking + MD + ADMET)",
+    "plataforma": "docking",
+    "plataforma_app": "dashboard_v2.py (Flask, :5001)",
+    "plataforma_irma": "epigenoma (R/Shiny, app_v3.R)",
+    "convencao": "subNN = subprojeto; nome_geral = programa guarda-chuva; nome_especifico = titulo atual do paper",
+    "criado": "2026-06-19",
+    "atualizado": "2026-06-19",
+    "responsavel": "Luiz Dione Barbosa de Melo",
+    "orcid": "0000-0003-2445-9943",
+    "instituicao": "IFRJ",
+    "schema_version": "1.0",
+    "schema_irmao": "epigenoma/subprojeto/subprojeto_config.json"
+  },
+  "subprojetos": {
+    "SUB01": {
+      "id": "SUB01",
+      "sigla": "NQ-TR-subversivo",
+      "nome_especifico": "2-Tiocianato-1,4-naftoquinona como substrato subversivo da tripanotiona redutase: ligacao seletiva na si-face do FAD em Trypanosoma cruzi e Leishmania versus glutationa redutase humana",
+      "titulo_paper_atual": "2-Thiocyanate-1,4-naphthoquinone as a subversive substrate of trypanothione reductase: selective FAD si-face binding in Trypanosoma cruzi and Leishmania versus human glutathione reductase",
+      "status": "em_desenvolvimento",
+      "fase_atual": "MD n=3 consolidada (50 ns x 3 replicas por alvo); redacao do manuscrito em curso",
+      "periodico_alvo": "ACS Infectious Diseases (Q1)",
+      "composto_base": "2-SCN-NQ",
+      "smiles": "O=C1C=C(SC#N)C(=O)c2ccccc21",
+      "formula": "C11H5NO2S",
+      "mw_g_mol": 215.23,
+      "alvos": {
+        "TcTR": "Trypanothione reductase de Trypanosoma cruzi (parasito-alvo)",
+        "LiTR": "Trypanothione reductase de Leishmania (parasito-alvo)",
+        "hGR": "Glutathione reductase humana (contra-alvo de seletividade)"
+      },
+      "alvos_painel_seletividade": ["TcTR", "LiTR", "hGR", "hCatL", "hDHODH", "hMnSOD", "LmDHODH", "TcCruzain", "TcFeSOD"],
+      "criado": "2026-03-11",
+      "atualizado": "2026-06-19",
+      "caminhos": {
+        "raiz": "C:\\Users\\luizd\\OneDrive\\Data_Science\\Projetos\\docking",
+        "dados": "docking_project",
+        "figuras": "docking_project/figures",
+        "md_clean": "docking_project/figures/2-SCN-NQ/md_clean",
+        "resultados": "docking_project/results/2-SCN-NQ",
+        "resumo": "subprojeto/SUB01/RESUMO_SUB01.md",
+        "status_md": "subprojeto/SUB01/status.json",
+        "pipeline_svg": "docking_project/figures/pipeline_sub01.svg"
+      },
+      "scripts": {
+        "docking": {"arquivo": "docking_v2.py", "engine": "AutoDock Vina 1.2.7 (vina.exe)"},
+        "md": {"arquivo": "md_simulation.py", "engine": "OpenMM 8.2 (CUDA)", "wrapper": "run_md_safe.ps1"},
+        "md_replicas": {"arquivo": "replica_driver.py", "saida": "replica_summary.json"},
+        "agregacao_n3": {"arquivo": "aggregate_md_n3.py", "saida": "n3_resultados.json"},
+        "binding_mode": {"arquivo": "analyze_dcd_numpy.py", "metrica": "lig-FAD / lig-ditiol (A)"},
+        "admet": {"arquivo": "admet_module.py"},
+        "toxicidade": {"arquivo": "toxicity_module.py"},
+        "ciclodextrina": {"arquivo": "cyclodex_module.py"},
+        "drug_design_dual": {"arquivo": "dual_design_pipeline.py"},
+        "analise_figuras": {"arquivo": "analysis.py"}
+      }
+    }
+  },
+  "subprojetos_futuros_sugeridos": {
+    "SUB02": "Otimizacao estrutural dual (derivados maiores NQ-SPM/NQ-PTZ/NQ-ACR/NQ-TZ-POL/BIS-NQ) via drug design dual + re-docking + MD confirmatoria",
+    "SUB03": "Complexacao com beta-ciclodextrina para solubilidade/biodisponibilidade do 2-SCN-NQ e derivados"
+  }
+}

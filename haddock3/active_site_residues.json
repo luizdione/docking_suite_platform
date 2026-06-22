@@ -1,0 +1,266 @@
+{
+  "A": [
+    {
+      "resnum": 15,
+      "resname": "SER",
+      "min_dist_A": 3.23
+    },
+    {
+      "resnum": 18,
+      "resname": "LEU",
+      "min_dist_A": 3.59
+    },
+    {
+      "resnum": 19,
+      "resname": "GLU",
+      "min_dist_A": 3.04
+    },
+    {
+      "resnum": 22,
+      "resname": "TRP",
+      "min_dist_A": 3.97
+    },
+    {
+      "resnum": 53,
+      "resname": "CYS",
+      "min_dist_A": 3.99
+    },
+    {
+      "resnum": 54,
+      "resname": "VAL",
+      "min_dist_A": 3.25
+    },
+    {
+      "resnum": 59,
+      "resname": "VAL",
+      "min_dist_A": 3.29
+    },
+    {
+      "resnum": 62,
+      "resname": "LYS",
+      "min_dist_A": 4.38
+    },
+    {
+      "resnum": 107,
+      "resname": "ILE",
+      "min_dist_A": 3.78
+    },
+    {
+      "resnum": 110,
+      "resname": "SER",
+      "min_dist_A": 3.36
+    },
+    {
+      "resnum": 111,
+      "resname": "TYR",
+      "min_dist_A": 2.79
+    },
+    {
+      "resnum": 114,
+      "resname": "MET",
+      "min_dist_A": 4.49
+    },
+    {
+      "resnum": 335,
+      "resname": "THR",
+      "min_dist_A": 3.93
+    },
+    {
+      "resnum": 336,
+      "resname": "PRO",
+      "min_dist_A": 4.14
+    },
+    {
+      "resnum": 339,
+      "resname": "ILE",
+      "min_dist_A": 3.55
+    },
+    {
+      "resnum": 396,
+      "resname": "PHE",
+      "min_dist_A": 3.37
+    },
+    {
+      "resnum": 397,
+      "resname": "THR",
+      "min_dist_A": 3.96
+    },
+    {
+      "resnum": 398,
+      "resname": "PRO",
+      "min_dist_A": 3.25
+    },
+    {
+      "resnum": 399,
+      "resname": "LEU",
+      "min_dist_A": 2.96
+    },
+    {
+      "resnum": 402,
+      "resname": "LYS",
+      "min_dist_A": 3.44
+    },
+    {
+      "resnum": 458,
+      "resname": "ILE",
+      "min_dist_A": 4.07
+    },
+    {
+      "resnum": 459,
+      "resname": "GLY",
+      "min_dist_A": 3.0
+    },
+    {
+      "resnum": 461,
+      "resname": "HIS",
+      "min_dist_A": 3.05
+    },
+    {
+      "resnum": 462,
+      "resname": "PRO",
+      "min_dist_A": 3.96
+    },
+    {
+      "resnum": 463,
+      "resname": "THR",
+      "min_dist_A": 3.19
+    },
+    {
+      "resnum": 464,
+      "resname": "SER",
+      "min_dist_A": 3.65
+    },
+    {
+      "resnum": 466,
+      "resname": "GLU",
+      "min_dist_A": 3.03
+    },
+    {
+      "resnum": 467,
+      "resname": "GLU",
+      "min_dist_A": 3.34
+    },
+    {
+      "resnum": 470,
+      "resname": "SER",
+      "min_dist_A": 3.57
+    }
+  ],
+  "B": [
+    {
+      "resnum": 15,
+      "resname": "SER",
+      "min_dist_A": 3.7
+    },
+    {
+      "resnum": 18,
+      "resname": "LEU",
+      "min_dist_A": 3.76
+    },
+    {
+      "resnum": 19,
+      "resname": "GLU",
+      "min_dist_A": 3.49
+    },
+    {
+      "resnum": 22,
+      "resname": "TRP",
+      "min_dist_A": 3.58
+    },
+    {
+      "resnum": 54,
+      "resname": "VAL",
+      "min_dist_A": 4.06
+    },
+    {
+      "resnum": 59,
+      "resname": "VAL",
+      "min_dist_A": 3.41
+    },
+    {
+      "resnum": 107,
+      "resname": "ILE",
+      "min_dist_A": 4.04
+    },
+    {
+      "resnum": 110,
+      "resname": "SER",
+      "min_dist_A": 3.13
+    },
+    {
+      "resnum": 111,
+      "resname": "TYR",
+      "min_dist_A": 2.69
+    },
+    {
+      "resnum": 114,
+      "resname": "MET",
+      "min_dist_A": 4.31
+    },
+    {
+      "resnum": 335,
+      "resname": "THR",
+      "min_dist_A": 3.08
+    },
+    {
+      "resnum": 336,
+      "resname": "PRO",
+      "min_dist_A": 3.5
+    },
+    {
+      "resnum": 339,
+      "resname": "ILE",
+      "min_dist_A": 3.48
+    },
+    {
+      "resnum": 396,
+      "resname": "PHE",
+      "min_dist_A": 3.26
+    },
+    {
+      "resnum": 398,
+      "resname": "PRO",
+      "min_dist_A": 3.92
+    },
+    {
+      "resnum": 399,
+      "resname": "LEU",
+      "min_dist_A": 4.18
+    },
+    {
+      "resnum": 461,
+      "resname": "HIS",
+      "min_dist_A": 2.71
+    },
+    {
+      "resnum": 462,
+      "resname": "PRO",
+      "min_dist_A": 3.96
+    },
+    {
+      "resnum": 463,
+      "resname": "THR",
+      "min_dist_A": 3.4
+    },
+    {
+      "resnum": 464,
+      "resname": "SER",
+      "min_dist_A": 3.51
+    },
+    {
+      "resnum": 466,
+      "resname": "GLU",
+      "min_dist_A": 3.15
+    },
+    {
+      "resnum": 467,
+      "resname": "GLU",
+      "min_dist_A": 3.42
+    },
+    {
+      "resnum": 470,
+      "resname": "SER",
+      "min_dist_A": 3.64
+    }
+  ]
+}

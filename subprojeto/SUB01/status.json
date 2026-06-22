@@ -1,0 +1,27 @@
+{
+  "id": "SUB01",
+  "nome_geral": "NQ-Antiparasitarios",
+  "nome_especifico": "2-Thiocyanate-1,4-naphthoquinone as a subversive substrate of trypanothione reductase",
+  "status": "em_desenvolvimento",
+  "atualizado": "2026-06-19",
+  "etapas": [
+    {"etapa": "docking_painel_9_alvos", "status": "done"},
+    {"etapa": "md_subversivo_n3_TcTR", "status": "done"},
+    {"etapa": "md_subversivo_n3_LiTR", "status": "done"},
+    {"etapa": "md_subversivo_n3_hGR", "status": "done"},
+    {"etapa": "agregacao_n3", "status": "done"},
+    {"etapa": "metrica_seletividade_lig_FAD", "status": "done"},
+    {"etapa": "md_inibidor_n3", "status": "pending"},
+    {"etapa": "qmmm_ou_dG_ligacao", "status": "pending"},
+    {"etapa": "manuscrito_build_paper", "status": "pending"},
+    {"etapa": "figuras_300dpi_e_suplementar", "status": "pending"},
+    {"etapa": "cover_letter_declaracoes", "status": "pending"}
+  ],
+  "metricas_chave": {
+    "lig_fad_A": {"TcTR": [2.26, 0.07], "LiTR": [2.43, 0.23], "hGR": [9.28, 1.44]},
+    "lig_dithiol_A": {"TcTR": [2.50, 0.00], "LiTR": [2.82, 0.55], "hGR": [7.55, 1.86]},
+    "n_replicas": 3,
+    "ns_por_replica": 50
+  },
+  "fontes": ["replica_summary.json", "n3_resultados.json", "RELATORIO_n3.md"]
+}

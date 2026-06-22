@@ -1,0 +1,8 @@
+{
+  "_note": "MODELO. Copie para docking_project/notion_config.json e preencha com seu token real. NUNCA versionar o arquivo real (esta no .gitignore). Alternativa: definir a variavel de ambiente NOTION_TOKEN.",
+  "token": "secret_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "db_ids": {
+    "compounds": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "results": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  }
+}

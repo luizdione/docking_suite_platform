@@ -1,0 +1,77 @@
+# ==========================================================================
+# NQ-Docking Suite — .gitignore (consolidado pela auditoria 2026-06-21)
+# Repo PRIVADO enquanto o paper SUB01 (ACS Infectious Diseases) estiver em
+# desenvolvimento. Nunca versionar segredos, dados pesados nem o manuscrito.
+# ==========================================================================
+
+# --- Ambientes / caches ---
+__pycache__/
+*.py[cod]
+*$py.class
+.idea/
+.vscode/
+*.bak
+*.bak_*
+*.before_*
+*.partial_*
+*.INVALID.txt
+*_v3_elemfix.xml
+
+# --- Ambientes virtuais / conda / terceiros ---
+PyMol/
+venv/
+.venv/
+env/
+ENV/
+*.egg-info/
+
+# --- Binarios de terceiros / pesados ---
+vina.exe
+*.exe
+*.dll
+icone.ico
+icone.png
+
+# --- Trajetorias / saidas de MD (GB) ---
+*.dcd
+*.xtc
+*.trr
+*.chk
+*.checkpoint
+*.h5
+docking_project/figures/md_clean/*.pdb
+docking_project/figures/md_clean/minimized_*.pdb
+docking_project/figures/smoke_test_*/
+docking_project/proteins/*_receptor.pdbqt
+docking_project/validation/
+docking_project/_obsoletos_pdb_errados/
+
+# --- Saidas do HADDOCK (manter inputs/protocolo) ---
+haddock3/run-*/
+haddock3/*.tgz
+
+# --- Logs / PIDs / estado de execucao ---
+*.log
+*.pid
+*.runlog
+*_boot.log
+*.boot.out.log
+*.boot.err.log
+chain_log.txt
+
+# --- Segredos / config local (NUNCA versionar) ---
+docking_project/notion_config.json
+.env
+*.env
+venv_info.json
+.claude_analysis.json
+
+# --- Manuscrito / scripts-do-paper / artefatos nao-plataforma ---
+PAPER/
+OBSOLETOS/
+paper_tools/
+n3_resultados.json
+RELATORIO_n3.md
+
+# --- Lixo de serializacao JS ([object Object]) ---
+**/_object_Object_/

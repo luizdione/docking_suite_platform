@@ -1,0 +1,44 @@
+{
+  "updated": "2026-06-17 07:57:34",
+  "current_job": null,
+  "elapsed_h": 56.93,
+  "done": [
+    "hGR_subversive_r2",
+    "LiTR_subversive_r2",
+    "hGR_subversive_r3"
+  ],
+  "n_done": 3,
+  "n_total": 6,
+  "jobs": {
+    "hGR_subversive_r2": {
+      "status": "done"
+    },
+    "LiTR_subversive_r2": {
+      "status": "done"
+    },
+    "TcTR_subversive_r2": {
+      "status": "failed",
+      "attempts": 3,
+      "rc": 0,
+      "last": "2026-06-15 14:40:24"
+    },
+    "hGR_subversive_r3": {
+      "status": "done",
+      "hours": 11.45,
+      "attempts": 1,
+      "finished": "2026-06-16 02:14:14"
+    },
+    "LiTR_subversive_r3": {
+      "status": "failed",
+      "attempts": 3,
+      "rc": 3221225786,
+      "last": "2026-06-16 10:28:08"
+    },
+    "TcTR_subversive_r3": {
+      "status": "failed",
+      "attempts": 3,
+      "rc": 0,
+      "last": "2026-06-17 07:57:34"
+    }
+  }
+}
