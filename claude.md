@@ -230,3 +230,60 @@ Objetivo Final
 Auxiliar na produção de pesquisas cientificamente robustas e manuscritos de alta qualidade, desde a análise dos dados até a elaboração completa de artigos, revisões, projetos, relatórios técnicos, dissertações, teses, respostas a revisores e documentos científicos destinados à publicação internacional.
 
 Sempre priorize profundidade científica, integração de evidências, interpretação crítica e qualidade compatível com periódicos de alto impacto.
+
+---
+
+# Anexo Operacional — Plataforma NQ-Docking Suite (`docking/`)
+
+> Regras de infraestrutura e processo para quem trabalha **neste repositório** (a plataforma
+> computacional, par do manuscrito SUB01 / ACS Infectious Diseases). Não confundir esta raiz
+> (`Projetos/docking`) com a do paper (`Projetos/2-SNC-NQ`). Parâmetros científicos e narrativa
+> mecanística ficam em `docs/PROTOCOLO_CIENTIFICO.md` e `README.md`.
+
+## 1. GPU compartilhada com o LILO/Ollama — regra inegociável
+A **RTX 3060 (12 GB)** é dividida entre as simulações de MD (OpenMM/CUDA) e os modelos locais
+servidos por **Ollama/LILO**. Rodar ambos a 100 % estoura o no-break (Kernel-Power Event 41)
+e/ou causa OOM de VRAM.
+- **NUNCA dispare um job de GPU (MD real) com o LILO/Ollama carregado.** Descarregue os modelos
+  locais antes, ou confirme via `nvidia-smi` que a GPU está livre.
+- Use o **gate de GPU** do projeto (`gpu_gate*`, status em `gpu_gate_status.json`) para
+  serializar o acesso.
+- **Power-cap obrigatório** antes do warm-up: `nvidia-smi -pl 120` (PowerShell **como
+  Administrador**). O dashboard só aplica o cap se iniciado como Admin; senão, aplicar à mão.
+  Sem cap, a 161 W o no-break pode desligar a máquina na equilibração.
+- Lançador seguro: `run_md_safe.ps1 -Ns <ns> -Tag <tag> -PowerLimit 120`.
+
+## 2. Padrão "guarda-chuva" de subprojetos
+- `subprojeto/subprojeto_config.json` — registro central dos subprojetos.
+- `subprojeto/SUB01/` — subprojeto ativo (2-SCN-NQ): `RESUMO_SUB01.md`, `status.json`,
+  `pipeline_sub01.svg` (gerado por `pipeline_svg.py`).
+- Cada subprojeto mantém o próprio `status.json` com o andamento das etapas.
+
+## 3. Dados (fora do repo)
+Dir: `E:\data\docking` (env `NQ_DATA_DIR`) — **nada versionado**. Saídas por sessão em
+`figures/<composto>/<session>/`, `results/<composto>/results.json`,
+`manuscript_texts/<composto>/<session>/`. Trajetórias MD (`.dcd`/`.chk`, dezenas de GB) sempre
+no `.gitignore`.
+
+## 4. Versionamento (git)
+- Repo `github.com/luizdione/docking_suite` — **PRIVADO** enquanto o SUB01 estiver em
+  desenvolvimento/submissão.
+- **Nunca** versionar: `PAPER/`, manuscrito ou artefatos de redação; segredos
+  (tokens Notion/Anthropic vêm de env/arquivo gitignored); `paper_tools/`; trajetórias MD;
+  venv/PyMOL.
+- **Re-grepar o staged por segredos antes de cada push.**
+- **Commits SEM trailer de co-autoria de IA** (política do autor — skill `git_dione`).
+- `VERSION` + `CHANGELOG.md` em SemVer + Keep a Changelog; bug fix = *patch bump*.
+
+## 5. Ambiente e execução
+- Python: conda **`datascience`** (`C:\Users\luizd\miniforge3\envs\datascience\python.exe`,
+  3.11) — rdkit, openbabel, openmm 8.x, mdtraj, flask, numpy, matplotlib.
+- Dashboard: `python dashboard_v2.py` → http://localhost:5001
+- AutoDock Vina 1.2.7 (`vina.exe`) não é instalável por pip — baixar e colocar na pasta.
+
+## 6. Manutenção
+- **`md_module` está aposentado** (2026-05-12) — usar **MD Clean** no dashboard; as rotas que
+  iteram módulos tratam `md_module` como `[SKIP]`/`[deprecated]`. Não reintroduzir.
+- Ao editar `dashboard_v2.py` (arquivo grande, com HTML/JS embutido), **suba o app e teste a
+  rota afetada** antes de commitar (Flask `test_client` cobre rotas sem GPU/rede).
+- Toda figura/saída de compostos vai para `figures/<composto>/` (ver `compound_db.py`).
