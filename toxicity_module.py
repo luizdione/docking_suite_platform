@@ -24,13 +24,14 @@ try:
     from matplotlib.gridspec import GridSpec
     import matplotlib.patches as mpatches
 except ImportError:
-    import subprocess
-    subprocess.run([sys.executable, "-m", "pip", "install", "numpy", "matplotlib", "--quiet"])
+    import _deps
+    _deps.ensure(["numpy", "matplotlib"])  # raise se nao opt-in; instala se DOCKING_AUTO_PIP=1
     import numpy as np
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     from matplotlib.gridspec import GridSpec
+    import matplotlib.patches as mpatches
 
 RDKIT_OK = False
 try:

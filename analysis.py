@@ -29,9 +29,8 @@ try:
     from matplotlib.colors import LinearSegmentedColormap
     import matplotlib.gridspec as gridspec
 except ImportError:
-    print("Installing matplotlib and numpy...")
-    import subprocess
-    subprocess.run([sys.executable, "-m", "pip", "install", "matplotlib", "numpy", "--quiet"])
+    import _deps
+    _deps.ensure(["matplotlib", "numpy"])  # raise se nao opt-in; instala se DOCKING_AUTO_PIP=1
     import numpy as np
     import matplotlib
     matplotlib.use('Agg')
