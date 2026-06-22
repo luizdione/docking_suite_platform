@@ -13,7 +13,8 @@ from pathlib import Path
 try:
     from flask import Flask, jsonify, request, Response
 except ImportError:
-    subprocess.run([sys.executable, "-m", "pip", "install", "flask", "--quiet"])
+    import _deps
+    _deps.ensure(["flask"])  # raise se nao opt-in; instala se DOCKING_AUTO_PIP=1
     from flask import Flask, jsonify, request, Response
 
 app        = Flask(__name__)
@@ -22,6 +23,21 @@ app        = Flask(__name__)
 import os as _os
 BASE_DIR   = Path(_os.environ.get("NQ_DATA_DIR", r"E:\data\docking"))
 SCRIPT_DIR = Path(__file__).resolve().parent
+
+
+def _clean_compound(value, default="2-SCN-NQ"):
+    """Normaliza o nome do composto vindo do frontend.
+
+    Rede de defesa contra objetos JS serializados ('[object Object]'),
+    valores nao-string e vazios — que geravam pastas espurias '_object_Object_'
+    via compound_db._safe_name. Retorna o composto default do projeto nesses casos.
+    """
+    if not isinstance(value, str):
+        return default
+    s = value.strip()
+    if not s or s.lower() in ("[object object]", "undefined", "null"):
+        return default
+    return s
 
 # ── HTML ──────────────────────────────────────────────────────────
 # Usa __TARGETS__ como placeholder — SEM Jinja2 — para evitar que o
@@ -6038,7 +6054,7 @@ def static_text():
 def generate_all_sections():
     data          = request.json
     lang          = data.get('lang','en')
-    compound_name = data.get('compound_name','2-SCN-NQ')
+    compound_name = _clean_compound(data.get('compound_name'))
     session_tag   = data.get('session_tag') or None
 
     sys.path.insert(0, str(SCRIPT_DIR))
@@ -6080,6 +6096,64 @@ def generate_all_sections():
             files.append(f"[INFO] sem results.json — pule analysis.run_analysis")
 
     return jsonify({"files": files, "session_tag": session_tag})
+
+
+@app.route('/build_paper', methods=['POST'])
+def build_paper():
+    """Agrega as secoes de texto ja geradas de uma sessao num unico manuscrito
+    Markdown (manuscript_<lang>.md), em ordem canonica de artigo. Robusto:
+    inclui apenas as secoes cujos arquivos existem (Paper AI 'flat' e/ou por
+    sessao). Nao inventa conteudo — so consolida o que foi gerado."""
+    data        = request.json or {}
+    compound    = _clean_compound(data.get('compound') or data.get('compound_name'))
+    lang        = data.get('lang', 'en')
+    session_tag = data.get('session_tag') or ''
+    sys.path.insert(0, str(SCRIPT_DIR))
+    from compound_db import get_session_dirs, make_session_tag, list_sessions
+    if not session_tag:
+        sess = list_sessions(BASE_DIR, compound)
+        session_tag = sess[0]['tag'] if sess else make_session_tag()
+    dirs = get_session_dirs(BASE_DIR, session_tag, compound)
+    tdir = dirs['texts']
+    flat = BASE_DIR / 'manuscript_texts'
+    order = [
+        ("Abstract",                     [f"abstract_{lang}_ai.txt"]),
+        ("Introduction",                 [f"introduction_{lang}_ai.txt", f"intro_{lang}_ai.txt", f"intro_{lang}.txt"]),
+        ("Methods",                      [f"methods_{lang}_ai.txt"]),
+        ("Results — ADMET",              [f"ADMET_results_{lang}.txt", f"admet_{lang}.txt"]),
+        ("Results — Molecular Dynamics", [f"MD_results_{lang}.txt"]),
+        ("Results — Cyclodextrin",       [f"CD_results_{lang}.txt", f"cyclodextrin_{lang}.txt"]),
+        ("Results — Toxicity",           [f"Toxicity_results_{lang}.txt", f"toxicity_{lang}.txt"]),
+        ("Discussion",                   [f"discussion_{lang}_ai.txt"]),
+        ("Conclusion",                   [f"conclusion_{lang}_ai.txt", f"conclusion_{lang}.txt"]),
+    ]
+    parts = [f"# Manuscript — {compound} ({lang.upper()})",
+             f"_Sessao: {session_tag}_", ""]
+    included = []
+    for title, candidates in order:
+        content = None
+        for fname in candidates:
+            for base in (tdir, flat):
+                fp = base / fname
+                if fp.exists():
+                    try:
+                        content = fp.read_text(encoding='utf-8').strip()
+                    except Exception as e:
+                        app.logger.warning("build_paper: falha ao ler %s: %s", fp, e)
+                        content = None
+                    if content:
+                        break
+            if content:
+                break
+        if content:
+            parts.append(f"## {title}\n\n{content}\n")
+            included.append(title)
+    manuscript = "\n".join(parts)
+    out = tdir / f"manuscript_{lang}.md"
+    out.write_text(manuscript, encoding='utf-8')
+    return jsonify({"path": str(out), "word_count": len(manuscript.split()),
+                    "n_sections": len(included), "sections_included": included,
+                    "session_tag": session_tag})
 
 
 @app.route('/data_status')
@@ -6146,8 +6220,8 @@ def _ensure_svg(sid):
         try:
             subprocess.run([sys.executable, str(gen), sid], cwd=str(SCRIPT_DIR),
                            check=False, timeout=60)
-        except Exception:
-            pass
+        except Exception as e:
+            app.logger.warning("_ensure_svg: geracao do pipeline SVG falhou para %r: %s", sid, e)
     if svg_path.exists():
         return svg_path
     alt = SUBPROJ_DIR / sid / f"pipeline_{sid.lower()}.svg"
