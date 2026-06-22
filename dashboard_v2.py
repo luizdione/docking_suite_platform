@@ -5457,8 +5457,8 @@ def run_docking_route():
         results_json = SCRIPT_DIR / "docking_project" / "results" / "docking_results.json"
         if results_json.exists():
             results = json.loads(results_json.read_text(encoding="utf-8"))
-    except Exception:
-        pass
+    except Exception as e:
+        app.logger.warning("docking: falha ao ler docking_results.json: %s", e)
 
     return jsonify({
         "log": log_buf.getvalue(),
@@ -5512,8 +5512,8 @@ def help_list_route():
                     if s.startswith('#'):
                         title = s.lstrip('#').strip() or p.stem
                         break
-            except Exception:
-                pass
+            except Exception as e:
+                app.logger.debug("help docs: falha ao ler titulo de %s: %s", p.name, e)
             items.append({"file": p.name, "title": title})
     return jsonify({"docs": items})
 
