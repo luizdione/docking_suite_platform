@@ -516,14 +516,14 @@ def _convert_to_pdbqt(pdb_path, pdbqt_path):
             raise ValueError("RDKit MolFromPDBFile retornou None")
         try:
             Chem.SanitizeMol(mol, sanitizeOps=(Chem.SANITIZE_ALL ^ Chem.SANITIZE_PROPERTIES))
-        except Exception:
-            pass
+        except Exception as e:
+            log.debug("prepare receptor: SanitizeMol parcial falhou (%s); seguindo", e)
 
         # Calcular cargas Gasteiger
         try:
             AllChem.ComputeGasteigerCharges(mol)
-        except Exception:
-            pass
+        except Exception as e:
+            log.debug("prepare receptor: ComputeGasteigerCharges falhou (%s)", e)
 
         # Mapeamento simples de elemento -> tipo AutoDock para receptor
         # (proteinas tem elementos limitados: C, N, O, S, H, P, e ocasionalmente metais)
@@ -553,8 +553,8 @@ def _convert_to_pdbqt(pdb_path, pdbqt_path):
             for atom in mol.GetAtoms():
                 if atom.GetIsAromatic():
                     aromatic_atoms.add(atom.GetIdx())
-        except Exception:
-            pass
+        except Exception as e:
+            log.debug("prepare receptor: deteccao de aromaticos falhou (%s)", e)
 
         # Acceptor N atoms (NA): aromatic N in heterocycle, ou N sem H ligado
         acceptor_n = set()
@@ -899,8 +899,8 @@ def run_full_pipeline(selected_targets, base_dir="docking_project",
                 log.warning(f"    Contains ROOT/BRANCH tags (ligand format, not receptor)")
                 log.warning(f"    Deleting to re-generate correctly...")
                 existing_pdbqt.unlink()
-        except Exception:
-            pass
+        except Exception as e:
+            log.debug("receptor QC: checagem de PDBQT corrompido falhou (%s)", e)
 
     all_results = {}
     vina_path = find_vina()

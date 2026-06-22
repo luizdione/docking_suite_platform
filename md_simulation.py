@@ -413,8 +413,8 @@ def pick_platform(prefer: str = "CUDA", strict: bool = True):
                 log.info(f"Plugin load failures: {list(loaded)}")
             else:
                 log.info("Plugins carregados sem falhas.")
-        except Exception:
-            pass
+        except Exception as e:
+            log.debug(f"Diagnostico de plugins indisponivel: {e}")
     except Exception as e:
         log.warning(f"Diagnostico plugins skip: {e}")
 

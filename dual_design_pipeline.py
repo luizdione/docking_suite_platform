@@ -153,8 +153,8 @@ def smiles_to_pdbqt(smiles, out_pdbqt):
             AllChem.EmbedMolecule(m, useRandomCoords=True)
         try:
             AllChem.MMFFOptimizeMolecule(m, maxIters=500)
-        except Exception:
-            pass
+        except Exception as e:
+            log(f"[debug] MMFF optimize falhou ({e}); seguindo sem minimizar")
         pdb = out_pdbqt.replace(".pdbqt", "_3d.pdb")
         Chem.MolToPDBFile(m, pdb)
         obabel = OBABEL if os.path.exists(OBABEL) else "obabel"
