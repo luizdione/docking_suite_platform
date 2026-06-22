@@ -17,6 +17,9 @@ import math
 import sys
 from pathlib import Path
 from datetime import datetime
+import logging
+
+log = logging.getLogger(__name__)
 
 import os as _os
 # BASE_DIR responde ao mesmo env var que o dashboard usa (NQ_DATA_DIR).
@@ -69,11 +72,26 @@ def get_ligand_dir(compound_name: str) -> Path:
     return LIGAND_DIR / _safe_name(compound_name)
 
 
-def _safe_name(name: str) -> str:
-    """Make a filesystem-safe directory name."""
+def _safe_name(name) -> str:
+    """Nome de diretorio seguro para o filesystem.
+
+    Rede de defesa contra entradas invalidas vindas do frontend: objetos JS
+    serializados chegavam como '[object Object]' e viravam a pasta espuria
+    '_object_Object_'. Rejeita nao-strings, vazios e sentinelas de serializacao,
+    devolvendo 'compound' como fallback neutro. Nomes validos (ex.: '2-SCN-NQ')
+    passam inalterados.
+    """
     import re
-    safe = re.sub(r'[^\w\-.]', '_', name.strip())
-    return safe or "compound"
+    if not isinstance(name, str):
+        return "compound"
+    s = name.strip()
+    if not s or s.lower() in ("[object object]", "undefined", "null", "nan", "none"):
+        return "compound"
+    safe = re.sub(r'[^\w\-.]', '_', s)
+    # rejeita resultados degenerados (so '_'/'.' ou o classico _object_Object_)
+    if not safe.strip("_.") or safe.lower().startswith("_object_object"):
+        return "compound"
+    return safe
 
 
 def list_compounds() -> list[dict]:
@@ -96,8 +114,8 @@ def list_compounds() -> list[dict]:
                 meta["_has_pdbqt"] = any(subdir.glob("*.pdbqt"))
                 meta["_has_mol2"]  = any(subdir.glob("*.mol2"))
                 compounds.append(meta)
-            except Exception:
-                pass
+            except Exception as e:
+                log.warning("list_compounds: metadata ilegivel em %s: %s", meta_path, e)
         else:
             # Directory exists but no metadata — infer minimal info
             compounds.append({
@@ -163,7 +181,7 @@ def add_compound(name: str, smiles: str, formula: str = "",
                 if formula == "":
                     formula = rdMolDescriptors.CalcMolFormula(mol)
         except ImportError:
-            pass
+            log.debug("add_compound: RDKit ausente; MW/formula nao calculados de SMILES")
 
     meta = {
         "name":            name,
@@ -224,8 +242,8 @@ def generate_pdbqt(smiles: str, pdbqt_path: Path, mol2_path: Path = None) -> tup
             AllChem.EmbedMolecule(mol, useRandomCoords=True)
         try:
             AllChem.MMFFOptimizeMolecule(mol, maxIters=500)
-        except Exception:
-            pass
+        except Exception as e:
+            log.debug("generate_pdbqt: MMFF optimize falhou (%s); seguindo sem minimizar", e)
         pdb_tmp = str(pdbqt_path).replace(".pdbqt", "_3d.pdb")
         Chem.MolToPDBFile(mol, pdb_tmp)
         # obabel: PDB -> pdbqt
@@ -281,8 +299,8 @@ def _find_obabel() -> str:
             r = subprocess.run([c, "--version"], capture_output=True, timeout=5)
             if r.returncode == 0 or b"Open Babel" in (r.stdout + r.stderr):
                 return c
-        except Exception:
-            pass
+        except Exception as e:
+            log.debug("_find_obabel: candidato %r indisponivel: %s", c, e)
     return "obabel"  # fallback to PATH
 
 
@@ -352,8 +370,8 @@ def clean_orphan_dirs() -> list[str]:
                 import shutil
                 shutil.rmtree(d)
                 removed.append(d.name)
-            except Exception:
-                pass
+            except Exception as e:
+                log.warning("clean_orphan_dirs: falha ao remover %s: %s", d, e)
     return removed
 
 
