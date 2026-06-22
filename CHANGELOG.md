@@ -2,7 +2,47 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 [Semantic Versioning](https://semver.org/lang/pt-BR/). Datas em horário de
-Brasília (BRT). Pendências e contexto vivo continuam em `docs/BRIEFING_*.md`.
+Brasília (BRT). Documentos históricos (briefings, status reports) foram arquivados em
+`docs/historico/`; os ativos permanecem em `docs/`.
+
+---
+
+## [2.5.0] — 2026-06-22
+
+Fase 3 da curadoria (melhorias). Investigação por workflow multiagente (6 scouts + síntese);
+execução serial e testada no `dashboard_v2.py`. Entrega: montagem de manuscrito, correção da
+causa-raiz das pastas espúrias `_object_Object_` (frontend + backend + servidor), política de
+dependências reprodutível e melhorias de UX/observabilidade.
+
+### Added
+- **Rota `/build_paper`** + botão **"Build Manuscript"**: agrega as seções de texto já geradas
+  de uma sessão num único `manuscript_<lang>.md`, em ordem canônica de artigo (inclui apenas as
+  seções existentes; não inventa conteúdo). Testada via `test_client`.
+- **Botão "EN+PT"** (`genBilingual`): gera a seção em inglês e português numa única ação.
+- **Glossário científico** na aba Ajuda — 20 termos do domínio (docking, Vina, ΔG, MD, RMSD,
+  ADMET, Lipinski, BOILED-Egg, QED, TcTR/LiTR/hGR, FAD, subversivo, IS, β-CD, IC50/CC50/ED50,
+  SMILES, pose, PBC).
+- **`_deps.py`** — política central de dependências (instalação opt-in via `DOCKING_AUTO_PIP`).
+- **`claude.md`** (anexo operacional): regras de GPU/LILO, guarda-chuva e versionamento.
+
+### Fixed
+- **Pastas espúrias `_object_Object_`** corrigidas na causa-raiz, em 3 camadas: (1) o frontend
+  deixa de enviar o objeto `CURRENT_COMPOUND` ao backend (passa `.name`); (2) `_clean_compound`
+  valida o composto em 11 rotas; (3) `compound_db._safe_name` rejeita objetos/sentinelas
+  (`[object Object]`, vazio, não-string). As 4 pastas orphan foram removidas.
+- Fallback de `matplotlib` do `toxicity_module` (faltava `import matplotlib.patches as mpatches`,
+  assimétrico com o `try` → `NameError` numa primeira execução sem matplotlib).
+
+### Changed
+- **Auto-pip em runtime removido por padrão** (reprodutibilidade): `admet_module`,
+  `cyclodex_module`, `analysis`, `toxicity_module` e `dashboard_v2` (flask) passam a usar
+  `_deps.ensure` — erro claro apontando `requirements.txt`; instalação só com `DOCKING_AUTO_PIP=1`.
+- `VERSION`: 2.4.1 → 2.5.0.
+
+### Housekeeping
+- 24 briefings/status reports históricos → `docs/historico/` (git rename, conteúdo intacto).
+- Logging em 13 `except` silenciosos (`compound_db`, `docking_v2`, `dual_design_pipeline`,
+  `md_simulation`, `dashboard_v2`): falhas antes engolidas agora são observáveis (`log.debug`/`warning`).
 
 ---
 
