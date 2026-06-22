@@ -30,6 +30,8 @@ except ImportError:
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
+    from matplotlib.gridspec import GridSpec
+    import matplotlib.patches as mpatches
 
 RDKIT_OK = False
 try:
@@ -102,7 +104,7 @@ def predict_cd_inclusion(ligand_smiles: str = SMILES_LIGAND) -> dict:
             "HBD": hbd,
             "HBA": hba,
             "aromatic_rings": n_rings,
-            "mol_dim_A": [round(d, 2) for d in mol_dims],
+            "mol_dim_A": [round(float(d), 2) for d in mol_dims],
         }
     else:
         # Pre-computed values for 2-SCN-NQ
@@ -115,17 +117,19 @@ def predict_cd_inclusion(ligand_smiles: str = SMILES_LIGAND) -> dict:
 
     # Check geometric compatibility
     # The molecule must fit the cavity: smallest dimension < cavity diameter
-    smallest_dim = min(props["mol_dim_A"])
-    fits_cavity = smallest_dim < cavity_d
+    smallest_dim = float(min(props["mol_dim_A"]))
+    # bool(...) garante tipo nativo: com RDKit, props vem de numpy e os
+    # comparadores produzem numpy.bool_, que quebra json.dumps (linha ~465).
+    fits_cavity = bool(smallest_dim < cavity_d)
 
     # Hydrophobic driving force: logP > 1 favors inclusion
-    hydrophobic_ok = props["logP"] > 1.0
+    hydrophobic_ok = bool(props["logP"] > 1.0)
 
     # Molecular size: MW should be 100–400 for good encapsulation
-    size_ok = 100 <= props["MW"] <= 400
+    size_ok = bool(100 <= props["MW"] <= 400)
 
     # Aromatic rings: π-π stacking inside cavity
-    aromatic_ok = props["aromatic_rings"] >= 1
+    aromatic_ok = bool(props["aromatic_rings"] >= 1)
 
     # Predicted inclusion geometry
     if fits_cavity and hydrophobic_ok:

@@ -35,6 +35,7 @@ except ImportError:
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
+    from matplotlib.patches import FancyBboxPatch
     from matplotlib.gridspec import GridSpec
 
 RDKIT_OK = False
