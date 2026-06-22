@@ -4544,7 +4544,7 @@ def run_pipeline():
     data            = request.json
     targets         = data.get('targets', [])
     exh             = data.get('exhaustiveness', 32)
-    compound_name   = data.get('compound_name', '2-SCN-NQ')
+    compound_name   = _clean_compound(data.get('compound_name'))
     compound_smiles = data.get('compound_smiles', None)
     session_tag     = data.get('session_tag', None)
 
@@ -4613,7 +4613,7 @@ def run_step():
                         for k in ['cofactors_found','metals_found','ligands_found','status']:
                             log_buf.write(f"  {k}: {qc.get(k)}\n")
         elif step == 'analysis':
-            compound_name = data.get('compound_name', '2-SCN-NQ')
+            compound_name = _clean_compound(data.get('compound_name'))
             session_tag   = data.get('session_tag') or None
             from compound_db import get_session_dirs, make_session_tag, _safe_name
             if session_tag is None:
@@ -4639,7 +4639,7 @@ def run_admet_route():
     data            = request.json
     smiles          = data.get('smiles') or "O=C1C=C(SC#N)C(=O)c2ccccc21"
     lang            = data.get('lang', 'en')
-    compound_name   = data.get('compound_name', '2-SCN-NQ')
+    compound_name   = _clean_compound(data.get('compound_name'))
     session_tag     = data.get('session_tag') or None
 
     sys.path.insert(0, str(SCRIPT_DIR))
@@ -5322,7 +5322,7 @@ def check_docking_for_md_route():
     """
     data = request.json or {}
     targets = data.get('targets', []) or []
-    compound = data.get('compound', '2-SCN-NQ')
+    compound = _clean_compound(data.get('compound'))
 
     sys.path.insert(0, str(SCRIPT_DIR))
     from compound_db import _safe_name
@@ -5407,7 +5407,7 @@ def run_docking_route():
     data = request.json or {}
     targets = data.get('targets', None)
     exhaustiveness = int(data.get('exhaustiveness', 32))
-    compound = data.get('compound', '2-SCN-NQ')
+    compound = _clean_compound(data.get('compound'))
 
     # Construir comando
     py_exe = sys.executable
@@ -5570,7 +5570,7 @@ def run_drug_design_route():
     parent_smiles  = data.get('parent_smiles', 'O=C1C=C(SC#N)C(=O)c2ccccc21')
     parent_name    = data.get('parent_name', '2-SCN-NQ')
     lang           = data.get('lang', 'en')
-    compound_name  = data.get('compound_name', '2-SCN-NQ')
+    compound_name  = _clean_compound(data.get('compound_name'))
     session_tag    = data.get('session_tag') or None
 
     sys.path.insert(0, str(SCRIPT_DIR))
@@ -5638,7 +5638,7 @@ def run_drug_design_route():
 def run_cyclodextrin_route():
     data            = request.json
     lang            = data.get('lang','en')
-    compound_name   = data.get('compound_name','2-SCN-NQ')
+    compound_name   = _clean_compound(data.get('compound_name'))
     compound_smiles = data.get('compound_smiles', None)
     session_tag     = data.get('session_tag') or None
 
@@ -5674,7 +5674,7 @@ def run_toxicity_route():
     data            = request.json
     smiles          = data.get('smiles', "O=C1C=C(SC#N)C(=O)c2ccccc21")
     lang            = data.get('lang', 'en')
-    compound_name   = data.get('compound_name', '2-SCN-NQ')
+    compound_name   = _clean_compound(data.get('compound_name'))
     session_tag     = data.get('session_tag') or None
     exp_data        = data.get('exp_data') or {}   # NEW: experimental values from UI
 
@@ -5716,7 +5716,7 @@ def run_all_figures():
     data            = request.json
     lang            = data.get('lang','en')
     smiles          = data.get('smiles',"O=C1C=C(SC#N)C(=O)c2ccccc21")
-    compound_name   = data.get('compound_name','2-SCN-NQ')
+    compound_name   = _clean_compound(data.get('compound_name'))
     session_tag     = data.get('session_tag') or None
 
     sys.path.insert(0, str(SCRIPT_DIR))
@@ -5883,7 +5883,7 @@ def generate_paper_text():
     # Derive results.json from the session/compound, not a fixed path.
     # dirs["results"] is per-compound (base/results/<safe_compound>); session_tag
     # is accepted for API symmetry but does not affect the results location.
-    compound    = data.get('compound', '2-SCN-NQ')
+    compound    = _clean_compound(data.get('compound'))
     session_tag = data.get('session', '')
     try:
         sys.path.insert(0, str(SCRIPT_DIR))
@@ -6007,7 +6007,7 @@ def static_text():
         if section == "results_tox":
             import toxicity_module
             return jsonify({"text": toxicity_module.generate_toxicity_text(toxicity_module.predict_toxicity(), lang=lang)})
-        compound    = data.get('compound', '2-SCN-NQ')
+        compound    = _clean_compound(data.get('compound'))
         session_tag = data.get('session', '')
         from compound_db import get_session_dirs
         dirs = get_session_dirs(BASE_DIR, session_tag, compound)
