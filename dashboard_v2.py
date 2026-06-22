@@ -1330,6 +1330,7 @@ label{font-size:.88em;color:var(--text-muted);display:block;margin-bottom:4px;le
       <div class="btn-group">
         <button class="btn btn-purple" onclick="genPaperAI()">&#10024; Gerar com IA</button>
         <button class="btn btn-secondary" onclick="genStaticText()">Texto pre-definido</button>
+        <button class="btn btn-blue" onclick="genBilingual()" title="Gera a secao em ingles e portugues de uma vez">EN+PT</button>
       </div>
       <div id="genStatus" style="margin-top:8px;font-size:.82em;color:#8b949e"></div>
     </div>
@@ -1358,6 +1359,7 @@ label{font-size:.88em;color:var(--text-muted);display:block;margin-bottom:4px;le
         <button class="btn btn-secondary" onclick="dlPaperOutput()">Download .txt</button>
         <button class="btn btn-primary" onclick="genAllSections()">Gerar TODAS as secoes</button>
         <button class="btn btn-blue" onclick="genAllFigures()">Gerar TODAS as figuras</button>
+        <button class="btn btn-purple" onclick="buildManuscript()" title="Agrega as secoes geradas num unico manuscrito .md">&#128196; Build Manuscript</button>
       </div>
       <div class="paper-text" id="paperOutput">Selecione a secao e clique em "Gerar com IA" ou "Texto pre-definido".</div>
     </div>
@@ -2170,6 +2172,36 @@ async function genAllSections(){
   var r=await fetch('/generate_all_sections',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lang:ln})});
   var d=await r.json();
   document.getElementById('allSectionsOutput').innerHTML=(d.files||[]).map(function(f){return(f.indexOf('[OK]')>=0?'\u2713 ':'\u2717 ')+f;}).join('<br>');
+}
+async function genBilingual(){
+  var sec=document.getElementById('paperSection').value;
+  var out=document.getElementById('paperOutput');
+  out.textContent='\u23f3 Gerando EN + PT...';
+  try{
+    var langs=['en','pt'], texts={};
+    for(var i=0;i<langs.length;i++){
+      var r=await fetch('/static_text',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lang:langs[i],section:sec})});
+      var d=await r.json(); texts[langs[i]]=d.text||'(secao nao disponivel)';
+    }
+    var combined='===== ENGLISH =====\n\n'+texts.en+'\n\n===== PORTUGUES =====\n\n'+texts.pt;
+    out.textContent=combined;
+    document.getElementById('wordCount').textContent=combined.split(/\s+/).filter(Boolean).length+' palavras (EN+PT)';
+  }catch(e){out.textContent='\u2717 Erro: '+e;}
+}
+async function buildManuscript(){
+  var ln=document.getElementById('paperLang').value;
+  var box=document.getElementById('allSectionsOutput');
+  box.innerHTML='\u23f3 Montando manuscrito ('+ln.toUpperCase()+')...';
+  try{
+    var body={lang:ln,compound:(CURRENT_COMPOUND&&CURRENT_COMPOUND.name)||'2-SCN-NQ',session_tag:(typeof CURRENT_SESSION!=='undefined'?CURRENT_SESSION:'')};
+    var r=await fetch('/build_paper',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    var d=await r.json();
+    if(d.path){
+      box.innerHTML='\u2713 Manuscrito: '+d.n_sections+' secao(oes), '+d.word_count+' palavras<br>'
+                   +'<span style="color:#8b949e;font-size:.82em">'+d.path+'</span><br>'
+                   +'<span style="color:#8b949e;font-size:.8em">Secoes: '+((d.sections_included||[]).join(', ')||'nenhuma')+'</span>';
+    }else{box.innerHTML='\u2717 '+(d.error||'falha ao montar');}
+  }catch(e){box.innerHTML='\u2717 Erro: '+e;}
 }
 async function genAllFigures(){
   var ln=document.getElementById('paperLang').value;
@@ -4217,6 +4249,35 @@ python md_module.py --check-cuda</pre>
       <div class="help-card-tag">Infraestrutura</div>
     </div>
 
+  </div>
+
+  <!-- ── Glossário científico ── -->
+  <style>.gloss{background:rgba(255,255,255,.03);border:1px solid #30363d;border-radius:8px;padding:8px 11px;line-height:1.5}.gloss b{color:var(--ifrj-green)}</style>
+  <div style="margin:6px 0 18px">
+    <h3 style="color:var(--ifrj-green);margin:0 0 6px">&#128218; Glossário científico</h3>
+    <p style="color:#8b949e;margin:0 0 12px;font-size:.9em">Termos-chave do pipeline computacional antiparasitário.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;font-size:.86em">
+      <div class="gloss"><b>Docking molecular</b> &mdash; predicao computacional da pose e afinidade de um ligante no sitio de uma proteina.</div>
+      <div class="gloss"><b>AutoDock Vina</b> &mdash; programa de docking (escore empirico); v1.2.7 usada aqui.</div>
+      <div class="gloss"><b>&Delta;G / afinidade</b> &mdash; energia livre de ligacao estimada (kcal/mol); mais negativo = mais forte.</div>
+      <div class="gloss"><b>MD (Dinamica Molecular)</b> &mdash; simulacao do movimento atomico ao longo do tempo (OpenMM/CUDA).</div>
+      <div class="gloss"><b>RMSD</b> &mdash; desvio quadratico medio das posicoes atomicas; mede estabilidade/deslocamento da pose.</div>
+      <div class="gloss"><b>ADMET</b> &mdash; Absorcao, Distribuicao, Metabolismo, Excrecao e Toxicidade in silico.</div>
+      <div class="gloss"><b>Regra de Lipinski</b> &mdash; criterios de drogabilidade oral (MW, logP, HBD, HBA).</div>
+      <div class="gloss"><b>BOILED-Egg</b> &mdash; modelo grafico de absorcao GI e permeabilidade cerebral (Daina &amp; Zoete).</div>
+      <div class="gloss"><b>QED</b> &mdash; Quantitative Estimate of Drug-likeness (0&ndash;1).</div>
+      <div class="gloss"><b>TcTR / LiTR</b> &mdash; tripanotiona redutase de <i>T. cruzi</i> / <i>Leishmania</i> (alvos parasitarios).</div>
+      <div class="gloss"><b>hGR</b> &mdash; glutationa redutase humana (ortologo de seletividade).</div>
+      <div class="gloss"><b>FAD / isoaloxazina</b> &mdash; cofator flavinico redox; a face-<i>si</i> da isoaloxazina e o sitio subversivo.</div>
+      <div class="gloss"><b>Substrato subversivo</b> &mdash; composto que compete por eletrons do FAD e gera radicais (estresse oxidativo).</div>
+      <div class="gloss"><b>Inibidor classico</b> &mdash; ocupa o canal do substrato e bloqueia a ligacao da tripanotiona.</div>
+      <div class="gloss"><b>Indice de seletividade (IS)</b> &mdash; razao entre potencia no alvo parasitario e no humano.</div>
+      <div class="gloss"><b>&beta;-ciclodextrina</b> &mdash; oligossacarideo que forma complexo de inclusao (solubilidade/estabilidade).</div>
+      <div class="gloss"><b>IC50 / CC50 / ED50</b> &mdash; concentracao/dose para 50% de inibicao, citotoxicidade e efeito.</div>
+      <div class="gloss"><b>SMILES</b> &mdash; notacao textual da estrutura quimica (ex.: <code>O=C1C=C(SC#N)C(=O)c2ccccc21</code>).</div>
+      <div class="gloss"><b>Pose</b> &mdash; conformacao + orientacao do ligante no sitio.</div>
+      <div class="gloss"><b>PBC</b> &mdash; condicoes periodicas de contorno; exige correcao ao medir distancias na MD.</div>
+    </div>
   </div>
 
   <!-- ── Todos os documentos (docs/) ── -->
