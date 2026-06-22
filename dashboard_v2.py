@@ -5719,7 +5719,11 @@ def run_all_figures():
     ]:
         try:
             from importlib import import_module, reload
-            mod = reload((import_module(mod_name) if mod_name != 'md_module' else None))
+            if mod_name == 'md_module':
+                # md_module aposentado em 2026-05-12 — use MD Clean no dashboard.
+                generated.append(f"[SKIP] {mod_name} (aposentado — use MD Clean)")
+                continue
+            mod = reload(import_module(mod_name))
             getattr(mod, func_name)(**kwargs)
             generated.append(f"[OK] {mod_name}")
         except Exception as e:
@@ -5860,11 +5864,29 @@ def generate_paper_text():
     lang = data.get('lang','en'); section = data.get('section','results_docking')
     style = data.get('style','acs'); tone = data.get('tone','scientific')
     results_data = {}; admet_data = {}
+    # Derive results.json from the session/compound, not a fixed path.
+    # dirs["results"] is per-compound (base/results/<safe_compound>); session_tag
+    # is accepted for API symmetry but does not affect the results location.
+    compound    = data.get('compound', '2-SCN-NQ')
+    session_tag = data.get('session', '')
     try:
-        rf = BASE_DIR/"results"/"results.json"
+        sys.path.insert(0, str(SCRIPT_DIR))
+        from compound_db import get_session_dirs
+        dirs = get_session_dirs(BASE_DIR, session_tag, compound)
+        rf = dirs["results"] / "results.json"
+        if not rf.exists():
+            # Last-resort: pick the most recent results.json across all compounds.
+            cand = sorted((BASE_DIR/"results").glob("*/results.json"),
+                          key=lambda p: p.stat().st_mtime, reverse=True) \
+                   if (BASE_DIR/"results").exists() else []
+            rf = cand[0] if cand else rf
         if rf.exists():
             with open(rf) as f: results_data = json.load(f).get("results",{})
-    except Exception: pass
+        else:
+            app.logger.warning("generate_paper_text: no results.json for compound=%r session=%r (looked in %s); "
+                               "using hardcoded fallback affinities", compound, session_tag, rf)
+    except Exception as e:
+        app.logger.warning("generate_paper_text: failed to load session results.json (%s); using fallback", e)
     try:
         af = BASE_DIR/"results"/"admet_profile.json"
         if af.exists():
@@ -5908,6 +5930,9 @@ def generate_paper_text():
         f"Write ONLY the section text. No markdown, no headers. (Author, year) citation style. "
         f"Length: {'150-250 words' if tone=='concise' else '300-500 words'}."
     )
+    api_key = os.environ.get('ANTHROPIC_API_KEY')
+    if not api_key:
+        return jsonify({"error": "ANTHROPIC_API_KEY nao configurada no ambiente. Defina a variavel de ambiente ANTHROPIC_API_KEY (sk-ant-...) e reinicie o servidor, ou use 'Texto pre-definido'."})
     try:
         import urllib.request
         req_data = json.dumps({
@@ -5918,7 +5943,11 @@ def generate_paper_text():
         req = urllib.request.Request(
             "https://api.anthropic.com/v1/messages",
             data=req_data,
-            headers={"Content-Type":"application/json"},
+            headers={
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json"
+            },
             method="POST"
         )
         with urllib.request.urlopen(req, timeout=60) as resp:
@@ -5962,14 +5991,26 @@ def static_text():
         if section == "results_tox":
             import toxicity_module
             return jsonify({"text": toxicity_module.generate_toxicity_text(toxicity_module.predict_toxicity(), lang=lang)})
-        rf = BASE_DIR / "results" / "results.json"
+        compound    = data.get('compound', '2-SCN-NQ')
+        session_tag = data.get('session', '')
+        from compound_db import get_session_dirs
+        dirs = get_session_dirs(BASE_DIR, session_tag, compound)
+        rf = dirs["results"] / "results.json"
+        if not rf.exists():
+            cand = sorted((BASE_DIR/"results").glob("*/results.json"),
+                          key=lambda p: p.stat().st_mtime, reverse=True) \
+                   if (BASE_DIR/"results").exists() else []
+            rf = cand[0] if cand else rf
         if rf.exists():
             from analysis import generate_results_text, load_results, fig_selectivity_index
             results = load_results(str(rf))
             si_data = fig_selectivity_index(results, BASE_DIR/"figures")
             return jsonify({"text": generate_results_text(results, si_data, lang)})
-    except Exception:
-        pass
+        else:
+            app.logger.warning("static_text: no results.json for compound=%r session=%r (looked in %s); "
+                               "falling back to hardcoded prose", compound, session_tag, rf)
+    except Exception as e:
+        app.logger.warning("static_text: failed to load session results.json (%s); using fallback prose", e)
     fallback = {
         "pt": (
             "2-Tiocianato-1,4-naftoquinona (2-SCN-NQ) foi avaliada por docking molecular "
@@ -6015,7 +6056,7 @@ def generate_all_sections():
     ]:
         try:
             from importlib import import_module, reload
-            mod = reload((import_module(mod_name) if mod_name != 'md_module' else None))
+            mod = None if mod_name == 'md_module' else reload(import_module(mod_name))
             if mod_name == "md_module":
                 text = "[deprecated] md_module aposentado em 2026-05-12 — use MD Clean no dashboard."
             else:
