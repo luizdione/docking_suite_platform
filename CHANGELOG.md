@@ -6,6 +6,35 @@ Brasília (BRT). Pendências e contexto vivo continuam em `docs/BRIEFING_*.md`.
 
 ---
 
+## [2.4.1] — 2026-06-22
+
+Fase 2 da curadoria: correção dos bugs de backend e de figuras mapeados no *Roadmap* da
+2.4.0, cada um validado em runtime (Flask `test_client`, sem rede/GPU). Um bug adicional de
+serialização foi descoberto durante o *smoke test* e corrigido na mesma rodada.
+
+### Fixed
+- **Paper AI — autenticação Anthropic** (`/generate_paper_text`): agora envia os headers
+  `x-api-key` e `anthropic-version` e lê `ANTHROPIC_API_KEY` do ambiente, com *guard* e
+  mensagem clara quando ausente (antes: 401 cego capturado pelo `except` → "API error").
+- **`reload(None)` de `md_module`** (`/run_all_figures`, `/generate_all_sections`): o módulo
+  aposentado deixa de cair em `reload() argument must be a module`; retorna `[SKIP]`/`[deprecated]`.
+- **`results.json` por sessão** (`/generate_paper_text`, `/static_text`): resolvido via
+  `compound_db.get_session_dirs` (caminho por composto) em vez de um *path* fixo inexistente
+  que sempre forçava o texto ao *fallback* hardcoded; quando não há dados, registra
+  `app.logger.warning` em vez de engolir a falha em silêncio.
+- **Fallback de `matplotlib`** (`admet_module`, `cyclodex_module`): o `except ImportError`
+  passa a reimportar todos os símbolos do `try` (`FancyBboxPatch`, `GridSpec`, `mpatches`),
+  evitando `NameError` numa primeira execução sem matplotlib (CI/máquina limpa).
+- **Serialização JSON da ciclodextrina** (`cyclodex_module.predict_cd_inclusion`): com RDKit,
+  os critérios de viabilidade e as dimensões eram `numpy.bool_`/`numpy.float64`, quebrando
+  `run_cyclodextrin` com *"Object of type bool is not JSON serializable"*; convertidos para
+  tipos nativos (`bool`/`float`) na origem, deixando o `dict` 100% JSON-safe.
+
+### Changed
+- `VERSION`: 2.4.0 → 2.4.1.
+
+---
+
 ## [2.4.0] — 2026-06-21
 
 Auditoria e curadoria abrangente da plataforma (multiagente, 86 achados) + registro do
