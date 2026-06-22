@@ -2529,7 +2529,7 @@ async function runMD() {
   // Sem result_<TID>.pdbqt, a MD posiciona o ligante FORA do bolsao,
   // produzindo resultados fisicamente invalidos. Em 'synthetic' nao precisa.
   if(mode === 'real') {
-    var compound = (typeof CURRENT_COMPOUND !== 'undefined' && CURRENT_COMPOUND) ? CURRENT_COMPOUND : '2-SCN-NQ';
+    var compound = (typeof CURRENT_COMPOUND !== 'undefined' && CURRENT_COMPOUND) ? CURRENT_COMPOUND.name : '2-SCN-NQ';
     alog('mdLog','[GATE] Verificando poses docked para ' + tgts.join(', ') + '...');
     var check = await checkDockingForMd(tgts, compound);
     if(check && !check.all_ok && check.missing && check.missing.length) {
@@ -2560,7 +2560,7 @@ async function runMD() {
         var sess = CURRENT_SESSION || '';
         var url  = '/md_progress?target='+encodeURIComponent(tgt)
                    +'&session='+encodeURIComponent(sess)
-                   +'&compound='+encodeURIComponent(CURRENT_COMPOUND||'2-SCN-NQ');
+                   +'&compound='+encodeURIComponent((CURRENT_COMPOUND&&CURRENT_COMPOUND.name)||'2-SCN-NQ');
         var pr   = await fetch(url);
         if(!pr.ok) return;
         var pd   = await pr.json();
@@ -3357,7 +3357,7 @@ function _getMdSelectedTargets() {
 async function checkDockingStatusUI() {
   var box = document.getElementById('dockingStatusBox');
   var tgts = _getMdSelectedTargets();
-  var compound = (typeof CURRENT_COMPOUND!=='undefined' && CURRENT_COMPOUND) ? CURRENT_COMPOUND : '2-SCN-NQ';
+  var compound = (typeof CURRENT_COMPOUND!=='undefined' && CURRENT_COMPOUND) ? CURRENT_COMPOUND.name : '2-SCN-NQ';
   box.innerHTML = '<i>Verificando ' + tgts.length + ' alvo(s)...</i>';
   try {
     var check = await checkDockingForMd(tgts, compound);
@@ -3382,7 +3382,7 @@ async function checkDockingStatusUI() {
 
 async function _runDocking(targets, label) {
   var box = document.getElementById('dockingStatusBox');
-  var compound = (typeof CURRENT_COMPOUND!=='undefined' && CURRENT_COMPOUND) ? CURRENT_COMPOUND : '2-SCN-NQ';
+  var compound = (typeof CURRENT_COMPOUND!=='undefined' && CURRENT_COMPOUND) ? CURRENT_COMPOUND.name : '2-SCN-NQ';
   box.innerHTML = '<b>Rodando docking de ' + label + '...</b><br>'
                 + 'Tempo estimado: ~5-10 min por alvo. Logs aparecerao no painel inferior.';
   alog('mdLog','[DOCKING] Iniciando para: ' + label);
