@@ -143,3 +143,21 @@ O usuário pode passar um argumento livre com o foco/nota da sessão, por exempl
 - Preserve: objetivo (seção 1), decisões (seção 4) e pendências (seção 5).
 - Pode descartar: saídas de ferramentas antigas e trechos longos já resumidos aqui.
 ```
+
+## Atalho no Windows (opcional)
+
+Para acesso rápido a esta pasta a partir de `Projetos`, a skill inclui um script
+que cria um atalho `.lnk` do Windows apontando para a **pasta desta skill**:
+
+- `criar_atalho.ps1` — cria o atalho na pasta de destino (padrão
+  `C:\Users\luizd\OneDrive\Data_Science\Projetos`). O alvo é a própria pasta da
+  skill (`$PSScriptRoot`), então funciona independentemente do nome da pasta local
+  do repositório (`docking` / `docking_suite`).
+- `criar_atalho.bat` — wrapper para dar **duplo-clique** no Windows.
+
+Uso (no Windows, dentro da pasta da skill):
+
+```powershell
+.\criar_atalho.ps1                          # destino padrão (Projetos)
+.\criar_atalho.ps1 -DestDir "D:\OutroLugar" # destino customizado
+```
