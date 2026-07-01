@@ -1,0 +1,14 @@
+.git
+**/__pycache__
+*.pyc
+.pytest_cache
+*.egg-info
+data/
+runs/
+inputs/
+*.raw
+*.mzML
+*.parquet
+.venv
+venv
+docs/*.pdf

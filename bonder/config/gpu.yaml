@@ -1,0 +1,52 @@
+# =============================================================================
+# bonder - configuracao de GPU (RTX 3060 12GB) com fallback CPU garantido.
+#
+# Prioridade de uso da GPU = ferramentas CONSAGRADAS e revisadas por pares.
+# ESM2 e exploratorio/suplementar (nao entra no escore de confianca do paper).
+# Todos os consumidores de GPU passam pelo gpu_gate (compartilhamento cooperativo
+# com o Ollama/LILO, no mesmo espirito da suite docking).
+# =============================================================================
+schema_version: 1
+
+device:
+  # 'auto' decide por probe real de capacidade; 'cpu' forca CPU.
+  prefer: auto
+  # Compute capability minima (RTX 3060 = Ampere sm_86 = (8, 6)).
+  min_capability: [8, 6]
+
+gpu_gate:
+  enabled: true
+  # Nomes de processos de LLM que compartilham a placa (nao disparar em cima).
+  llm_process_names: ["ollama", "llama"]
+  # VRAM livre minima exigida (MiB) para carregar o consumidor de GPU.
+  free_mb_required: 6000
+  # Fracao maxima da VRAM que um processo bonder pode reservar.
+  per_process_memory_fraction: 0.6
+  poll_seconds: 30
+  max_wait_minutes: 120
+
+# --- Ferramentas GPU consagradas (padrao do pipeline) ------------------------
+diann:
+  # Busca DIA acelerada por GPU (Demichev et al., Nat Methods 2020).
+  enabled: false                     # ligar so se os dados forem DIA
+  binary: diann                      # dentro do conteiner GPU
+  threads: 8
+
+rescore:
+  # MS2Rescore + AlphaPeptDeep (rescoring por deep learning; +IDs a FDR fixo).
+  enabled: false
+  engine: ms2rescore                 # usa modelos peptdeep na GPU
+
+alphafold:
+  # Validacao estrutural isca-presa dos melhores candidatos (ColabFold/AF2-Multimer).
+  enabled: false
+  top_n_candidates: 10               # so os N melhores por isca (custo/VRAM)
+  max_total_residues: 1400           # teto por complexo p/ caber na 3060
+
+# --- Priorizacao exploratoria (SUPLEMENTAR, fora do nucleo de confianca) ------
+esm2:
+  enabled: false
+  model_gpu: facebook/esm2_t33_650M_UR50D    # ~1.3GB fp16
+  model_cpu: facebook/esm2_t30_150M_UR50D    # fallback rapido em CPU
+  max_residues: 1022
+  batch_size: 8

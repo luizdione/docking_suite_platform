@@ -1,0 +1,29 @@
+# bonder - artefatos locais nao versionados
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# dados de referencia baixados (grandes; reproduzidos por 'bonder db sync')
+data/
+
+# saidas de corridas
+runs/
+
+# entradas do usuario (saidas de busca, .raw)
+inputs/
+*.raw
+*.mzML
+*.d/
+
+# sequencias de iscas fornecidas pelo usuario (nao versionar sequencias privadas)
+config/sequences/*.fasta
+
+# parquet/artefatos intermediarios
+*.parquet
+
+# ambientes
+.venv/
+venv/
+.env

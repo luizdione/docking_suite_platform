@@ -1,0 +1,50 @@
+# =============================================================================
+# bonder - definicao declarativa das ISCAS (baits) do projeto piloto.
+#
+# As duas iscas sao EXOGENAS ao proteoma murino. Os parceiros (preys) buscados
+# sao proteinas de CAMUNDONGO (host). Por isso as iscas NUNCA entram como preys
+# no denominador murino do scoring e sao mantidas como linhas distintas.
+# =============================================================================
+schema_version: 1
+
+organism_sample:
+  name: Mus musculus
+  taxid: 10090
+
+baits:
+  # --- Isca 1: proteina nao-estrutural NSs do ortobunyavirus Icoaraci ---------
+  - id: NSs_ICOARACI
+    display_name: "NSs (Icoaraci orthobunyavirus)"
+    source: viral
+    uniprot_accession: null          # sem acesso UniProt canonico assumido
+    fasta: sequences/NSs_Icoaraci.fasta   # sequencia fornecida pelo usuario
+    # Cabecalho com que a isca aparece no FASTA de busca (search_db.fasta):
+    search_db_header: "bait|NSs_ICOARACI|NSs Icoaraci orthobunyavirus"
+    ortholog_prior: false            # sem ortologo murino -> prior DESLIGADO
+    scoring:
+      saint: true
+      mist: true                     # paradigma host-pathogen (Krogan lab)
+    notes: >
+      Isca viral. Interatores esperados sao proteinas do hospedeiro (camundongo).
+      Sem ortologo murino: a priorizacao por ortologia fica desabilitada; a
+      priorizacao exploratoria por embeddings, se ligada, usa novidade/outlier.
+
+  # --- Isca 2: Galectina-3 humana (LGALS3) -----------------------------------
+  - id: LGALS3_HUMAN
+    display_name: "Galectina-3 (LGALS3, Homo sapiens)"
+    source: human
+    uniprot_accession: P17931
+    fasta: sequences/LGALS3_HUMAN.fasta
+    search_db_header: "sp|P17931|LEG3_HUMAN Galectin-3 OS=Homo sapiens OX=9606"
+    ortholog:
+      mouse_gene: Lgals3
+      mouse_accession: P16110        # ortologo MURINO: manter DISTINTO da isca
+    ortholog_prior: true
+    scoring:
+      saint: true
+      mist: false
+    notes: >
+      Isca humana. NAO colapsar com o ortologo murino Lgals3 (P16110): a
+      sequencia humana e a isca (excluida do scoring de preys), mas o Lgals3
+      murino co-precipitado e um achado legitimo (auto-associacao/interacao).
+      Peptideos compartilhados entre P17931 e P16110 devem ser sinalizados.

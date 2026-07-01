@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bonder - interactoma CoIP-MS (proteoma murino)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.2/cytoscape.min.js"></script>
+<style>
+  :root{
+    --bg:#0f1216; --panel:#171b21; --panel2:#1e242c; --line:#2a323c;
+    --fg:#e6e9ee; --muted:#9aa4b2; --accent:#4c8bf5; --ok:#34a853; --warn:#f9ab00; --err:#ea4335;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#f6f8fa; --panel:#fff; --panel2:#f0f3f6; --line:#d8dee4;
+           --fg:#1b1f24; --muted:#5b6572; --accent:#1a56db; }
+  }
+  *{box-sizing:border-box} body{margin:0;font:14px/1.5 system-ui,Segoe UI,Roboto,sans-serif;
+    background:var(--bg);color:var(--fg)}
+  header{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);
+    background:var(--panel)}
+  header h1{font-size:16px;margin:0;font-weight:650} .tag{font-size:11px;color:var(--muted)}
+  .badge{margin-left:auto;font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:999px}
+  .wrap{display:grid;grid-template-columns:320px 1fr;gap:0;height:calc(100vh - 53px)}
+  aside{border-right:1px solid var(--line);background:var(--panel);padding:16px;overflow:auto}
+  main{padding:16px 20px;overflow:auto}
+  label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+  input,select,button{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;
+    background:var(--panel2);color:var(--fg);font:inherit}
+  button{background:var(--accent);color:#fff;border:0;cursor:pointer;font-weight:600;margin-top:14px}
+  button:hover{filter:brightness(1.08)} button.secondary{background:var(--panel2);color:var(--fg);border:1px solid var(--line)}
+  .runs{margin-top:18px} .run{padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;
+    cursor:pointer;display:flex;justify-content:space-between;gap:8px} .run:hover{border-color:var(--accent)}
+  .st{font-size:11px;padding:1px 8px;border-radius:999px;border:1px solid var(--line)}
+  .st.done{color:var(--ok)} .st.running,.st.queued{color:var(--warn)} .st.error{color:var(--err)}
+  .tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .tabs button{width:auto;background:transparent;color:var(--muted);border:0;border-bottom:2px solid transparent;
+    border-radius:0;margin:0;padding:8px 12px;font-weight:600}
+  .tabs button.active{color:var(--fg);border-bottom-color:var(--accent)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+  table{width:100%;border-collapse:collapse;font-size:13px} th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel)}
+  .pill{font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line)}
+  .pill.alta{color:var(--ok);border-color:var(--ok)} .pill.media{color:var(--warn)} .pill.baixa{color:var(--muted)}
+  #cy{height:520px;background:var(--panel2);border-radius:10px}
+  .kv{display:grid;grid-template-columns:190px 1fr;gap:4px 12px;font-size:13px}
+  .kv div:nth-child(odd){color:var(--muted)}
+  .hint{color:var(--muted);font-size:12px} code{background:var(--panel2);padding:1px 5px;border-radius:5px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>bonder</h1>
+  <span class="tag">CoIP-MS / AP-MS &middot; parceiros no proteoma murino &middot; v{{ version }}</span>
+  <span class="badge" id="gpu">GPU: ...</span>
+</header>
+<div class="wrap">
+  <aside>
+    <h3 style="margin-top:0">Nova corrida</h3>
+    <label>Saida do motor de busca (caminho no servidor)</label>
+    <input id="input" placeholder="/data/proteinGroups.txt">
+    <p class="hint">MaxQuant / FragPipe (DDA) ou DIA-NN (DIA). O motor e a aquisicao sao detectados automaticamente.</p>
+    <label>Contraste (isca vs controle)</label>
+    <select id="contrast">
+      {% for c in contrasts %}<option value="{{ c.name }}">{{ c.name }} &mdash; {{ c.bait_id }}</option>{% endfor %}
+    </select>
+    <button id="runBtn">Rodar analise</button>
+    <div class="runs">
+      <h3>Corridas</h3>
+      <div id="runs"></div>
+    </div>
+  </aside>
+  <main>
+    <div class="tabs">
+      <button class="active" data-tab="resumo">Resumo / QC</button>
+      <button data-tab="interatores">Interatores</button>
+      <button data-tab="volcano">Volcano</button>
+      <button data-tab="rede">Rede</button>
+    </div>
+    <section id="tab-resumo">
+      <div class="card"><div class="kv" id="summary"><div>Selecione uma corrida</div><div></div></div></div>
+      <div class="card">
+        <b>Metodo</b>
+        <p class="hint">Especificidade isca-presa: <code>SAINTexpress</code> (todas as iscas) e <code>MiST</code>
+        (isca viral NSs). Quantitativo: <code>DEP/limma</code> (R/Bioconductor). Background: CRAPome interno
+        dos controles. O ranqueamento prioriza BFDR (SAINT) e FDR (DEP); descritivos sao apenas QC.</p>
+      </div>
+    </section>
+    <section id="tab-interatores" class="hidden">
+      <div class="card"><div style="max-height:70vh;overflow:auto"><table id="tbl"><thead></thead><tbody></tbody></table></div></div>
+    </section>
+    <section id="tab-volcano" class="hidden">
+      <div class="card"><img id="volcano" alt="volcano" style="max-width:640px">
+      <p class="hint" id="volcanoHint"></p></div>
+    </section>
+    <section id="tab-rede" class="hidden">
+      <div class="card"><div id="cy"></div>
+      <p class="hint">Cinza = isca; azul = presa detectada. Arraste os nos. Exporte GraphML/Cytoscape na pasta da corrida.</p></div>
+    </section>
+  </main>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+let current = null, poll = null;
+
+async function gpu(){ try{ const g = await (await fetch('/api/gpu')).json();
+  $('#gpu').textContent = 'GPU: ' + (g.device.device === 'cuda' ? g.device.name : 'CPU') ;
+  $('#gpu').title = g.device.reason; }catch(e){ $('#gpu').textContent='GPU: ?'; } }
+
+async function loadRuns(){
+  const runs = await (await fetch('/api/runs')).json();
+  $('#runs').innerHTML = runs.map(r =>
+    `<div class="run" data-id="${r.run_id}"><span>${r.run_id}</span>
+     <span class="st ${r.status}">${r.status}</span></div>`).join('') || '<p class="hint">Nenhuma ainda.</p>';
+  document.querySelectorAll('.run').forEach(el => el.onclick = () => selectRun(el.dataset.id));
+}
+
+async function selectRun(id){
+  current = id;
+  const d = await (await fetch('/api/runs/'+id)).json();
+  renderSummary(id, d);
+  if(d.status.status === 'done'){ renderTable(d.results); renderVolcano(id, d.results); renderNetwork(id); if(poll){clearInterval(poll);poll=null;} }
+  else { clearInterval(poll); poll = setInterval(()=>selectRun(id), 3000); }
+  loadRuns();
+}
+
+function renderSummary(id, d){
+  const s = d.results.summary || {}, qc = d.results.qc || {};
+  $('#summary').innerHTML = `
+    <div>Corrida</div><div>${id}</div>
+    <div>Status</div><div><span class="st ${d.status.status}">${d.status.status}</span> ${d.status.error?('- '+d.status.error):''}</div>
+    <div>Motor / aquisicao</div><div>${s.engine||'-'} / ${s.acquisition||'-'} (${s.quant_type||'-'})</div>
+    <div>Proteinas / amostras</div><div>${s.n_proteins||'-'} / ${s.n_samples||'-'}</div>
+    <div>Contaminantes / iscas</div><div>${s.n_contaminants||0} / ${s.n_baits||0}</div>
+    <div>Valores validos (mediana)</div><div>${qc.median_valid_values||'-'}</div>`;
+}
+
+function renderTable(res){
+  const rows = (res.top_interactors||[]);
+  const cols = ['prey','gene','confidence','bfdr','saint_score','log2fc','adj_p_value','background_freq','observed_ip','observed_ctrl'];
+  $('#tbl thead').innerHTML = '<tr>'+cols.map(c=>`<th>${c}</th>`).join('')+'</tr>';
+  $('#tbl tbody').innerHTML = rows.map(r=>'<tr>'+cols.map(c=>{
+    let v = r[c]; if(typeof v === 'number') v = Number.isInteger(v)? v : v.toFixed(3);
+    if(c==='confidence') return `<td><span class="pill ${v}">${v||''}</span></td>`;
+    return `<td>${v===undefined||v===null?'':v}</td>`;
+  }).join('')+'</tr>').join('');
+}
+
+function renderVolcano(id, res){
+  const has = res.artifacts && res.artifacts.volcano_png;
+  $('#volcano').classList.toggle('hidden', !has);
+  $('#volcanoHint').textContent = has ? '' : 'Volcano requer a etapa DEP/limma (R). Sem R, veja a tabela (SAINT/descritivos).';
+  if(has) $('#volcano').src = '/api/runs/'+id+'/volcano.png?ts='+Date.now();
+}
+
+async function renderNetwork(id){
+  try{
+    const net = await (await fetch('/api/runs/'+id+'/network')).json();
+    const cy = cytoscape({ container: $('#cy'), elements: net.elements,
+      style:[
+        {selector:'node',style:{'label':'data(label)','font-size':9,'color':getComputedStyle(document.body).color,
+          'background-color':'#4c8bf5','width':16,'height':16}},
+        {selector:'node[?is_bait]',style:{'background-color':'#9aa4b2','width':30,'height':30,'font-size':12}},
+        {selector:'edge',style:{'width':1,'line-color':'#2a323c'}},
+        {selector:'edge[edge_type="reference"]',style:{'line-color':'#34a853','width':2}}
+      ],
+      layout:{name:'cose',animate:false} });
+  }catch(e){ $('#cy').innerHTML = '<p class="hint" style="padding:12px">Rede indisponivel.</p>'; }
+}
+
+$('#runBtn').onclick = async () => {
+  const body = { input: $('#input').value.trim(), contrast: $('#contrast').value };
+  const r = await (await fetch('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).json();
+  if(r.error){ alert(r.error); return; }
+  selectRun(r.run_id);
+};
+
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  ['resumo','interatores','volcano','rede'].forEach(t =>
+    $('#tab-'+t).classList.toggle('hidden', t !== b.dataset.tab));
+});
+
+gpu(); loadRuns(); setInterval(loadRuns, 8000);
+</script>
+</body>
+</html>

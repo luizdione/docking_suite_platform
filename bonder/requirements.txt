@@ -1,0 +1,42 @@
+# =============================================================================
+# bonder - dependencias do NUCLEO (CPU). Testado em Python 3.11.
+# Ambiente alvo: conda 'datascience' (miniforge3) / Docker. GPU e R tem arquivos
+# proprios (requirements-gpu.txt e Dockerfile.r) para nao poluir o nucleo.
+# =============================================================================
+
+# --- Dados / numerico ---
+numpy>=1.25,<3
+pandas>=2.0
+pyarrow>=14.0            # serializacao Parquet do MSDataset
+scipy>=1.11
+networkx>=3.1           # rede de interacao
+
+# --- IO de espectrometria / config ---
+pyteomics>=4.6          # QC de mzML (opcional, lazy)
+pyyaml>=6.0
+requests>=2.31          # download reproduzivel dos bancos murinos
+
+# --- Figuras ---
+matplotlib>=3.7         # volcano e QC (backend Agg)
+
+# --- Web (dashboard Flask) ---
+flask>=2.3
+gunicorn>=21.0          # servidor no conteiner
+
+# --- Fila de jobs (worker) ---
+rq>=1.15
+redis>=5.0
+
+# --- Anotacao funcional (opcional) ---
+gprofiler-official>=1.0 ; python_version >= "3.8"
+
+# =============================================================================
+# INSTALACAO:
+#   conda:  conda env update -f environment.yml           (env 'datascience')
+#   pip:    pip install -r requirements.txt
+#   docker: docker compose up   (recomendado; ver docker/)
+#
+# Estatistica gold-standard roda no conteiner R (Dockerfile.r): DEP, limma,
+# MSstats (Bioconductor) + SAINTexpress. GPU roda no conteiner GPU
+# (requirements-gpu.txt): torch cu124, transformers, ms2rescore, peptdeep.
+# =============================================================================

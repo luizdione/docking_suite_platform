@@ -1,0 +1,36 @@
+# =============================================================================
+# Ambiente conda do conteiner de ANALISE (CPU): Python + R/Bioconductor + SAINT.
+# Reune as ferramentas gold-standard (revisadas por pares) num so ambiente
+# reproduzivel, para o worker chamar Rscript e SAINTexpress via subprocess.
+# =============================================================================
+name: bonder-analysis
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  # --- Python (orquestracao/web/worker) ---
+  - python=3.11
+  - numpy>=1.25
+  - pandas>=2.0
+  - pyarrow>=14
+  - scipy>=1.11
+  - networkx>=3.1
+  - matplotlib>=3.7
+  - pyyaml>=6.0
+  - requests>=2.31
+  - flask>=2.3
+  - gunicorn>=21
+  - rq>=1.15
+  - redis-py>=5.0
+  - pyteomics>=4.6
+  # --- R + Bioconductor: estatistica gold-standard ---
+  - r-base>=4.3
+  - bioconductor-dep          # DEP: enriquecimento diferencial AP-MS (limma)
+  - bioconductor-limma        # teste-t moderado (empirical Bayes)
+  - bioconductor-msstats      # quantificacao diferencial em nivel de feature
+  - r-dplyr
+  # --- Especificidade isca-presa ---
+  - saint                     # SAINTexpress-int / SAINTexpress-spc
+  - pip
+  - pip:
+      - gprofiler-official>=1.0

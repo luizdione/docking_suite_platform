@@ -1,0 +1,34 @@
+# =============================================================================
+# bonder - overlay de GPU (RTX 3060). Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build
+#
+# Requer NVIDIA Container Toolkit no host (Windows 11 + WSL2 ou Linux).
+# Adiciona o servico 'gpu' com as ferramentas aceleradas (DIA-NN, MS2Rescore,
+# AlphaPeptDeep, ESM2). O stack default (web/worker) continua CPU e sempre sobe;
+# o 'gpu' e usado sob demanda:
+#   docker compose ... run --rm gpu bonder --help
+#   docker compose ... run --rm gpu python -m bonder.gpu.tools ...
+# =============================================================================
+services:
+  gpu:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.gpu
+    environment:
+      BONDER_DATA_ROOT: /data
+      BONDER_RUNS_DIR: /runs
+      # compartilhamento cooperativo com o LLM local (Ollama) via gpu_gate
+      PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+    volumes:
+      - ./inputs:/inputs
+      - bonder-data:/data
+      - bonder-runs:/runs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    # nao sobe sozinho no 'up'; use 'run'/'--profile gpu'
+    profiles: ["gpu"]

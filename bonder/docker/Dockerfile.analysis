@@ -1,0 +1,30 @@
+# =============================================================================
+# bonder - imagem de ANALISE (CPU): Python + R/Bioconductor (DEP/limma/MSstats)
+# + SAINTexpress. Usada pelos servicos 'web' e 'worker'. Nada e reimplementado:
+# as estatisticas gold-standard rodam aqui via Rscript e SAINTexpress-int.
+# =============================================================================
+FROM mambaorg/micromamba:1.5.8
+
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential ca-certificates git curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Ambiente conda reproduzivel (gold-standard tools)
+COPY docker/environment-analysis.yml /tmp/env.yml
+RUN micromamba install -y -n base -f /tmp/env.yml && micromamba clean -a -y
+ENV PATH=/opt/conda/bin:$PATH
+
+WORKDIR /app
+# Instala o pacote bonder
+COPY . /app
+RUN pip install --no-deps -e . && python -c "import bonder; print('bonder', bonder.__version__)"
+
+# Confere que as ferramentas externas estao no PATH (falha cedo se faltarem)
+RUN Rscript -e 'stopifnot(requireNamespace("DEP"), requireNamespace("limma"))' \
+    && (command -v SAINTexpress-int || echo "AVISO: SAINTexpress-int nao encontrado no PATH")
+
+ENV BONDER_DATA_ROOT=/data BONDER_RUNS_DIR=/runs
+EXPOSE 8080
+# default: dashboard web (sobrescrito para 'worker' no compose)
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "-w", "2", "-t", "600", "bonder.web.app:create_app()"]

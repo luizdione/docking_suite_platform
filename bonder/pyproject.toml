@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bonder"
+version = "0.1.0"
+description = "Plataforma CoIP-MS / AP-MS para identificacao de parceiros no proteoma murino (orquestra SAINT/MiST/DEP/MSstats)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Luiz Dione" }]
+keywords = ["proteomics", "AP-MS", "CoIP-MS", "interactome", "mouse", "SAINT", "MSstats"]
+dependencies = [
+    "numpy>=1.25",
+    "pandas>=2.0",
+    "pyarrow>=14",
+    "scipy>=1.11",
+    "networkx>=3.1",
+    "pyyaml>=6.0",
+    "requests>=2.31",
+    "matplotlib>=3.7",
+    "flask>=2.3",
+]
+
+[project.optional-dependencies]
+web = ["gunicorn>=21", "rq>=1.15", "redis>=5.0"]
+ms = ["pyteomics>=4.6"]
+annotate = ["gprofiler-official>=1.0"]
+gpu = ["torch>=2.3", "transformers>=4.40", "ms2rescore>=3.0", "peptdeep>=1.2"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+bonder = "bonder.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["bonder*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

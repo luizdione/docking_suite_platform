@@ -1,0 +1,60 @@
+# =============================================================================
+# bonder - bancos de referencia MURINOS, FIXADOS POR VERSAO (reprodutibilidade).
+#
+# Nunca use 'latest'. Cada fonte tem versao + URL + sha256 esperado. O downloader
+# (bonder/db/downloader.py) grava no cache content-addressed, verifica o checksum
+# e FALHA se divergir. Rode 'bonder db sync' uma vez para popular o cache.
+#
+# Os sha256 abaixo estao como null: preencha na primeira sincronizacao
+# (o downloader imprime o hash observado) e faca commit, travando a versao.
+# =============================================================================
+schema_version: 1
+
+# Raiz do cache de dados (sobrescrevivel por BONDER_DATA_ROOT).
+data_root: data
+# Modo offline: usa somente o que ja esta em cache; erro claro se faltar.
+offline: false
+
+organism:
+  name: Mus musculus
+  taxid: 10090
+
+sources:
+  uniprot_mouse:
+    description: "Proteoma de referencia UniProt Mus musculus (Swiss-Prot revisado)"
+    release: "2024_06"
+    # Stream REST do UniProtKB (reviewed, taxid 10090), FASTA canonico:
+    fasta_url: "https://rest.uniprot.org/uniprotkb/stream?format=fasta&query=%28reviewed%3Atrue%29+AND+%28organism_id%3A10090%29"
+    # Tabela id<->gene<->xrefs (para crosswalks):
+    tsv_url: "https://rest.uniprot.org/uniprotkb/stream?format=tsv&fields=accession,gene_primary,gene_synonym,protein_name,xref_string,xref_biogrid&query=%28reviewed%3Atrue%29+AND+%28organism_id%3A10090%29"
+    include_trembl: false            # incluir nao-revisados (TrEMBL)?
+    sha256_fasta: null
+    sha256_tsv: null
+
+  string_mouse:
+    description: "STRING v12.0 - rede PPI Mus musculus (10090)"
+    version: "12.0"
+    links_url: "https://stringdb-downloads.org/download/protein.links.v12.0/10090.protein.links.v12.0.txt.gz"
+    aliases_url: "https://stringdb-downloads.org/download/protein.aliases.v12.0/10090.protein.aliases.v12.0.txt.gz"
+    min_combined_score: 400          # 400 = confianca media; 700 = alta
+    sha256_links: null
+    sha256_aliases: null
+
+  biogrid_mouse:
+    description: "BioGRID - interacoes Mus musculus (tab3)"
+    version: "4.4.235"
+    url: "https://downloads.thebiogrid.org/Download/BioGRID/Release-Archive/BIOGRID-4.4.235/BIOGRID-ORGANISM-4.4.235.tab3.zip"
+    organism_file: "BIOGRID-ORGANISM-Mus_musculus-4.4.235.tab3.txt"
+    sha256: null
+
+  contaminants:
+    description: "Contaminantes cRAP (thegpm) - filtro AP-MS"
+    version: "2012.01.01"
+    url: "https://www.thegpm.org/crap/crap.fasta"
+    sha256: null
+
+  crapome_mouse:
+    description: "CRAPome-style background (opcional; ou calculado dos controles do usuario)"
+    version: "user-supplied"
+    url: null                        # exportacao CRAPome fornecida pelo usuario
+    sha256: null

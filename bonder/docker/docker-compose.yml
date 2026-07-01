@@ -1,0 +1,70 @@
+# =============================================================================
+# bonder - orquestracao localhost (CPU por padrao; funciona em qualquer maquina).
+#
+#   docker compose up --build
+#     -> dashboard em http://localhost:8080
+#
+# Para habilitar a GPU (RTX 3060), sobreponha com docker-compose.gpu.yml:
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build
+#
+# Coloque suas saidas de busca em ./inputs (montado em /inputs nos conteineres).
+# =============================================================================
+name: bonder
+
+services:
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.analysis
+    command: ["gunicorn", "-b", "0.0.0.0:8080", "-w", "2", "-t", "600", "bonder.web.app:create_app()"]
+    environment:
+      BONDER_REDIS_URL: redis://redis:6379/0
+      BONDER_HOST: 0.0.0.0
+      BONDER_DATA_ROOT: /data
+      BONDER_RUNS_DIR: /runs
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./inputs:/inputs
+      - bonder-data:/data
+      - bonder-runs:/runs
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8080/api/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.analysis
+    command: ["rq", "worker", "-u", "redis://redis:6379/0", "bonder"]
+    environment:
+      BONDER_REDIS_URL: redis://redis:6379/0
+      BONDER_DATA_ROOT: /data
+      BONDER_RUNS_DIR: /runs
+    volumes:
+      - ./inputs:/inputs
+      - bonder-data:/data
+      - bonder-runs:/runs
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  bonder-data:
+  bonder-runs:

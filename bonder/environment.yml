@@ -1,0 +1,30 @@
+# =============================================================================
+# bonder - ambiente conda (compativel com o env 'datascience' do miniforge3).
+# Atualiza um env existente:  conda env update -n datascience -f environment.yml
+# Ou cria dedicado:           conda env create -f environment.yml   (nome: bonder)
+# =============================================================================
+name: bonder
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.11
+  - numpy>=1.25
+  - pandas>=2.0
+  - pyarrow>=14
+  - scipy>=1.11
+  - networkx>=3.1
+  - matplotlib>=3.7
+  - pyyaml>=6.0
+  - requests>=2.31
+  - flask>=2.3
+  - gunicorn>=21
+  - redis-py>=5.0
+  - rq>=1.15
+  - pyteomics>=4.6
+  - pip
+  - pip:
+      - gprofiler-official>=1.0
+# GPU (torch cu124, transformers, ms2rescore, peptdeep) e a estatistica R
+# (DEP/limma/MSstats + SAINTexpress) sao providos pelos conteineres dedicados
+# (docker/Dockerfile.gpu e docker/Dockerfile.r) para maxima reprodutibilidade.

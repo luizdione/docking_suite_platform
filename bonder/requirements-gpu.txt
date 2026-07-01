@@ -1,0 +1,17 @@
+# =============================================================================
+# bonder - dependencias de GPU (conteiner GPU / RTX 3060). Instale com o indice
+# de wheels CUDA 12.4 do PyTorch:
+#   pip install -r requirements-gpu.txt --extra-index-url https://download.pytorch.org/whl/cu124
+#
+# Fallback CPU: troque por 'torch' do indice cpu (https://download.pytorch.org/whl/cpu).
+# Todas as libs abaixo sao de ferramentas revisadas por pares.
+# =============================================================================
+torch>=2.3               # cu124 no conteiner GPU; cpu no fallback
+transformers>=4.40       # ESM2 (priorizacao exploratoria, SUPLEMENTAR)
+
+# Rescoring por deep learning (opcional; +IDs a FDR fixo)
+ms2rescore>=3.0
+peptdeep>=1.2            # AlphaPeptDeep (modelos MS2/RT na GPU)
+
+# NOTA: DIA-NN e ColabFold/AlphaFold2 NAO sao pip: sao instalados como binarios
+# no Dockerfile.gpu (ver docker/Dockerfile.gpu) ou apontados por PATH.
