@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Manual das Minhas Skills Pessoais — Claude Code</title>
+<style>
+  body {
+    font-family: "Liberation Sans", "DejaVu Sans", Arial, sans-serif;
+    color: #1f2933;
+    font-size: 11pt;
+    line-height: 1.5;
+    margin: 2.2cm 2.0cm;
+  }
+  h1 {
+    color: #0b5563;
+    font-size: 22pt;
+    margin: 0 0 2pt 0;
+  }
+  .sub { color: #52606d; font-size: 11pt; margin: 0 0 4pt 0; }
+  .bar { border-bottom: 3px solid #0b7285; margin-bottom: 14pt; padding-bottom: 8pt; }
+  h2 {
+    color: #0b5563;
+    font-size: 15pt;
+    border-bottom: 1px solid #b7cfd6;
+    padding-bottom: 3pt;
+    margin-top: 20pt;
+  }
+  h3 { color: #12657a; font-size: 12.5pt; margin-top: 14pt; margin-bottom: 2pt; }
+  code {
+    font-family: "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+    background: #eef2f4;
+    border: 1px solid #d6dee2;
+    padding: 0 3px;
+    font-size: 10pt;
+    color: #0a3b45;
+  }
+  pre {
+    font-family: "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+    background: #0f2b33;
+    color: #e8f1f2;
+    padding: 8pt 10pt;
+    font-size: 9.5pt;
+    line-height: 1.4;
+    border-radius: 4px;
+    white-space: pre-wrap;
+  }
+  pre code { background: none; border: none; color: inherit; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 8pt 0; font-size: 10pt; }
+  th, td { border: 1px solid #c4d0d5; padding: 5pt 7pt; text-align: left; vertical-align: top; }
+  th { background: #0b7285; color: #ffffff; }
+  tr:nth-child(even) td { background: #f2f6f7; }
+  .callout {
+    background: #fff8e6;
+    border: 1px solid #f0d68a;
+    border-left: 4px solid #e0a800;
+    padding: 8pt 10pt;
+    margin: 10pt 0;
+    font-size: 10.5pt;
+  }
+  .ok { color: #0a7a44; font-weight: bold; }
+  .muted { color: #667380; }
+  .cmd { color: #0b5563; font-weight: bold; }
+  ul, ol { margin-top: 4pt; }
+  li { margin-bottom: 2pt; }
+  .footer { margin-top: 24pt; border-top: 1px solid #c4d0d5; padding-top: 6pt; color: #7b8794; font-size: 9pt; }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <h1>Manual das Minhas Skills Pessoais</h1>
+  <p class="sub">Claude Code &middot; Skills de memória de sessão &middot; NQ-Docking Suite</p>
+  <p class="sub muted">Autor: Luiz Dione &middot; Local das skills: <code>C:\Users\luizd\.claude\skills</code></p>
+</div>
+
+<h2>1. O que são "skills pessoais" e onde ficam</h2>
+<p>
+  Uma <b>skill</b> é uma pastinha com um arquivo <code>SKILL.md</code> que ensina o Claude Code
+  a executar uma tarefa. Quando a skill fica em <code>C:\Users\luizd\.claude\skills\</code> ela é
+  <b>pessoal (global)</b>: vale em <b>todos os seus projetos</b>, não só na NQ-Docking Suite.
+</p>
+<table>
+  <tr><th>Escopo</th><th>Local</th><th>Vale para</th></tr>
+  <tr><td><b>Pessoal (global)</b></td><td><code>C:\Users\luizd\.claude\skills\&lt;nome&gt;\SKILL.md</code></td><td>Todos os seus projetos</td></tr>
+  <tr><td>Projeto</td><td><code>&lt;repo&gt;\.claude\skills\&lt;nome&gt;\SKILL.md</code></td><td>Só aquele projeto (versionado no git)</td></tr>
+</table>
+<p><b>Como chamar:</b> digite <code>/</code> seguido do nome da skill no Claude Code. Ex.:
+  <code class="cmd">/salvar_contexto</code>. Você também pode passar um foco:
+  <code class="cmd">/salvar_contexto módulo ADMET</code>.
+</p>
+
+<h2>2. As duas skills e o que cada uma faz</h2>
+
+<h3>/salvar_contexto</h3>
+<p>Gera/atualiza a <b>memória da sessão atual</b> em arquivos Markdown do projeto (objetivo,
+  progresso, decisões, arquivos tocados e pendências). Serve para você <b>reduzir o contexto</b>
+  depois — com <code>/compact</code>, <code>/clear</code> ou <code>/branch</code> — <b>sem perder
+  a continuidade</b> da tarefa.</p>
+<p class="muted"><b>Quando usar:</b> contexto grande (perto do limite / 1M no Opus), antes de
+  compactar/limpar/forkar, ou ao encerrar um bloco de trabalho.</p>
+
+<h3>/salvar_contexto_compactar</h3>
+<p>Faz o mesmo que a <code>/salvar_contexto</code> (grava a memória) e, no fim, <b>entrega o
+  comando <code>/compact</code> pronto</b> (com foco) para você digitar — o fluxo "salvar e
+  compactar" numa tacada só.</p>
+<div class="callout">
+  <b>Importante:</b> nenhuma skill executa <code>/compact</code> sozinha. <code>/compact</code>,
+  <code>/clear</code> e <code>/branch</code> são comandos que <b>você digita</b> no Claude Code.
+  A skill <b>prepara tudo</b> (salva a memória) e te diz o comando exato para digitar em seguida.
+</div>
+
+<h2>3. Quais arquivos <code>.md</code> são atualizados</h2>
+<p>As duas skills mexem nos <b>mesmos três</b> arquivos, sempre dentro do projeto atual:</p>
+<table>
+  <tr><th>Arquivo</th><th>Papel</th><th>Como é atualizado</th></tr>
+  <tr>
+    <td><code>docs/historico/CONTEXTO_SESSAO.md</code></td>
+    <td><b>Arquivo vivo</b> — estado mais recente (é o que se relê ao retomar)</td>
+    <td><b>Sobrescrito</b> a cada execução</td>
+  </tr>
+  <tr>
+    <td><code>docs/historico/BRIEFING_&lt;data&gt;_&lt;tag&gt;.md</code></td>
+    <td><b>Snapshot datado</b> — histórico imutável da sessão</td>
+    <td><b>Novo</b> a cada vez; nunca sobrescreve os anteriores</td>
+  </tr>
+  <tr>
+    <td><code>claude.md</code> (raiz)</td>
+    <td>Ponteiro de compactação</td>
+    <td>Ganha a seção <code>## Instruções de Compactação</code> <b>só na 1ª vez</b> (idempotente)</td>
+  </tr>
+</table>
+<p>👉 Para <b>retomar do zero</b>, o arquivo-chave é <code>docs/historico/CONTEXTO_SESSAO.md</code>.</p>
+
+<h2>4. O hook de auto-load (memória automática ao abrir a sessão)</h2>
+<p>
+  O projeto tem um <b>hook SessionStart</b> (<code>.claude/settings.json</code> +
+  <code>.claude/hooks/carregar_contexto.py</code>) que <b>injeta automaticamente</b> o conteúdo de
+  <code>docs/historico/CONTEXTO_SESSAO.md</code> no início de <b>toda</b> sessão nova, retomada,
+  após <code>/clear</code> e após <code>/compact</code>. Se o arquivo não existir, o hook não faz
+  nada (silencioso). Assim, ao abrir a sessão, o Claude já "lembra" onde você parou — sem você
+  digitar nada.
+</p>
+<p class="muted">Teto de segurança: o hook injeta no máximo ~20 mil caracteres, para não inflar o
+  contexto logo na abertura. Mantenha o <code>CONTEXTO_SESSAO.md</code> enxuto.</p>
+
+<h2>5. Fluxo completo recomendado</h2>
+<table>
+  <tr><th>#</th><th>Situação</th><th>O que fazer</th></tr>
+  <tr><td>1</td><td>Contexto ficando grande (perto de 1M)</td><td><code>/salvar_contexto_compactar</code> (ou <code>/salvar_contexto</code>)</td></tr>
+  <tr><td>2</td><td>Reduzir de fato o contexto</td><td>Digitar <code>/compact foque em &lt;tema&gt;</code> (a skill te dá o comando pronto)</td></tr>
+  <tr><td>3</td><td>(Opcional) fazer a memória viajar</td><td><code>git add/commit</code> dos <code>.md</code> em <code>docs/historico/</code></td></tr>
+  <tr><td>4</td><td>Abrir sessão nova do zero</td><td>O <b>hook carrega a memória sozinho</b>. Se quiser o detalhe: "releia <code>docs/historico/CONTEXTO_SESSAO.md</code>"</td></tr>
+</table>
+
+<h2>6. Instalar / atualizar as skills pessoais</h2>
+<p>As skills são desenvolvidas e versionadas no repositório e depois copiadas para a sua pasta
+  pessoal. Rode o instalador (no Windows) a partir da pasta <code>.claude</code> do repo:</p>
+<pre><code>cd "C:\Users\luizd\OneDrive\Data_Science\Projetos\docking\.claude"
+.\instalar_skills_pessoais.ps1</code></pre>
+<p>O instalador copia <code>salvar_contexto</code> e <code>salvar_contexto_compactar</code> para
+  <code>C:\Users\luizd\.claude\skills\</code> e copia este manual para
+  <code>...\Projetos\manual_skills.pdf</code>. Para reinstalar depois de editar uma skill, é só
+  rodar de novo (ele sobrescreve).</p>
+<div class="callout">
+  Como estão em escopo pessoal, as skills passam a valer em <b>qualquer</b> projeto seu. Dentro da
+  NQ-Docking Suite elas também existem no escopo do projeto (repo) — funciona igual; se preferir,
+  pode manter só a versão pessoal.
+</div>
+
+<h2>7. Atalho rápido para a pasta da skill</h2>
+<p>Há um script que cria um atalho do Windows apontando para a pasta da skill, dentro de
+  <code>Projetos</code>:</p>
+<pre><code>cd "...\docking\.claude\skills\salvar_contexto"
+.\criar_atalho.ps1   # cria "salvar_contexto (skill).lnk" em ...\Projetos</code></pre>
+
+<h2>8. Referência rápida (cola)</h2>
+<table>
+  <tr><th>Comando</th><th>Efeito</th></tr>
+  <tr><td><code>/salvar_contexto</code></td><td>Grava a memória nos 3 arquivos <code>.md</code></td></tr>
+  <tr><td><code>/salvar_contexto_compactar</code></td><td>Grava a memória e entrega o <code>/compact</code> pronto</td></tr>
+  <tr><td><code>/compact foque em X</code></td><td>Reduz o contexto mantendo o essencial (você digita)</td></tr>
+  <tr><td><code>/clear</code> &rarr; <code>/resume</code></td><td>Zera o contexto; depois retoma a sessão anterior</td></tr>
+  <tr><td><code>/branch</code></td><td>Forka a sessão (cópia com novo ID), mantém a original</td></tr>
+  <tr><td><code>/context</code></td><td>Mostra o que está ocupando o contexto</td></tr>
+</table>
+
+<div class="footer">
+  Gerado para Luiz Dione &middot; Skills: salvar_contexto, salvar_contexto_compactar &middot;
+  Memória viva em docs/historico/CONTEXTO_SESSAO.md
+</div>
+
+</body>
+</html>
