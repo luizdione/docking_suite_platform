@@ -1,0 +1,29 @@
+name: bonder CI
+
+# Testa o nucleo CPU do subprojeto bonder/ (sem GPU, sem R): IO, formatacao
+# SAINT, pipeline ponta-a-ponta e jobs web. Path-filtrado para nao rodar em
+# mudancas fora de bonder/.
+on:
+  push:
+    branches: ["**"]
+    paths: ["bonder/**", ".github/workflows/bonder-ci.yml"]
+  pull_request:
+    paths: ["bonder/**", ".github/workflows/bonder-ci.yml"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bonder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar dependencias do nucleo
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy pandas pyarrow scipy networkx pyyaml flask matplotlib pytest
+      - name: Rodar testes (nucleo CPU)
+        run: python -m pytest -q

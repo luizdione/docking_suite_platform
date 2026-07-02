@@ -320,24 +320,20 @@ def parse_diann(path, report_tsv=None, samples_cfg=None, baits_cfg=None) -> MSDa
     feats["majority_protein_ids"] = df.get("Protein.Ids", df["Protein.Group"]).values
     feats["gene_names"] = df.get("Genes", pd.Series([""] * len(df))).values
 
-    # evidencia de peptideos e q-value: do report.tsv se fornecido
+    # evidencia de peptideos e q-value: do report.tsv se fornecido.
+    # Chave = 'Protein.Group' ORIGINAL (mesma string do report), nao o acesso
+    # lider derivado - senao o lookup nao casa e zera tudo.
     if report_tsv is not None and Path(report_tsv).exists():
         rep = pd.read_csv(report_tsv, sep="\t", dtype=str, low_memory=False)
+        group = df["Protein.Group"]
         if {"Protein.Group", "Stripped.Sequence"}.issubset(rep.columns):
             npep = rep.groupby("Protein.Group")["Stripped.Sequence"].nunique()
-            feats["n_unique_peptides"] = (
-                pd.Series(feats["leading_accession"].values, index=feats.index)
-                .map(lambda a: int(npep.get(a, 0)))
-                .values
-            )
-            feats["n_peptides"] = feats["n_unique_peptides"].values
+            counts = group.map(lambda g: int(npep.get(g, 0))).values
+            feats["n_unique_peptides"] = counts
+            feats["n_peptides"] = counts
         if "PG.Q.Value" in rep.columns:
             qmin = pd.to_numeric(rep["PG.Q.Value"], errors="coerce").groupby(rep["Protein.Group"]).min()
-            feats["q_value"] = (
-                pd.Series(feats["leading_accession"].values, index=feats.index)
-                .map(lambda a: qmin.get(a, np.nan))
-                .values
-            )
+            feats["q_value"] = group.map(lambda g: qmin.get(g, np.nan)).values
 
     acc_contam, acc_decoy = cont.flag_series(leading.values)
     feats["is_contaminant"] = np.array(acc_contam)
