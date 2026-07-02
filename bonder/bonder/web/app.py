@@ -58,6 +58,19 @@ def create_app() -> "Flask":
         from bonder.web import health
         return jsonify(health.self_test())
 
+    @app.get("/api/docs")
+    def docs_list():
+        from bonder.web import docs
+        return jsonify(docs.list_docs())
+
+    @app.get("/api/docs/<doc_id>")
+    def docs_get(doc_id):
+        from bonder.web import docs
+        d = docs.get_doc(doc_id)
+        if d is None:
+            abort(404)
+        return jsonify(d)
+
     @app.post("/api/run")
     def run():
         data = request.get_json(force=True, silent=True) or {}

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>bonder - interactoma CoIP-MS (proteoma murino)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.2/cytoscape.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
   :root{
     --bg:#0f1216; --panel:#171b21; --panel2:#1e242c; --line:#2a323c;
@@ -49,6 +50,22 @@
   .hgrid{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
   .chip{font-size:12px;padding:3px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}
   h4{margin:14px 0 4px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  /* aba Ajuda */
+  .docwrap{display:grid;grid-template-columns:240px 1fr;min-height:65vh}
+  .docnav{border-right:1px solid var(--line);padding:10px;overflow:auto}
+  .docnav .cat{font-size:11px;color:var(--muted);text-transform:uppercase;margin:12px 6px 4px}
+  .docnav button{display:block;width:100%;text-align:left;background:transparent;border:0;color:var(--fg);
+    padding:6px 8px;border-radius:6px;margin:0;font:inherit;cursor:pointer}
+  .docnav button:hover{background:var(--panel2)} .docnav button.active{background:var(--panel2);color:var(--accent);font-weight:600}
+  .md{padding:18px 24px;overflow:auto;max-height:78vh;line-height:1.65}
+  .md h1,.md h2,.md h3{border-bottom:1px solid var(--line);padding-bottom:4px;margin:18px 0 10px}
+  .md h1{font-size:22px} .md h2{font-size:18px} .md h3{font-size:15px}
+  .md code{background:var(--panel2);padding:1px 5px;border-radius:5px;font-size:13px}
+  .md pre{background:var(--panel2);padding:12px;border-radius:8px;overflow:auto;border:1px solid var(--line)}
+  .md pre code{background:transparent;padding:0}
+  .md table{width:auto;margin:10px 0} .md a{color:var(--accent)}
+  .md blockquote{border-left:3px solid var(--line);margin:10px 0;padding:2px 12px;color:var(--muted)}
+  .md ul,.md ol{padding-left:22px}
 </style>
 </head>
 <body>
@@ -80,6 +97,7 @@
       <button data-tab="volcano">Volcano</button>
       <button data-tab="rede">Rede</button>
       <button data-tab="manutencao">Manutencao</button>
+      <button data-tab="ajuda">Ajuda e Tutoriais</button>
     </div>
     <section id="tab-resumo">
       <div class="card"><div class="kv" id="summary"><div>Selecione uma corrida</div><div></div></div></div>
@@ -116,6 +134,14 @@
       <div class="card" id="selftestCard" style="display:none">
         <b>Autoteste do pipeline (dados sinteticos, sem GPU/R)</b>
         <div id="selftest"></div>
+      </div>
+    </section>
+    <section id="tab-ajuda" class="hidden">
+      <div class="card" style="padding:0">
+        <div class="docwrap">
+          <nav id="docnav" class="docnav"><p class="hint" style="padding:12px">Carregando...</p></nav>
+          <article id="docview" class="md"><p class="hint">Selecione um documento a esquerda.</p></article>
+        </div>
       </div>
     </section>
   </main>
@@ -204,10 +230,38 @@ $('#runBtn').onclick = async () => {
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
   document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
   b.classList.add('active');
-  ['resumo','interatores','volcano','rede','manutencao'].forEach(t =>
+  ['resumo','interatores','volcano','rede','manutencao','ajuda'].forEach(t =>
     $('#tab-'+t).classList.toggle('hidden', t !== b.dataset.tab));
   if(b.dataset.tab === 'manutencao') renderHealth();
+  if(b.dataset.tab === 'ajuda' && !docsLoaded) renderDocs();
 });
+
+// ---- aba Ajuda e Tutoriais: serve os .md do projeto ----
+let docsLoaded = false;
+async function renderDocs(){
+  let docs; try{ docs = await (await fetch('/api/docs')).json(); }
+  catch(e){ $('#docnav').innerHTML = '<p class="hint" style="padding:12px">Falha ao listar docs.</p>'; return; }
+  docsLoaded = true;
+  const cats = {};
+  docs.forEach(d => { (cats[d.category] = cats[d.category] || []).push(d); });
+  let nav = '';
+  Object.keys(cats).forEach(cat => {
+    nav += `<div class="cat">${cat}</div>`;
+    nav += cats[cat].map(d => `<button data-doc="${d.id}">${d.title}</button>`).join('');
+  });
+  $('#docnav').innerHTML = nav;
+  document.querySelectorAll('#docnav button').forEach(b => b.onclick = () => openDoc(b.dataset.doc, b));
+  if(docs.length) openDoc(docs[0].id, document.querySelector('#docnav button'));
+}
+async function openDoc(id, btn){
+  document.querySelectorAll('#docnav button').forEach(x => x.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  $('#docview').innerHTML = '<p class="hint">Carregando...</p>';
+  let d; try{ d = await (await fetch('/api/docs/'+id)).json(); }
+  catch(e){ $('#docview').innerHTML = '<p class="hint">Documento indisponivel.</p>'; return; }
+  const md = d.markdown || '';
+  $('#docview').innerHTML = (window.marked ? marked.parse(md) : ('<pre>'+md.replace(/</g,'&lt;')+'</pre>'));
+}
 
 // ---- aba Manutencao: auditoria + autoteste ----
 function bdg(ok){ return `<span class="pill ${ok?'alta':'baixa'}">${ok?'OK':'FALTA'}</span>`; }
