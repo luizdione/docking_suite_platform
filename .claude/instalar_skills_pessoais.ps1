@@ -67,7 +67,12 @@ if ($HookGlobal) {
   $helperSrc = Join-Path $src "hooks\carregar_contexto.py"
   $helperDst = Join-Path $hooksDir "carregar_contexto.py"
   Copy-Item -LiteralPath $helperSrc -Destination $helperDst -Force
-  $cmd = 'python "' + $helperDst + '"'
+  # Resolve o caminho absoluto do python agora, para o hook nao depender do PATH
+  # do processo que o Claude Code usar ao disparar o SessionStart.
+  $py = (Get-Command python -ErrorAction SilentlyContinue).Source
+  if (-not $py) { $py = (Get-Command python3 -ErrorAction SilentlyContinue).Source }
+  if (-not $py) { $py = "python" }
+  $cmd = '"' + $py + '" "' + $helperDst + '"'
 
   $settingsPath = Join-Path $env:USERPROFILE ".claude\settings.json"
   $entry = [pscustomobject]@{
@@ -104,8 +109,9 @@ if ($HookGlobal) {
       }
     }
   }
-  Write-Host "   Obs.: no repo docking o hook JA existe em escopo de projeto;" -ForegroundColor DarkGray
-  Write-Host "         com o global, nesse repo a memoria seria injetada 2x." -ForegroundColor DarkGray
+  Write-Host "   Hook global ativo: vale em TODOS os projetos" -ForegroundColor DarkGray
+  Write-Host "   (le docs/historico/CONTEXTO_SESSAO.md relativo a pasta de cada projeto)." -ForegroundColor DarkGray
+  Write-Host "   Comando do hook: $cmd" -ForegroundColor DarkGray
 }
 
 Write-Host ""
