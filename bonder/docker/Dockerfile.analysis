@@ -7,7 +7,7 @@ FROM mambaorg/micromamba:1.5.8
 
 USER root
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential ca-certificates git curl unzip libgsl-dev \
+    build-essential ca-certificates git curl unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # Ambiente conda reproduzivel (gold-standard tools: Python + R/Bioconductor)
@@ -24,6 +24,9 @@ ENV PATH=/opt/bonder/bin:/opt/conda/bin:$PATH
 # Release oficial (tar.gz). Compila com o script 'compile' de cada subdir, que
 # usa g++ + GSL (libgsl-dev, instalado acima). Usa o g++ de /usr/bin (nao o do
 # conda) para achar os headers da GSL do sistema.
+# GSL numa camada tardia (nao invalida o cache da camada pesada do R/conda).
+RUN apt-get update && apt-get install -y --no-install-recommends libgsl-dev \
+    && rm -rf /var/lib/apt/lists/*
 ARG SAINT_URL="https://sourceforge.net/projects/saint-apms/files/SAINTexpress_v3.6.3__2018-03-09.tar.gz/download"
 RUN set -x; ( \
       curl -fL -o /tmp/saint.tgz "$SAINT_URL" \
