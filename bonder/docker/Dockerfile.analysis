@@ -7,28 +7,34 @@ FROM mambaorg/micromamba:1.5.8
 
 USER root
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential ca-certificates git curl unzip \
+    build-essential ca-certificates git curl unzip libgsl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Ambiente conda reproduzivel (gold-standard tools: Python + R/Bioconductor)
 COPY docker/environment-analysis.yml /tmp/env.yml
 RUN micromamba install -y -n base -f /tmp/env.yml && micromamba clean -a -y
-ENV PATH=/opt/conda/bin:$PATH
+# /opt/bonder/bin no PATH: escotilha para montar um SAINTexpress-int do host
+# (volume) sem reconstruir a imagem.
+RUN mkdir -p /opt/bonder/bin
+ENV PATH=/opt/bonder/bin:/opt/conda/bin:$PATH
 
 # SAINTexpress: NAO existe em conda. Compila do codigo-fonte (SourceForge).
 # BEST-EFFORT e NAO-FATAL: se o download/build falhar (ex.: sem rede), a imagem
 # ainda sobe e a etapa SAINT e apenas 'pulada' em runtime (o pipeline tolera).
-ARG SAINT_URL1="https://sourceforge.net/projects/saint-apms/files/latest/download"
-ARG SAINT_URL2="https://sourceforge.net/projects/saint-apms/files/SAINTexpress_v3.6.3__2018-03-09.zip/download"
+# Release oficial (tar.gz). Compila com o script 'compile' de cada subdir, que
+# usa g++ + GSL (libgsl-dev, instalado acima). Usa o g++ de /usr/bin (nao o do
+# conda) para achar os headers da GSL do sistema.
+ARG SAINT_URL="https://sourceforge.net/projects/saint-apms/files/SAINTexpress_v3.6.3__2018-03-09.tar.gz/download"
 RUN set -x; ( \
-      ( curl -fL -o /tmp/saint.zip "$SAINT_URL1" || curl -fL -o /tmp/saint.zip "$SAINT_URL2" ) \
-      && cd /tmp && unzip -q saint.zip \
-      && for mk in $(find /tmp -maxdepth 4 -name Makefile -path '*SAINTexpress*'); do make -C "$(dirname "$mk")" || true; done \
-      && find /tmp -type f -name 'SAINTexpress-int' -exec cp {} /usr/local/bin/ \; \
-      && find /tmp -type f -name 'SAINTexpress-spc' -exec cp {} /usr/local/bin/ \; \
-      && chmod +x /usr/local/bin/SAINTexpress-* 2>/dev/null \
-      && rm -f /tmp/saint.zip \
-    ) || echo "AVISO: SAINTexpress nao instalado automaticamente; etapa SAINT sera pulada (ver docs para instalacao manual)."
+      curl -fL -o /tmp/saint.tgz "$SAINT_URL" \
+      && mkdir -p /tmp/saint && tar xzf /tmp/saint.tgz -C /tmp/saint \
+      && for d in $(find /tmp/saint -type d \( -name 'SAINTexpress-int' -o -name 'SAINTexpress-spc' \)); do \
+           ( cd "$d" && PATH=/usr/bin:$PATH sh -c 'if [ -f compile ]; then bash compile; else make; fi' ) || true; \
+         done \
+      && find /tmp/saint -type f \( -name 'SAINTexpress-int' -o -name 'SAINTexpress-spc' \) -perm -u+x -exec cp {} /usr/local/bin/ \; \
+      && chmod +x /usr/local/bin/SAINTexpress-* \
+      && rm -rf /tmp/saint /tmp/saint.tgz \
+    ) || echo "AVISO: SAINTexpress nao instalado automaticamente; etapa SAINT sera pulada (ver docs/COMO_RODAR.md)."
 
 WORKDIR /app
 # Instala o pacote bonder

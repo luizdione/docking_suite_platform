@@ -27,3 +27,7 @@ config/sequences/*.fasta
 .venv/
 venv/
 .env
+
+# binarios externos vendored (nao versionar)
+vendor/bin/*
+!vendor/bin/.gitkeep

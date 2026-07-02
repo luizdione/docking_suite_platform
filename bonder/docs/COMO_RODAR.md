@@ -87,12 +87,17 @@ passos: {... 'saint': 'ok', 'dep': 'ok', ...}
 
 - `dep: ok`  -> R/Bioconductor (DEP/limma) rodou de verdade.
 - `saint: ok` -> SAINTexpress rodou de verdade.
-- Se aparecer `saint: pulado`, o download/compilacao do SAINTexpress (SourceForge)
-  nao ocorreu no build. Instale manualmente: baixe o SAINTexpress de
-  https://sourceforge.net/projects/saint-apms/ , compile (`make`) e copie os
-  binarios `SAINTexpress-int`/`SAINTexpress-spc` para um diretorio no PATH do
-  conteiner (ex.: monte um volume em /usr/local/bin). O pipeline passa a usa-lo
-  automaticamente. DEP/limma nao dependem disso.
+- Se aparecer `saint: pulado`, o SAINTexpress nao compilou no build. Instalacao
+  manual (o release oficial e um tar.gz e compila com GSL):
+  ```bash
+  # dentro de um conteiner/host Linux com g++ e libgsl-dev instalados:
+  curl -fL -o saint.tgz "https://sourceforge.net/projects/saint-apms/files/SAINTexpress_v3.6.3__2018-03-09.tar.gz/download"
+  tar xzf saint.tgz
+  cd SAINTexpress_v3.6.3__2018-03-09/SAINTexpress-int && bash compile
+  # copie o binario 'SAINTexpress-int' gerado para um diretorio do PATH
+  # (ex.: monte um volume do host em /opt/bonder/bin, ja incluido no PATH).
+  ```
+  O pipeline passa a usa-lo automaticamente. DEP/limma NAO dependem disso.
 
 Em CPU puro (conda, sem Docker) o mesmo `python -m bonder.cli selftest` mostra
 `saint`/`dep` como `pulado` - esperado, pois SAINT/R vivem no conteiner.
