@@ -52,6 +52,22 @@ FEATURE_COLUMNS = [
 SAMPLE_COLUMNS = ["condition", "bait_id", "role", "replicate", "raw_file"]
 
 
+def _parquet_available() -> bool:
+    """True se houver engine de Parquet (pyarrow/fastparquet) REALMENTE importavel.
+
+    Em Windows/conda o pyarrow as vezes instala mas falha no import (build/DLL);
+    por isso testamos o import de verdade e caimos para pickle quando indisponivel,
+    para a serializacao intermediaria nunca quebrar a analise.
+    """
+    for eng in ("pyarrow", "fastparquet"):
+        try:
+            __import__(eng)
+            return True
+        except Exception:
+            continue
+    return False
+
+
 @dataclass
 class MSDataset:
     """Matriz proteina x amostra unificada + metadados + proveniencia."""
@@ -121,11 +137,20 @@ class MSDataset:
         """Grava intensity/features/samples em Parquet + proveniencia em JSON."""
         d = Path(run_dir)
         d.mkdir(parents=True, exist_ok=True)
-        self.intensity.to_parquet(d / "intensity.parquet")
-        self.features.to_parquet(d / "features.parquet")
-        self.samples.to_parquet(d / "samples.parquet")
+        fmt = "parquet" if _parquet_available() else "pickle"
+        if fmt == "parquet":
+            self.intensity.to_parquet(d / "intensity.parquet")
+            self.features.to_parquet(d / "features.parquet")
+            self.samples.to_parquet(d / "samples.parquet")
+        else:
+            # fallback resiliente quando pyarrow/fastparquet nao importam
+            self.intensity.to_pickle(d / "intensity.pkl")
+            self.features.to_pickle(d / "features.pkl")
+            self.samples.to_pickle(d / "samples.pkl")
+        prov = dict(self.provenance)
+        prov["_storage_format"] = fmt
         (d / "provenance.json").write_text(
-            json.dumps(self.provenance, indent=2, ensure_ascii=True), encoding="utf-8"
+            json.dumps(prov, indent=2, ensure_ascii=True), encoding="utf-8"
         )
         return d
 
@@ -136,10 +161,15 @@ class MSDataset:
         pj = d / "provenance.json"
         if pj.exists():
             prov = json.loads(pj.read_text(encoding="utf-8"))
+        # detecta o formato pelo arquivo presente (parquet ou pickle)
+        if (d / "intensity.parquet").exists():
+            rd, ext = pd.read_parquet, "parquet"
+        else:
+            rd, ext = pd.read_pickle, "pkl"
         return cls(
-            intensity=pd.read_parquet(d / "intensity.parquet"),
-            features=pd.read_parquet(d / "features.parquet"),
-            samples=pd.read_parquet(d / "samples.parquet"),
+            intensity=rd(d / ("intensity.%s" % ext)),
+            features=rd(d / ("features.%s" % ext)),
+            samples=rd(d / ("samples.%s" % ext)),
             provenance=prov,
         )
 

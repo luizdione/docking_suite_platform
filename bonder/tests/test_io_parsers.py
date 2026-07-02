@@ -155,6 +155,23 @@ def test_parquet_roundtrip(tmp_path):
     assert ds2.provenance["engine"] == "maxquant"
 
 
+def test_parquet_fallback_to_pickle(tmp_path, monkeypatch):
+    # simula pyarrow/fastparquet indisponiveis (caso Windows/conda quebrado):
+    # a serializacao intermediaria deve cair para pickle e o roundtrip funcionar.
+    from bonder.io import schema
+    monkeypatch.setattr(schema, "_parquet_available", lambda: False)
+    p = tmp_path / "proteinGroups.txt"
+    _write_maxquant(p)
+    ds = parse_maxquant(p, samples_cfg=SAMPLES_CFG, baits_cfg=BAITS_CFG)
+    outdir = tmp_path / "run_pkl"
+    ds.to_parquet(outdir)
+    assert (outdir / "intensity.pkl").exists()
+    assert not (outdir / "intensity.parquet").exists()
+    ds2 = schema.MSDataset.from_parquet(outdir)
+    pd.testing.assert_frame_equal(ds.intensity, ds2.intensity)
+    assert ds2.provenance.get("_storage_format") == "pickle"
+
+
 def test_unmatched_sample_raises(tmp_path):
     p = tmp_path / "proteinGroups.txt"
     _write_maxquant(p)

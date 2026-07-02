@@ -37,7 +37,7 @@ from bonder.config import load_config
 PY_DEPS = [
     ("numpy", "numpy", True),
     ("pandas", "pandas", True),
-    ("pyarrow", "pyarrow", True),
+    ("pyarrow", "pyarrow", False),      # serializacao Parquet; fallback pickle se ausente
     ("networkx", "networkx", True),
     ("yaml", "pyyaml", True),
     ("requests", "requests", True),
