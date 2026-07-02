@@ -48,6 +48,16 @@ def create_app() -> "Flask":
         return jsonify({"device": probe().to_dict(), "gpu_free_mb": gpu_gate.gpu_free_mb(),
                         "llm_present": gpu_gate.llm_present()})
 
+    @app.get("/api/health/full")
+    def health_full():
+        from bonder.web import health
+        return jsonify(health.full_report())
+
+    @app.post("/api/health/selftest")
+    def health_selftest():
+        from bonder.web import health
+        return jsonify(health.self_test())
+
     @app.post("/api/run")
     def run():
         data = request.get_json(force=True, silent=True) or {}

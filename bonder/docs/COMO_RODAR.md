@@ -69,6 +69,25 @@ python -m bonder.cli run --input inputs/proteinGroups.txt --contrast NSs_vs_CTRL
 - `volcano.png` — volcano do DEP/limma.
 - `manifest.json` — reprodutibilidade (versoes/ferramentas/device/passos).
 
+## Aba Manutencao (auditoria + autoteste)
+
+No dashboard, a aba **Manutencao** faz uma auditoria de sanidade:
+
+- dependencias Python (nucleo x opcionais) e suas versoes;
+- ferramentas externas no PATH (SAINTexpress, Rscript, DIA-NN, ColabFold, nvidia-smi);
+- pacotes R gold-standard (DEP/limma/MSstats) quando o Rscript existe;
+- GPU (device escolhido + VRAM livre) e config (iscas/contrastes/avisos);
+- bancos de referencia em cache + `search_db.fasta`; caminhos com escrita; corridas.
+
+O botao **Rodar autoteste** executa o pipeline em dados sinteticos (num diretorio
+temporario) e mostra o status de cada etapa e verificacao — a checagem de
+sanidade dos scripts e processos, sem depender de GPU nem de R. Tambem por API:
+
+```bash
+curl http://localhost:8080/api/health/full
+curl -X POST http://localhost:8080/api/health/selftest
+```
+
 ## Dicas de GPU (compartilhar com o Ollama)
 
 O `gpu_gate` espera VRAM livre e ausencia de processo do LLM (Ollama/llama) antes

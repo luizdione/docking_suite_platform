@@ -46,6 +46,9 @@
   .kv div:nth-child(odd){color:var(--muted)}
   .hint{color:var(--muted);font-size:12px} code{background:var(--panel2);padding:1px 5px;border-radius:5px}
   .hidden{display:none}
+  .hgrid{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+  .chip{font-size:12px;padding:3px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}
+  h4{margin:14px 0 4px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
 </style>
 </head>
 <body>
@@ -76,6 +79,7 @@
       <button data-tab="interatores">Interatores</button>
       <button data-tab="volcano">Volcano</button>
       <button data-tab="rede">Rede</button>
+      <button data-tab="manutencao">Manutencao</button>
     </div>
     <section id="tab-resumo">
       <div class="card"><div class="kv" id="summary"><div>Selecione uma corrida</div><div></div></div></div>
@@ -98,6 +102,21 @@
     <section id="tab-rede" class="hidden">
       <div class="card"><div id="cy"></div>
       <p class="hint">Cinza = isca; azul = presa detectada. Arraste os nos. Exporte GraphML/Cytoscape na pasta da corrida.</p></div>
+    </section>
+    <section id="tab-manutencao" class="hidden">
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <b>Auditoria da plataforma</b>
+          <span class="badge" id="healthOverall">...</span>
+          <button class="secondary" id="refreshHealth" style="width:auto;margin:0">Atualizar</button>
+          <button id="runSelftest" style="width:auto;margin:0">Rodar autoteste</button>
+        </div>
+        <div id="health"><p class="hint">Carregando auditoria...</p></div>
+      </div>
+      <div class="card" id="selftestCard" style="display:none">
+        <b>Autoteste do pipeline (dados sinteticos, sem GPU/R)</b>
+        <div id="selftest"></div>
+      </div>
     </section>
   </main>
 </div>
@@ -185,9 +204,59 @@ $('#runBtn').onclick = async () => {
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
   document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
   b.classList.add('active');
-  ['resumo','interatores','volcano','rede'].forEach(t =>
+  ['resumo','interatores','volcano','rede','manutencao'].forEach(t =>
     $('#tab-'+t).classList.toggle('hidden', t !== b.dataset.tab));
+  if(b.dataset.tab === 'manutencao') renderHealth();
 });
+
+// ---- aba Manutencao: auditoria + autoteste ----
+function bdg(ok){ return `<span class="pill ${ok?'alta':'baixa'}">${ok?'OK':'FALTA'}</span>`; }
+async function renderHealth(){
+  $('#health').innerHTML = '<p class="hint">Carregando auditoria...</p>';
+  let h; try{ h = await (await fetch('/api/health/full')).json(); }
+  catch(e){ $('#health').innerHTML = '<p class="hint">Falha ao auditar.</p>'; return; }
+  $('#healthOverall').textContent = 'geral: ' + (h.overall||'?').toUpperCase();
+  $('#healthOverall').style.color = h.overall==='ok' ? 'var(--ok)' : 'var(--err)';
+  const chips = arr => '<div class="hgrid">'+arr.join('')+'</div>';
+  let html = `<div class="kv">
+    <div>bonder</div><div>${h.system.bonder_version}</div>
+    <div>Python</div><div>${h.system.python}</div>
+    <div>Plataforma</div><div>${h.system.platform}</div>
+    <div>GPU</div><div>${h.gpu.device.device}${h.gpu.device.reason?(' - '+h.gpu.device.reason):''}</div></div>`;
+  html += '<h4>Dependencias Python (* = nucleo)</h4>' + chips(h.python_deps.map(d=>
+    `<span class="chip" title="${d.import}">${d.name}${d.core?'*':''} ${bdg(d.ok)}${d.version?(' '+d.version):''}</span>`));
+  html += '<h4>Ferramentas externas</h4>' + chips(h.tools.map(t=>
+    `<span class="chip" title="${t.purpose}">${t.name} ${bdg(t.ok)}</span>`));
+  const rp = (h.r_packages&&h.r_packages.packages)||{};
+  html += '<h4>Pacotes R (Bioconductor)</h4>' + chips(Object.keys(rp).map(k=>`<span class="chip">${k} ${bdg(rp[k])}</span>`))
+    + `<p class="hint">${(h.r_packages&&h.r_packages.note)||''}</p>`;
+  html += `<h4>Configuracao</h4><div class="kv">
+    <div>Iscas</div><div>${(h.config.baits||[]).join(', ')}</div>
+    <div>Contrastes</div><div>${(h.config.contrasts||[]).join(', ')}</div>
+    <div>Amostras</div><div>${h.config.n_samples}</div></div>`;
+  if((h.config.warnings||[]).length) html += '<p class="hint">Avisos: '+h.config.warnings.join(' &middot; ')+'</p>';
+  html += `<h4>Bancos de referencia</h4><div class="kv">
+    <div>data_root</div><div>${h.databases.data_root}</div>
+    <div>Fontes em cache</div><div>${h.databases.n_cached} ${(h.databases.cached_sources||[]).join(', ')}</div>
+    <div>search_db.fasta</div><div>${bdg(h.databases.search_db_fasta)}</div></div>`;
+  html += '<h4>Caminhos (escrita)</h4>' + chips(h.paths.map(p=>`<span class="chip" title="${p.path}">${p.label} ${bdg(p.writable)}</span>`));
+  html += `<h4>Corridas</h4><p class="hint">total: ${h.runs.total} &middot; ${JSON.stringify(h.runs.by_status)}</p>`;
+  $('#health').innerHTML = html;
+}
+async function runSelftest(){
+  $('#selftestCard').style.display='block';
+  $('#selftest').innerHTML = '<p class="hint">Rodando autoteste (pipeline sintetico)...</p>';
+  let s; try{ s = await (await fetch('/api/health/selftest',{method:'POST'})).json(); }
+  catch(e){ $('#selftest').innerHTML='<p class="hint">Falha ao rodar autoteste.</p>'; return; }
+  let html = `<p>Resultado: <span class="pill ${s.ok?'alta':'baixa'}">${s.ok?'PASSOU':'FALHOU'}</span>
+    em ${s.elapsed_s||'?'}s &middot; ${s.n_candidates||0} candidatos</p>`;
+  html += '<h4>Verificacoes</h4><div class="hgrid">'+(s.checks||[]).map(c=>`<span class="chip">${c.artifact} ${bdg(c.ok)}</span>`).join('')+'</div>';
+  html += '<h4>Passos do pipeline</h4><div class="hgrid">'+(s.steps||[]).map(st=>`<span class="chip">${st.step}: ${st.status}</span>`).join('')+'</div>';
+  if(s.error) html += `<p class="hint">Erro: ${s.error}</p>`;
+  $('#selftest').innerHTML = html;
+}
+$('#refreshHealth').onclick = renderHealth;
+$('#runSelftest').onclick = runSelftest;
 
 gpu(); loadRuns(); setInterval(loadRuns, 8000);
 </script>
