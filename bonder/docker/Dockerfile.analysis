@@ -18,15 +18,17 @@ ENV PATH=/opt/conda/bin:$PATH
 # SAINTexpress: NAO existe em conda. Compila do codigo-fonte (SourceForge).
 # BEST-EFFORT e NAO-FATAL: se o download/build falhar (ex.: sem rede), a imagem
 # ainda sobe e a etapa SAINT e apenas 'pulada' em runtime (o pipeline tolera).
-ARG SAINT_URL="https://sourceforge.net/projects/saint-apms/files/SAINTexpress_v3.6.3__2018-03-09.zip/download"
+ARG SAINT_URL1="https://sourceforge.net/projects/saint-apms/files/latest/download"
+ARG SAINT_URL2="https://sourceforge.net/projects/saint-apms/files/SAINTexpress_v3.6.3__2018-03-09.zip/download"
 RUN set -x; ( \
-      curl -fL -o /tmp/saint.zip "$SAINT_URL" \
+      ( curl -fL -o /tmp/saint.zip "$SAINT_URL1" || curl -fL -o /tmp/saint.zip "$SAINT_URL2" ) \
       && cd /tmp && unzip -q saint.zip \
-      && d="$(find /tmp -maxdepth 1 -type d -name 'SAINTexpress*' | head -1)" \
-      && make -C "$d/SAINTexpress-int" && make -C "$d/SAINTexpress-spc" \
-      && find "$d" -type f -name 'SAINTexpress-*' -perm -u+x -exec cp {} /usr/local/bin/ \; \
-      && rm -rf /tmp/saint.zip "$d" \
-    ) || echo "AVISO: SAINTexpress nao instalado (build/download falhou); etapa SAINT sera pulada."
+      && for mk in $(find /tmp -maxdepth 4 -name Makefile -path '*SAINTexpress*'); do make -C "$(dirname "$mk")" || true; done \
+      && find /tmp -type f -name 'SAINTexpress-int' -exec cp {} /usr/local/bin/ \; \
+      && find /tmp -type f -name 'SAINTexpress-spc' -exec cp {} /usr/local/bin/ \; \
+      && chmod +x /usr/local/bin/SAINTexpress-* 2>/dev/null \
+      && rm -f /tmp/saint.zip \
+    ) || echo "AVISO: SAINTexpress nao instalado automaticamente; etapa SAINT sera pulada (ver docs para instalacao manual)."
 
 WORKDIR /app
 # Instala o pacote bonder

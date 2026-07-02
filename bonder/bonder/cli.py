@@ -92,6 +92,24 @@ def cmd_list_contrasts(args) -> int:
     return 0
 
 
+def cmd_selftest(args) -> int:
+    """Autoteste do pipeline (dados sinteticos). Exit 0 se PASSOU, 1 se FALHOU.
+
+    Dentro da imagem de analise (SAINT + R presentes), os passos saint/dep rodam
+    de verdade; em CPU puro eles aparecem como 'pulado'.
+    """
+    from bonder.web import health
+    r = health.self_test()
+    print("AUTOTESTE:", "PASSOU" if r.get("ok") else "FALHOU",
+          "| candidatos:", r.get("n_candidates"), "| tempo:", r.get("elapsed_s"), "s")
+    print("passos:", {s["step"]: s["status"] for s in r.get("steps", [])})
+    for c in r.get("checks", []):
+        print("  [%s] %s" % ("OK" if c["ok"] else "X ", c["artifact"]))
+    if r.get("error"):
+        print("erro:", r["error"])
+    return 0 if r.get("ok") else 1
+
+
 def cmd_run(args) -> int:
     from bonder.pipeline import run_pipeline
     cfg = load_config()
@@ -131,6 +149,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     lc = sub.add_parser("list-contrasts", help="lista contrastes de samples.yaml")
     lc.set_defaults(func=cmd_list_contrasts)
+
+    st = sub.add_parser("selftest", help="autoteste do pipeline (valida SAINT/R quando presentes)")
+    st.set_defaults(func=cmd_selftest)
 
     r = sub.add_parser("run", help="roda o pipeline")
     r.add_argument("--input", required=True, help="saida do motor de busca")

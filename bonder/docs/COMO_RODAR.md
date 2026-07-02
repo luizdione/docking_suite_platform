@@ -69,6 +69,34 @@ python -m bonder.cli run --input inputs/proteinGroups.txt --contrast NSs_vs_CTRL
 - `volcano.png` — volcano do DEP/limma.
 - `manifest.json` — reprodutibilidade (versoes/ferramentas/device/passos).
 
+## Validar a pilha completa (SAINT + R rodando de verdade)
+
+Depois de subir com Docker, rode o autoteste DENTRO do conteiner de analise
+(que tem R/Bioconductor e SAINTexpress):
+
+```bash
+docker compose -f docker/docker-compose.yml run --rm worker bonder selftest
+```
+
+Saida esperada com a pilha completa:
+
+```
+AUTOTESTE: PASSOU | candidatos: ~248
+passos: {... 'saint': 'ok', 'dep': 'ok', ...}
+```
+
+- `dep: ok`  -> R/Bioconductor (DEP/limma) rodou de verdade.
+- `saint: ok` -> SAINTexpress rodou de verdade.
+- Se aparecer `saint: pulado`, o download/compilacao do SAINTexpress (SourceForge)
+  nao ocorreu no build. Instale manualmente: baixe o SAINTexpress de
+  https://sourceforge.net/projects/saint-apms/ , compile (`make`) e copie os
+  binarios `SAINTexpress-int`/`SAINTexpress-spc` para um diretorio no PATH do
+  conteiner (ex.: monte um volume em /usr/local/bin). O pipeline passa a usa-lo
+  automaticamente. DEP/limma nao dependem disso.
+
+Em CPU puro (conda, sem Docker) o mesmo `python -m bonder.cli selftest` mostra
+`saint`/`dep` como `pulado` - esperado, pois SAINT/R vivem no conteiner.
+
 ## Aba Manutencao (auditoria + autoteste)
 
 No dashboard, a aba **Manutencao** faz uma auditoria de sanidade:

@@ -236,20 +236,42 @@ def full_report() -> Dict[str, Any]:
 # Autoteste do pipeline (sanidade de scripts e processos, sem GPU/R)
 # ---------------------------------------------------------------------------
 def _synthetic_maxquant(path: Path) -> None:
+    """Gera um proteinGroups.txt sintetico REALISTA (~250 proteinas, 3 IP x 3 CTRL).
+
+    Grande o bastante para as estatisticas gold-standard (vsn/limma/DEP e SAINT)
+    rodarem de verdade dentro da imagem de analise - nao so os stubs em CPU.
+    Contem: a isca (excluida dos preys), 1 contaminante, ~25 interatores
+    verdadeiros (enriquecidos no IP) e ~220 proteinas de background.
+    """
+    import numpy as np
     import pandas as pd
-    cols = {
-        "Majority protein IDs": ["P16110", "NSs_ICOARACI", "P12345", "Q8R1", "CON__P00761"],
-        "Gene names": ["Lgals3", "NSs", "Prey1", "Prey2", "Trypsin"],
-        "Peptides": ["8", "12", "5", "6", "3"],
-        "Razor + unique peptides": ["6", "10", "4", "5", "2"],
-        "Reverse": ["", "", "", "", ""],
-        "Potential contaminant": ["", "", "", "", "+"],
-    }
-    for s, base in [("NSs_IP_1", 5000), ("NSs_IP_2", 5200), ("NSs_IP_3", 4800)]:
-        cols["LFQ intensity %s" % s] = [str(base + 100), str(base * 10), str(base), str(base // 2), "300"]
-    for s in ["NSs_CTRL_1", "NSs_CTRL_2", "NSs_CTRL_3"]:
-        cols["LFQ intensity %s" % s] = ["0", "50", "700", "0", "320"]
-    pd.DataFrame(cols).to_csv(path, sep="\t", index=False)
+    rng = np.random.default_rng(0)
+    ip = ["NSs_IP_1", "NSs_IP_2", "NSs_IP_3"]
+    ctrl = ["NSs_CTRL_1", "NSs_CTRL_2", "NSs_CTRL_3"]
+
+    def _row(acc, gene, ip_lvl, ctrl_lvl, pep=4, contam="", rev=""):
+        r = {"Majority protein IDs": acc, "Gene names": gene,
+             "Peptides": str(pep + 2), "Razor + unique peptides": str(pep),
+             "Reverse": rev, "Potential contaminant": contam}
+        for c in ip:
+            r["LFQ intensity %s" % c] = str(int(10 ** (ip_lvl + rng.normal(0, 0.15))))
+        for c in ctrl:
+            r["LFQ intensity %s" % c] = str(int(10 ** (ctrl_lvl + rng.normal(0, 0.15))))
+        return r
+
+    rows = [
+        _row("NSs_ICOARACI", "NSs", 8.2, 5.0, pep=12),          # isca (exogena)
+        _row("CON__P00761", "Trypsin", 5.6, 5.6, pep=3, contam="+"),  # contaminante
+        _row("P12345", "Prey1", 7.6, 6.0, pep=6),               # interator nomeado
+        _row("Q8R1", "Prey2", 7.3, 6.0, pep=5),                 # interator nomeado
+        _row("P16110", "Lgals3", 7.0, 6.2, pep=6),              # ortologo murino
+    ]
+    for i in range(1, 26):                                      # 25 interatores verdadeiros
+        rows.append(_row("PINT%04d" % i, "Int%d" % i, 7.0 + rng.uniform(0, 0.8), 5.8, pep=4))
+    for i in range(1, 221):                                     # 220 de background
+        lvl = 6.0 + rng.normal(0, 0.2)
+        rows.append(_row("PBG%04d" % i, "Bg%d" % i, lvl, lvl, pep=3))
+    pd.DataFrame(rows).to_csv(path, sep="\t", index=False)
 
 
 def self_test() -> Dict[str, Any]:
