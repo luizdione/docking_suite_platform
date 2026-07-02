@@ -83,33 +83,40 @@ def run_pipeline(
         )
 
     # 4) especificidade: SAINT (+ MiST p/ isca viral) -----------------------
+    # SAINT so faz sentido para IP-vs-IgG (role bait vs control). Contrastes
+    # diferenciais (IP condicao A vs IP condicao B) pulam SAINT e usam so DEP.
     saint_df = None
-    saint_dir = run_dir / "saint"
-    from bonder.scoring import saint as saint_mod, mist as mist_mod
-    prey_lengths = mouse_ref.lengths if mouse_ref else None
-    gene_map = mouse_ref.gene_map() if mouse_ref else None
-    inputs = saint_mod.write_saint_inputs(clean, contrast, saint_dir,
-                                          prey_lengths=prey_lengths, gene_map=gene_map)
-    if _tool_available("SAINTexpress-int"):
-        try:
-            lst = saint_mod.run_saintexpress(inputs, saint_dir)
-            saint_df = saint_mod.parse_saint_output(lst)
-            log_step("saint", "ok", n_prey=int(saint_df.shape[0]))
-        except Exception as e:
-            log_step("saint", "erro", detail=str(e))
-    else:
-        log_step("saint", "pulado", detail="SAINTexpress-int ausente; inputs gerados em saint/")
+    is_differential = contrast.get("type") == "differential"
+    if not is_differential:
+        saint_dir = run_dir / "saint"
+        from bonder.scoring import saint as saint_mod, mist as mist_mod
+        prey_lengths = mouse_ref.lengths if mouse_ref else None
+        gene_map = mouse_ref.gene_map() if mouse_ref else None
+        inputs = saint_mod.write_saint_inputs(clean, contrast, saint_dir,
+                                              prey_lengths=prey_lengths, gene_map=gene_map)
+        if _tool_available("SAINTexpress-int"):
+            try:
+                lst = saint_mod.run_saintexpress(inputs, saint_dir)
+                saint_df = saint_mod.parse_saint_output(lst)
+                log_step("saint", "ok", n_prey=int(saint_df.shape[0]))
+            except Exception as e:
+                log_step("saint", "erro", detail=str(e))
+        else:
+            log_step("saint", "pulado", detail="SAINTexpress-int ausente; inputs gerados em saint/")
 
-    bait = cfg.bait(contrast["bait_id"]) if contrast.get("bait_id") in cfg.bait_ids() else {}
-    if (bait.get("scoring") or {}).get("mist"):
-        mist_inputs = mist_mod.write_mist_inputs(clean, contrast, run_dir / "mist")
-        mist_out = None
-        try:
-            mist_out = mist_mod.run_mist(mist_inputs, run_dir / "mist")
-        except Exception as e:
-            log_step("mist", "erro", detail=str(e))
-        log_step("mist", "ok" if mist_out else "pulado",
-                 detail="MiST executado" if mist_out else "BONDER_MIST_CMD nao definido; inputs gerados")
+        bait = cfg.bait(contrast["bait_id"]) if contrast.get("bait_id") in cfg.bait_ids() else {}
+        if (bait.get("scoring") or {}).get("mist"):
+            mist_inputs = mist_mod.write_mist_inputs(clean, contrast, run_dir / "mist")
+            mist_out = None
+            try:
+                mist_out = mist_mod.run_mist(mist_inputs, run_dir / "mist")
+            except Exception as e:
+                log_step("mist", "erro", detail=str(e))
+            log_step("mist", "ok" if mist_out else "pulado",
+                     detail="MiST executado" if mist_out else "BONDER_MIST_CMD nao definido; inputs gerados")
+    else:
+        log_step("saint", "pulado", detail="contraste diferencial (IP vs IP); SAINT nao aplicavel")
+        from bonder.scoring import saint as saint_mod, mist as mist_mod
 
     # 5) quantitativo: DEP/limma (R) ---------------------------------------
     dep_df = None

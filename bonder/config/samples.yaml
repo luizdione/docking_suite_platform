@@ -11,11 +11,21 @@
 #
 # Recomendacao de desenho (publicabilidade): >= 3 replicas biologicas por grupo
 # e um controle negativo pareado (IgG/mock/linhagem parental) por isca.
+#
+# >>> PARA SEUS DADOS REAIS <<<
+#   1) ajuste 'raw_file' de cada amostra para casar com os NOMES DAS COLUNAS da
+#      sua saida de busca (ex.: 'LFQ intensity <X>' no MaxQuant, ou o caminho do
+#      .raw no DIA-NN). O casamento e por nome/basename.
+#   2) ajuste o numero de replicas (adicione/remova blocos) e o tipo de controle.
+#   3) os 'condition' definem os grupos; os 'contrasts' (no fim) ligam IP vs CTRL.
+# O bloco abaixo e um MODELO 3 IP x 3 CTRL por isca (tambem usado pelo demo).
 # =============================================================================
 schema_version: 1
 
 samples:
-  # ---- Isca 1: NSs (Icoaraci) ----
+  # ===========================================================================
+  # Isca 1: NSs (Icoaraci orthobunyavirus) — 3 IP x 3 IgG CTRL
+  # ===========================================================================
   - sample: NSs_IP_1
     condition: IP_NSs
     bait_id: NSs_ICOARACI
@@ -53,51 +63,252 @@ samples:
     replicate: 3
     raw_file: NSs_CTRL_3.raw
 
-  # ---- Isca 2: Galectina-3 (LGALS3 humana) ----
-  - sample: LGALS3_IP_1
-    condition: IP_LGALS3
-    bait_id: LGALS3_HUMAN
-    role: bait
-    replicate: 1
-    raw_file: LGALS3_IP_1.raw
-  - sample: LGALS3_IP_2
-    condition: IP_LGALS3
-    bait_id: LGALS3_HUMAN
-    role: bait
-    replicate: 2
-    raw_file: LGALS3_IP_2.raw
-  - sample: LGALS3_IP_3
-    condition: IP_LGALS3
-    bait_id: LGALS3_HUMAN
-    role: bait
-    replicate: 3
-    raw_file: LGALS3_IP_3.raw
-  - sample: LGALS3_CTRL_1
-    condition: CTRL_LGALS3
+  # ===========================================================================
+  # Isca 2: Galectina-3 (LGALS3_HUMAN, P17931) — desenho multi-condicao
+  #
+  # 7 condicoes de IP (anti-Gal3) + 1 grupo IgG controle (celulas nao infectadas)
+  #   CTRL_uninfected : celulas nao infectadas (baseline)
+  #   LA_6h / LA_18h / LA_24h : infectadas com Leishmania amazonensis
+  #   TC_6h / TC_18h / TC_24h : infectadas com Trypanosoma cruzi
+  #
+  # O controle IgG (CTRL_IgG_LGALS3) e de celulas nao infectadas; serve como
+  # controle negativo de ligacao inespecifica para SAINT em todas as condicoes.
+  # Para analise diferencial (DEP/limma), cada condicao infectada e comparada
+  # contra CTRL_uninfected (IP anti-Gal3 em celulas nao infectadas).
+  # ===========================================================================
+
+  # ---- IgG controle negativo (celulas nao infectadas) ----
+  - sample: LGALS3_IgG_1
+    condition: CTRL_IgG_LGALS3
     bait_id: control
     role: control
+    replicate: 1
+    raw_file: LGALS3_IgG_1.raw
+  - sample: LGALS3_IgG_2
+    condition: CTRL_IgG_LGALS3
+    bait_id: control
+    role: control
+    replicate: 2
+    raw_file: LGALS3_IgG_2.raw
+  - sample: LGALS3_IgG_3
+    condition: CTRL_IgG_LGALS3
+    bait_id: control
+    role: control
+    replicate: 3
+    raw_file: LGALS3_IgG_3.raw
+
+  # ---- Gal3 IP: controle nao infectado ----
+  - sample: LGALS3_CTRL_1
+    condition: IP_LGALS3_CTRL
+    bait_id: LGALS3_HUMAN
+    role: bait
     replicate: 1
     raw_file: LGALS3_CTRL_1.raw
   - sample: LGALS3_CTRL_2
-    condition: CTRL_LGALS3
-    bait_id: control
-    role: control
+    condition: IP_LGALS3_CTRL
+    bait_id: LGALS3_HUMAN
+    role: bait
     replicate: 2
     raw_file: LGALS3_CTRL_2.raw
   - sample: LGALS3_CTRL_3
-    condition: CTRL_LGALS3
-    bait_id: control
-    role: control
+    condition: IP_LGALS3_CTRL
+    bait_id: LGALS3_HUMAN
+    role: bait
     replicate: 3
     raw_file: LGALS3_CTRL_3.raw
 
-# Contrastes isca-vs-controle avaliados pelo scoring (SAINT/MSstats).
+  # ---- Gal3 IP: L. amazonensis 6h ----
+  - sample: LGALS3_LA6h_1
+    condition: IP_LGALS3_LA6h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 1
+    raw_file: LGALS3_LA6h_1.raw
+  - sample: LGALS3_LA6h_2
+    condition: IP_LGALS3_LA6h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 2
+    raw_file: LGALS3_LA6h_2.raw
+  - sample: LGALS3_LA6h_3
+    condition: IP_LGALS3_LA6h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 3
+    raw_file: LGALS3_LA6h_3.raw
+
+  # ---- Gal3 IP: L. amazonensis 18h ----
+  - sample: LGALS3_LA18h_1
+    condition: IP_LGALS3_LA18h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 1
+    raw_file: LGALS3_LA18h_1.raw
+  - sample: LGALS3_LA18h_2
+    condition: IP_LGALS3_LA18h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 2
+    raw_file: LGALS3_LA18h_2.raw
+  - sample: LGALS3_LA18h_3
+    condition: IP_LGALS3_LA18h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 3
+    raw_file: LGALS3_LA18h_3.raw
+
+  # ---- Gal3 IP: L. amazonensis 24h ----
+  - sample: LGALS3_LA24h_1
+    condition: IP_LGALS3_LA24h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 1
+    raw_file: LGALS3_LA24h_1.raw
+  - sample: LGALS3_LA24h_2
+    condition: IP_LGALS3_LA24h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 2
+    raw_file: LGALS3_LA24h_2.raw
+  - sample: LGALS3_LA24h_3
+    condition: IP_LGALS3_LA24h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 3
+    raw_file: LGALS3_LA24h_3.raw
+
+  # ---- Gal3 IP: Trypanosoma cruzi 6h ----
+  - sample: LGALS3_TC6h_1
+    condition: IP_LGALS3_TC6h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 1
+    raw_file: LGALS3_TC6h_1.raw
+  - sample: LGALS3_TC6h_2
+    condition: IP_LGALS3_TC6h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 2
+    raw_file: LGALS3_TC6h_2.raw
+  - sample: LGALS3_TC6h_3
+    condition: IP_LGALS3_TC6h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 3
+    raw_file: LGALS3_TC6h_3.raw
+
+  # ---- Gal3 IP: Trypanosoma cruzi 18h ----
+  - sample: LGALS3_TC18h_1
+    condition: IP_LGALS3_TC18h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 1
+    raw_file: LGALS3_TC18h_1.raw
+  - sample: LGALS3_TC18h_2
+    condition: IP_LGALS3_TC18h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 2
+    raw_file: LGALS3_TC18h_2.raw
+  - sample: LGALS3_TC18h_3
+    condition: IP_LGALS3_TC18h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 3
+    raw_file: LGALS3_TC18h_3.raw
+
+  # ---- Gal3 IP: Trypanosoma cruzi 24h ----
+  - sample: LGALS3_TC24h_1
+    condition: IP_LGALS3_TC24h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 1
+    raw_file: LGALS3_TC24h_1.raw
+  - sample: LGALS3_TC24h_2
+    condition: IP_LGALS3_TC24h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 2
+    raw_file: LGALS3_TC24h_2.raw
+  - sample: LGALS3_TC24h_3
+    condition: IP_LGALS3_TC24h
+    bait_id: LGALS3_HUMAN
+    role: bait
+    replicate: 3
+    raw_file: LGALS3_TC24h_3.raw
+
+# =============================================================================
+# Contrastes
+#
+# Tipo 1 - SAINT (IP vs IgG): identifica interatores verdadeiros por condicao.
+# Tipo 2 - Diferencial (condicao vs condicao): identifica mudancas no
+#           interactoma entre condicoes (DEP/limma ou MSstats).
+# =============================================================================
 contrasts:
+  # ---- NSs: IP vs IgG (SAINT) ----
   - name: NSs_vs_CTRL
     bait_id: NSs_ICOARACI
     test: IP_NSs
     control: CTRL_NSs
-  - name: LGALS3_vs_CTRL
+
+  # ---- LGALS3: IP vs IgG por condicao (SAINT) ----
+  - name: LGALS3_CTRL_vs_IgG
     bait_id: LGALS3_HUMAN
-    test: IP_LGALS3
-    control: CTRL_LGALS3
+    test: IP_LGALS3_CTRL
+    control: CTRL_IgG_LGALS3
+  - name: LGALS3_LA6h_vs_IgG
+    bait_id: LGALS3_HUMAN
+    test: IP_LGALS3_LA6h
+    control: CTRL_IgG_LGALS3
+  - name: LGALS3_LA18h_vs_IgG
+    bait_id: LGALS3_HUMAN
+    test: IP_LGALS3_LA18h
+    control: CTRL_IgG_LGALS3
+  - name: LGALS3_LA24h_vs_IgG
+    bait_id: LGALS3_HUMAN
+    test: IP_LGALS3_LA24h
+    control: CTRL_IgG_LGALS3
+  - name: LGALS3_TC6h_vs_IgG
+    bait_id: LGALS3_HUMAN
+    test: IP_LGALS3_TC6h
+    control: CTRL_IgG_LGALS3
+  - name: LGALS3_TC18h_vs_IgG
+    bait_id: LGALS3_HUMAN
+    test: IP_LGALS3_TC18h
+    control: CTRL_IgG_LGALS3
+  - name: LGALS3_TC24h_vs_IgG
+    bait_id: LGALS3_HUMAN
+    test: IP_LGALS3_TC24h
+    control: CTRL_IgG_LGALS3
+
+  # ---- LGALS3: diferenciais infeccao vs controle nao infectado (DEP/limma) ----
+  - name: LGALS3_LA6h_vs_CTRL
+    bait_id: LGALS3_HUMAN
+    test: IP_LGALS3_LA6h
+    control: IP_LGALS3_CTRL
+    type: differential
+  - name: LGALS3_LA18h_vs_CTRL
+    bait_id: LGALS3_HUMAN
+    test: IP_LGALS3_LA18h
+    control: IP_LGALS3_CTRL
+    type: differential
+  - name: LGALS3_LA24h_vs_CTRL
+    bait_id: LGALS3_HUMAN
+    test: IP_LGALS3_LA24h
+    control: IP_LGALS3_CTRL
+    type: differential
+  - name: LGALS3_TC6h_vs_CTRL
+    bait_id: LGALS3_HUMAN
+    test: IP_LGALS3_TC6h
+    control: IP_LGALS3_CTRL
+    type: differential
+  - name: LGALS3_TC18h_vs_CTRL
+    bait_id: LGALS3_HUMAN
+    test: IP_LGALS3_TC18h
+    control: IP_LGALS3_CTRL
+    type: differential
+  - name: LGALS3_TC24h_vs_CTRL
+    bait_id: LGALS3_HUMAN
+    test: IP_LGALS3_TC24h
+    control: IP_LGALS3_CTRL
+    type: differential

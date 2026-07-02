@@ -1,0 +1,13 @@
+>bait|NSs_ICOARACI|NSs Icoaraci orthobunyavirus
+MNIMNFIYEMPIILSYGGMGNPEAEVGYYPYEGFTTYRVSVHHDMEIPVGTYRQVMDHRS
+TLEDFYSRGHFPFRWGPGSFNSRVENPTCSDFDEMLRELMLFPNEAYTRSFLPNISEAIS
+WPLGYPCSKFIQLSNEQKSQLTLRSWKSAAATCILRMNPWVSTFDQAFVEAHKMILKEAT
+NRGLSRMLFPGYDLIKEVAIVQLVRAMNALDIDMTYSRIPTVLTNMLEKHKNVFENENPDL
+LGNRKWIPSDDTWFEVLNYHGESEFDTSSDSDAA
+# ----------------------------------------------------------------------------
+# Sequencia REAL da NSs do isolado de Icoaraci (orthobunyavirus). Para usar:
+#   1) renomeie este arquivo para  NSs_Icoaraci.fasta
+#   2) rode:  bonder baits check
+# A Galectina-3 humana (bait 2) e publica - baixe a sequencia exata com:
+#   curl -L "https://rest.uniprot.org/uniprotkb/P17931.fasta" -o LGALS3_HUMAN.fasta
+# ----------------------------------------------------------------------------
