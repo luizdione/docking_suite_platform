@@ -7,22 +7,36 @@ FROM mambaorg/micromamba:1.5.8
 
 USER root
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential ca-certificates git curl \
+    build-essential ca-certificates git curl unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Ambiente conda reproduzivel (gold-standard tools)
+# Ambiente conda reproduzivel (gold-standard tools: Python + R/Bioconductor)
 COPY docker/environment-analysis.yml /tmp/env.yml
 RUN micromamba install -y -n base -f /tmp/env.yml && micromamba clean -a -y
 ENV PATH=/opt/conda/bin:$PATH
+
+# SAINTexpress: NAO existe em conda. Compila do codigo-fonte (SourceForge).
+# BEST-EFFORT e NAO-FATAL: se o download/build falhar (ex.: sem rede), a imagem
+# ainda sobe e a etapa SAINT e apenas 'pulada' em runtime (o pipeline tolera).
+ARG SAINT_URL="https://sourceforge.net/projects/saint-apms/files/SAINTexpress_v3.6.3__2018-03-09.zip/download"
+RUN set -x; ( \
+      curl -fL -o /tmp/saint.zip "$SAINT_URL" \
+      && cd /tmp && unzip -q saint.zip \
+      && d="$(find /tmp -maxdepth 1 -type d -name 'SAINTexpress*' | head -1)" \
+      && make -C "$d/SAINTexpress-int" && make -C "$d/SAINTexpress-spc" \
+      && find "$d" -type f -name 'SAINTexpress-*' -perm -u+x -exec cp {} /usr/local/bin/ \; \
+      && rm -rf /tmp/saint.zip "$d" \
+    ) || echo "AVISO: SAINTexpress nao instalado (build/download falhou); etapa SAINT sera pulada."
 
 WORKDIR /app
 # Instala o pacote bonder
 COPY . /app
 RUN pip install --no-deps -e . && python -c "import bonder; print('bonder', bonder.__version__)"
 
-# Confere que as ferramentas externas estao no PATH (falha cedo se faltarem)
+# Confere R/Bioconductor (obrigatorio) e reporta SAINTexpress (opcional, nao-fatal)
 RUN Rscript -e 'stopifnot(requireNamespace("DEP"), requireNamespace("limma"))' \
-    && (command -v SAINTexpress-int || echo "AVISO: SAINTexpress-int nao encontrado no PATH")
+    && (command -v SAINTexpress-int && echo "SAINTexpress OK" \
+        || echo "AVISO: SAINTexpress-int ausente; etapa SAINT sera pulada em runtime.")
 
 ENV BONDER_DATA_ROOT=/data BONDER_RUNS_DIR=/runs
 EXPOSE 8080

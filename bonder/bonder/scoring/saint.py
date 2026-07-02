@@ -90,7 +90,10 @@ def write_saint_inputs(
     prey_rows: List[str] = []
     for prey in prey_index:
         length = int(prey_lengths.get(prey, DEFAULT_PREY_LENGTH))
-        gene = gene_map.get(prey) or str(feats.at[prey, "gene_names"] or prey)
+        raw_gene = feats.at[prey, "gene_names"]
+        # NaN e "truthy" em Python: precisa checar isinstance(str) antes do fallback,
+        # senao 'nan or prey' devolve nan e str(nan) grava o literal 'nan'.
+        gene = gene_map.get(prey) or (str(raw_gene) if isinstance(raw_gene, str) and raw_gene else prey)
         gene = gene.split(";")[0] if gene else prey
         prey_rows.append("%s\t%d\t%s" % (prey, length, gene))
     prey_path = out_dir / "prey.txt"

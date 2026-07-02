@@ -87,7 +87,9 @@
       </div>
     </section>
     <section id="tab-interatores" class="hidden">
-      <div class="card"><div style="max-height:70vh;overflow:auto"><table id="tbl"><thead></thead><tbody></tbody></table></div></div>
+      <div class="card"><div style="max-height:70vh;overflow:auto"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+      <p class="hint">* <b>log2fc</b>: valor do DEP/limma quando disponivel; sem R, mostra o <b>log2fc_descriptivo</b>
+      (razao de medias IP/controle, apenas QC). <b>bfdr/saint_score</b> aparecem quando o SAINTexpress rodou.</p></div>
     </section>
     <section id="tab-volcano" class="hidden">
       <div class="card"><img id="volcano" alt="volcano" style="max-width:640px">
@@ -119,8 +121,10 @@ async function selectRun(id){
   current = id;
   const d = await (await fetch('/api/runs/'+id)).json();
   renderSummary(id, d);
-  if(d.status.status === 'done'){ renderTable(d.results); renderVolcano(id, d.results); renderNetwork(id); if(poll){clearInterval(poll);poll=null;} }
-  else { clearInterval(poll); poll = setInterval(()=>selectRun(id), 3000); }
+  const st = d.status.status;
+  if(st === 'done'){ renderTable(d.results); renderVolcano(id, d.results); renderNetwork(id); }
+  if(st === 'done' || st === 'error'){ if(poll){clearInterval(poll);poll=null;} }   // estados terminais param o poll
+  else { if(poll) clearInterval(poll); poll = setInterval(()=>selectRun(id), 3000); }
   loadRuns();
 }
 
@@ -138,9 +142,12 @@ function renderSummary(id, d){
 function renderTable(res){
   const rows = (res.top_interactors||[]);
   const cols = ['prey','gene','confidence','bfdr','saint_score','log2fc','adj_p_value','background_freq','observed_ip','observed_ctrl'];
-  $('#tbl thead').innerHTML = '<tr>'+cols.map(c=>`<th>${c}</th>`).join('')+'</tr>';
+  $('#tbl thead').innerHTML = '<tr>'+cols.map(c=>`<th>${c==='log2fc'?'log2fc*':c}</th>`).join('')+'</tr>';
   $('#tbl tbody').innerHTML = rows.map(r=>'<tr>'+cols.map(c=>{
-    let v = r[c]; if(typeof v === 'number') v = Number.isInteger(v)? v : v.toFixed(3);
+    // sem DEP/R, o backend so tem log2fc_descriptive: usa como fallback do log2fc
+    let v = r[c];
+    if(c==='log2fc' && (v===undefined||v===null)) v = r['log2fc_descriptive'];
+    if(typeof v === 'number') v = Number.isInteger(v)? v : v.toFixed(3);
     if(c==='confidence') return `<td><span class="pill ${v}">${v||''}</span></td>`;
     return `<td>${v===undefined||v===null?'':v}</td>`;
   }).join('')+'</tr>').join('');

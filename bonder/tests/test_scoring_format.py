@@ -34,6 +34,26 @@ def test_saint_inputs_shape(tmp_path):
     assert all(len(l.split("\t")) == 3 for l in prey)
 
 
+def test_saint_gene_fallback_no_nan(tmp_path):
+    # prey sem gene (celula vazia -> NaN) deve cair para o acesso, nunca 'nan'
+    from bonder.io.parsers import parse_diann
+    d = tmp_path / "report.pg_matrix.tsv"
+    pd.DataFrame({
+        "Protein.Group": ["P12345", "Q8R1"],
+        "Genes": ["Prey1", ""],   # Q8R1 sem gene
+        "/data/NSs_IP_1.raw": ["800", "500"],
+        "/data/NSs_IP_2.raw": ["810", "0"],
+        "/data/NSs_CTRL_1.raw": ["0", "480"],
+        "/data/NSs_CTRL_2.raw": ["0", "470"],
+    }).to_csv(d, sep="\t", index=False)
+    ds = parse_diann(d, samples_cfg=SAMPLES_CFG, baits_cfg=BAITS_CFG)
+    paths = write_saint_inputs(ds, CONTRAST, tmp_path / "saint", exclude_baits=True)
+    prey_lines = paths["prey"].read_text().strip().splitlines()
+    genes = {l.split("\t")[0]: l.split("\t")[2] for l in prey_lines}
+    assert genes["Q8R1"] == "Q8R1"          # fallback para o acesso
+    assert "nan" not in genes.values()       # nunca o literal 'nan'
+
+
 def test_saint_parse_output(tmp_path):
     from bonder.scoring import parse_saint_output
     lst = tmp_path / "list.txt"

@@ -29,8 +29,8 @@ dependencies:
   - bioconductor-limma        # teste-t moderado (empirical Bayes)
   - bioconductor-msstats      # quantificacao diferencial em nivel de feature
   - r-dplyr
-  # --- Especificidade isca-presa ---
-  - saint                     # SAINTexpress-int / SAINTexpress-spc
+  # NOTA: SAINTexpress NAO existe como pacote conda; e compilado do codigo-fonte
+  # (SourceForge) no Dockerfile.analysis (best-effort, nao quebra o build).
   - pip
   - pip:
       - gprofiler-official>=1.0
