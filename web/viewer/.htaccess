@@ -1,0 +1,47 @@
+# =============================================================================
+# NQ-Docking viewer - configuracao Apache/LiteSpeed (Hostinger le .htaccess).
+#
+# SEGURO POR PADRAO: este arquivo NAO ativa a senha sozinho (para nao dar erro
+# 500 se o caminho do .htpasswd estiver errado). Ative a protecao por senha de
+# UMA das duas formas (ver README_DEPLOY.md):
+#   (A) RECOMENDADO: hPanel -> Avancado -> "Protecao por senha de diretorios"
+#       (GUI da Hostinger; nao precisa mexer aqui).
+#   (B) MANUAL: descomente o bloco "Basic Auth" abaixo e ajuste AuthUserFile
+#       para o caminho ABSOLUTO do seu .htpasswd no servidor.
+# =============================================================================
+
+# charset e tipos MIME corretos para os dados do viewer
+AddDefaultCharset UTF-8
+AddType application/json .json
+AddType image/svg+xml .svg
+AddType text/markdown .md
+AddType application/wasm .wasm
+
+# nao listar o conteudo dos diretorios
+Options -Indexes
+
+# cache leve dos assets estaticos (js/css/imagens/wasm); dados (json/md) sem cache
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType application/javascript "access plus 7 days"
+  ExpiresByType application/wasm "access plus 30 days"
+  ExpiresByType text/css "access plus 7 days"
+  ExpiresByType image/png "access plus 7 days"
+  ExpiresByType image/svg+xml "access plus 7 days"
+</IfModule>
+<IfModule mod_headers.c>
+  <FilesMatch "\.(json|md)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# (B) Basic Auth MANUAL - descomente e ajuste o caminho absoluto do .htpasswd.
+# Gere o .htpasswd com o utilitario do hPanel ou:  htpasswd -c .htpasswd usuario
+# Exemplo de caminho na Hostinger:
+#   /home/uXXXXXXXX/domains/ifrj-crj-geneticamolecular.online/.htpasswd_docking
+# ---------------------------------------------------------------------------
+# AuthType Basic
+# AuthName "NQ-Docking - area interna"
+# AuthUserFile "/home/uXXXXXXXX/domains/ifrj-crj-geneticamolecular.online/.htpasswd_docking"
+# Require valid-user

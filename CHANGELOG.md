@@ -7,6 +7,40 @@ Brasília (BRT). Documentos históricos (briefings, status reports) foram arquiv
 
 ---
 
+## [2.6.0] — 2026-07-03
+
+Versão **hospedada (somente leitura)** para publicar os resultados na Hostinger
+(`docking.ifrj-crj-geneticamolecular.online`), espelhando o padrão já usado no *bonder*.
+A plataforma completa continua rodando **local** (`dashboard_v2.py`, :5001, com docking/MD/GPU);
+o repositório passa a conter, no mesmo lugar, a **fonte** da versão compacta de leitura.
+
+### Added
+- **`web/viewer/`** — viewer estático (SPA HTML/JS, sem Python/GPU/rede no servidor):
+  abas Visão geral (seletividade lig–FAD n=3), Docking & Binding (subversivo vs inibidor),
+  MD (RMSD/RMSF + figuras), ADMET, Compostos, Subprojetos e Ajuda/Glossário. Lib `marked`
+  vendorizada (sem CDN); `.htaccess` seguro por padrão (MIME + no-indexes + Basic Auth comentado);
+  `README_DEPLOY.md` com o passo a passo do subdomínio.
+- **`export_web.py`** — exportador do bundle publicável (`dist_web/`): captura os resultados das
+  rotas de leitura via `test_client`, **sanitiza caminhos absolutos locais** (nunca publica
+  `C:\…`/`E:\…`), copia só imagens leves (nunca `.dcd`/`.chk`/`.pdb` pesados) e agrega a
+  seletividade n=3 (dist. lig–FAD por alvo: TR parasitária vs GR humana).
+- **Calculadora de drug-likeness client-side (roda ONLINE no Hostinger)** — reimplementação em
+  JS puro das regras/QSAR do `admet_module` (Lipinski, Veber, Ghose, Egan, Muegge, Caco-2, %HIA,
+  BBB, ESOL, PPB, Vd). Habilita o uso do módulo ADMET sem servidor; hook opcional para
+  `RDKit.js` (SMILES → descritores) documentado.
+
+### Fixed
+- **`/static_text` (seção `results_md`)**: removido `AttributeError` latente
+  (`md_module = None; md_module.generate_md_text(...)`) que caía no fallback de *docking* (texto
+  errado para a seção de MD). Agora retorna a mensagem de obsolescência do MD Clean, coerente com
+  `/generate_all_sections`.
+
+### Changed
+- `VERSION`: 2.5.0 → 2.6.0.
+- `.gitignore`: ignora `dist_web/` (bundle publicável) e `.claude/` (config local).
+
+---
+
 ## [2.5.0] — 2026-06-22
 
 Fase 3 da curadoria (melhorias). Investigação por workflow multiagente (6 scouts + síntese);

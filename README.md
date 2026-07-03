@@ -43,7 +43,36 @@ Abrir no navegador: **http://localhost:5001**
 | `cyclodex_module.py` | Complexação β-ciclodextrina |
 | `analysis.py` | Figuras docking: heatmap, seletividade |
 | `vina.exe` | AutoDock Vina 1.2.7 |
+| `export_web.py` | Gera o bundle estático `dist_web/` (versão hospedada) |
+| `web/viewer/` | Viewer estático (somente leitura) para a Hostinger |
 | `docs/PROTOCOLO_CIENTIFICO.md` | Parâmetros científicos, alvos, narrativa mecanística |
+
+---
+
+## Duas versões: servidor local (completa) × Hostinger (somente leitura)
+
+Esta plataforma tem **duas faces**, ambas neste repositório:
+
+1. **Completa (servidor local)** — `dashboard_v2.py` em `http://localhost:5001`. Roda o
+   pipeline pesado: docking (Vina), **dinâmica molecular (OpenMM/GPU)**, geração de figuras,
+   ADMET/toxicidade/ciclodextrina, produção de texto. Exige a máquina com RTX 3060.
+
+2. **Compacta (Hostinger, somente leitura)** — site 100% estático publicado em
+   **`docking.ifrj-crj-geneticamolecular.online`**, gerado por `export_web.py`. Publica os
+   resultados já computados (seletividade, binding mode, MD/RMSD, ADMET, compostos, subprojetos)
+   e inclui uma **calculadora ADMET que roda no próprio navegador** (drug-likeness sem servidor).
+   Espelha o padrão do *bonder*. **A análise pesada nunca roda no Hostinger** (sem Python/GPU).
+
+```bat
+:: gerar o bundle publicavel e enviar por FTP/hPanel (ver web/viewer/README_DEPLOY.md)
+python export_web.py --out dist_web
+```
+
+| Módulo / aba | Hostinger (estático) | Só local (servidor) |
+|---|---|---|
+| Visão geral · Docking & Binding · MD/RMSD · Subprojetos · Ajuda | leitura | análise |
+| **ADMET · Compostos** | **leitura + calculadora client-side (online)** | recálculo RDKit |
+| MD (OpenMM) · Docking (Vina) · figuras | — | **exige GPU/binários** |
 
 ---
 

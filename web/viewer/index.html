@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NQ-Docking viewer — naftoquinonas antiparasitárias (docking + MD + ADMET)</title>
+<!-- Lib vendorizada (self-contained; sem CDN; funciona atrás de Basic Auth / offline) -->
+<script src="lib/marked.min.js"></script>
+<style>
+  :root{
+    --bg:#060c16; --panel:#0b1526; --panel2:#0f1e36; --line:rgba(0,185,140,.18);
+    --line2:rgba(0,185,140,.35); --fg:#d4e8f0; --muted:#5b8a9e; --bright:#e8f4fa;
+    --green:#00b98c; --green2:#00e6b0; --accent:#00d4ff; --warn:#f59e0b; --err:#ef4444;
+    --violet:#7c3aed; --mono:'JetBrains Mono','Consolas',monospace; --radius:10px;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#f4f8f9; --panel:#fff; --panel2:#eef4f5; --line:#d3e2e0; --line2:#00b98c;
+           --fg:#12242b; --muted:#5b7683; --bright:#0a1626; }
+  }
+  *{box-sizing:border-box} body{margin:0;font:14px/1.55 'Inter','Segoe UI',system-ui,sans-serif;
+    background:var(--bg);color:var(--fg)}
+  a{color:var(--accent)}
+  header{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);
+    background:var(--panel);position:sticky;top:0;z-index:5}
+  header h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.02em}
+  header h1 .g{color:var(--green)}
+  .tag{font-size:11px;color:var(--muted)}
+  .badge{margin-left:auto;font-size:12px;padding:4px 11px;border:1px solid var(--line2);border-radius:999px;color:var(--green2)}
+  .wrap{display:grid;grid-template-columns:300px 1fr;gap:0;min-height:calc(100vh - 53px)}
+  aside{border-right:1px solid var(--line);background:var(--panel);padding:16px;overflow:auto}
+  main{padding:18px 22px;overflow:auto}
+  label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+  input,select,button,textarea{padding:8px 10px;border:1px solid var(--line);border-radius:8px;
+    background:var(--panel2);color:var(--fg);font:inherit}
+  input:focus,select:focus{outline:1px solid var(--line2)}
+  button{background:linear-gradient(180deg,var(--green2),var(--green));color:#03110c;border:0;cursor:pointer;font-weight:700}
+  button:hover{filter:brightness(1.08)}
+  button.secondary{background:var(--panel2);color:var(--fg);border:1px solid var(--line2);font-weight:600}
+  .runs{margin-top:14px}
+  .run{padding:9px 11px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;cursor:pointer;
+    display:flex;justify-content:space-between;gap:8px} .run:hover{border-color:var(--line2)}
+  .run.active{border-color:var(--green);background:var(--panel2)}
+  .st{font-size:11px;padding:1px 8px;border-radius:999px;border:1px solid var(--line)}
+  .st.done,.st.em_desenvolvimento{color:var(--green2)} .st.running{color:var(--warn)}
+  .tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap}
+  .tabs button{background:transparent;color:var(--muted);border:0;border-bottom:2px solid transparent;
+    border-radius:0;padding:9px 13px;font-weight:600}
+  .tabs button.active{color:var(--bright);border-bottom-color:var(--green)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+  .card h3{margin:0 0 10px;font-size:14px;color:var(--bright)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr}.wrap{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;font-size:13px} th,td{text-align:left;padding:6px 9px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;white-space:nowrap}
+  td.num,th.num{text-align:right;font-family:var(--mono)}
+  .kv{display:grid;grid-template-columns:210px 1fr;gap:5px 12px;font-size:13px}
+  .kv div:nth-child(odd){color:var(--muted)}
+  .pill{font-size:11px;padding:1px 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+  .pill.ok{color:var(--green2);border-color:var(--green)} .pill.no{color:var(--err);border-color:var(--err)}
+  .pill.warn{color:var(--warn);border-color:var(--warn)}
+  .hint{color:var(--muted);font-size:12px} code{background:var(--panel2);padding:1px 5px;border-radius:5px;font-family:var(--mono)}
+  .hidden{display:none}
+  .metric{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+  .metric b{font-size:20px;color:var(--bright);font-family:var(--mono)} .metric span{font-size:11px;color:var(--muted)}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+  img.fig{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .selwrap{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .docwrap{display:grid;grid-template-columns:240px 1fr;min-height:60vh}
+  .docnav{border-right:1px solid var(--line);padding:10px;overflow:auto}
+  .docnav button{display:block;width:100%;text-align:left;background:transparent;border:0;color:var(--fg);
+    padding:6px 8px;border-radius:6px;margin:0;font:inherit;cursor:pointer}
+  .docnav button:hover{background:var(--panel2)} .docnav button.active{background:var(--panel2);color:var(--green2);font-weight:600}
+  .md{padding:6px 20px;overflow:auto;max-height:74vh;line-height:1.65}
+  .md h1,.md h2,.md h3{border-bottom:1px solid var(--line);padding-bottom:4px;margin:16px 0 8px}
+  .md pre{background:var(--panel2);padding:12px;border-radius:8px;overflow:auto;border:1px solid var(--line)}
+  .md code{background:var(--panel2);padding:1px 5px;border-radius:5px} .md table{width:auto}
+  .online{font-size:10px;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:1px 7px;margin-left:6px}
+  svg.plot{width:100%;height:240px;background:var(--panel2);border-radius:8px;border:1px solid var(--line)}
+  .foot{color:var(--muted);font-size:11px;margin:22px 4px}
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="g">NQ</span>-Docking <span style="font-weight:400;color:var(--muted)">viewer</span></h1>
+  <span class="tag" id="tagline">naftoquinonas antiparasitárias · docking + MD + ADMET</span>
+  <span class="badge" id="mode">somente leitura (hospedado)</span>
+</header>
+<div class="wrap">
+  <aside>
+    <h3 style="margin-top:0;font-size:14px">Composto</h3>
+    <select id="compoundSel"></select>
+    <div id="compoundMeta" class="hint" style="margin-top:8px"></div>
+    <h3 style="margin:18px 0 6px;font-size:14px">Alvos / corridas MD</h3>
+    <p class="hint">Resultados exportados das análises locais. A análise pesada (docking, MD/GPU)
+      roda no servidor local; aqui só publicamos os resultados já gerados.</p>
+    <div class="runs" id="runs"><p class="hint">Carregando…</p></div>
+  </aside>
+  <main>
+    <div class="tabs">
+      <button class="active" data-tab="visao">Visão geral</button>
+      <button data-tab="binding">Docking &amp; Binding</button>
+      <button data-tab="md">MD (RMSD/RMSF)</button>
+      <button data-tab="admet">ADMET <span class="online">online</span></button>
+      <button data-tab="compostos">Compostos</button>
+      <button data-tab="subprojetos">Subprojetos</button>
+      <button data-tab="ajuda">Ajuda &amp; Glossário</button>
+    </div>
+
+    <!-- VISÃO GERAL -->
+    <section id="tab-visao">
+      <div class="card">
+        <h3>Resumo do estudo</h3>
+        <div class="kv" id="overviewKv"><div>Carregando…</div><div></div></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <h3>Seletividade — modo subversivo (dist. ligante–FAD)</h3>
+          <div id="selectivity"><p class="hint">Carregando…</p></div>
+          <p class="hint">Menor distância ao FAD ⇒ pose subversiva estável (compete por elétrons ⇒ ROS).
+            Seletividade = TR parasitária (baixa dist.) vs GR humana (alta dist.).</p>
+        </div>
+        <div class="card">
+          <h3>Método</h3>
+          <p class="hint">Docking com <code>AutoDock Vina 1.2</code>; dinâmica molecular com
+            <code>OpenMM</code> (CUDA), 50 ns × 3 réplicas por alvo; perfil <code>ADMET</code> in silico
+            (RDKit + QSAR clássico). Esta é a versão <b>hospedada (somente leitura)</b>;
+            o módulo <b>ADMET</b> possui uma calculadora que roda 100% no navegador.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOCKING & BINDING -->
+    <section id="tab-binding" class="hidden">
+      <div class="grid2" id="bindingCards"><p class="hint">Carregando…</p></div>
+      <div class="card">
+        <h3>Contatos de resíduo (ocupância ao longo da MD)</h3>
+        <div id="contacts"><p class="hint">Selecione um modo.</p></div>
+      </div>
+    </section>
+
+    <!-- MD -->
+    <section id="tab-md" class="hidden">
+      <div class="card">
+        <h3>Corridas de MD disponíveis</h3>
+        <div class="selwrap">
+          <select id="mdTagSel"></select>
+        </div>
+        <div class="metrics" id="mdMetrics"></div>
+      </div>
+      <div class="card" id="mdFigCard">
+        <h3>Figura RMSD/RMSF</h3>
+        <div id="mdFig"><p class="hint">Sem figura para esta corrida.</p></div>
+      </div>
+    </section>
+
+    <!-- ADMET (com calculadora client-side) -->
+    <section id="tab-admet" class="hidden">
+      <div class="grid2">
+        <div class="card">
+          <h3>Perfil ADMET pré-computado</h3>
+          <div class="kv" id="admetKv"><div>Carregando…</div><div></div></div>
+        </div>
+        <div class="card">
+          <h3>Calculadora de drug-likeness <span class="online">roda no navegador</span></h3>
+          <p class="hint">Reimplementação client-side das regras do módulo ADMET (Lipinski, Veber, Ghose,
+            Egan, Muegge, Caco-2, %HIA, BBB, ESOL, PPB, Vd). Ajuste os descritores e recalcule —
+            sem servidor. <span id="rdkitHint"></span></p>
+          <div class="selwrap" style="gap:6px">
+            <input id="smiInput" placeholder="SMILES (opcional; requer RDKit.js)" style="min-width:220px">
+            <button class="secondary" id="rdkitBtn" title="carrega RDKit.js se presente em lib/">SMILES → descritores</button>
+          </div>
+          <div class="grid2" style="gap:8px">
+            <div><label>MW (g/mol)</label><input id="i_mw" type="number" step="0.01"></div>
+            <div><label>logP</label><input id="i_logp" type="number" step="0.01"></div>
+            <div><label>HBD</label><input id="i_hbd" type="number"></div>
+            <div><label>HBA</label><input id="i_hba" type="number"></div>
+            <div><label>TPSA (Å²)</label><input id="i_tpsa" type="number" step="0.1"></div>
+            <div><label>Ligações rotáveis</label><input id="i_rb" type="number"></div>
+            <div><label>Anéis aromáticos</label><input id="i_ar" type="number"></div>
+            <div><label>Refração molar</label><input id="i_mr" type="number" step="0.1"></div>
+          </div>
+          <div style="margin-top:10px"><button id="calcBtn">Calcular ADMET</button></div>
+          <div id="calcOut" style="margin-top:12px"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPOSTOS -->
+    <section id="tab-compostos" class="hidden">
+      <div class="card">
+        <h3>Biblioteca de compostos</h3>
+        <div style="overflow:auto"><table id="cmpTbl"><thead></thead><tbody></tbody></table></div>
+        <p class="hint">Clique numa linha para carregar os descritores na calculadora ADMET.</p>
+      </div>
+    </section>
+
+    <!-- SUBPROJETOS -->
+    <section id="tab-subprojetos" class="hidden">
+      <div class="card">
+        <h3 id="progTitle">Programa guarda-chuva</h3>
+        <div id="subprojList"><p class="hint">Carregando…</p></div>
+      </div>
+      <div class="card">
+        <h3>Pipeline (SUB01)</h3>
+        <div id="pipelineSvg"><p class="hint">Carregando SVG…</p></div>
+      </div>
+    </section>
+
+    <!-- AJUDA -->
+    <section id="tab-ajuda" class="hidden">
+      <div class="card" style="padding:0">
+        <div class="docwrap">
+          <nav id="docnav" class="docnav"><p class="hint" style="padding:12px">Carregando…</p></nav>
+          <article id="docview" class="md"><p class="hint">Selecione um documento à esquerda.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <div class="foot" id="foot"></div>
+  </main>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+async function jget(u){ const r = await fetch(u,{cache:'no-store'}); if(!r.ok) throw new Error(u); return r.json(); }
+async function tget(u){ const r = await fetch(u,{cache:'no-store'}); if(!r.ok) throw new Error(u); return r.text(); }
+const num = (v,d=2)=> (v==null||v===''||isNaN(+v))?'—':(Number.isInteger(+v)?+v:(+v).toFixed(d));
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+let CFG={}, COMPOUNDS=[], BINDING={}, MDINDEX={tags:[]}, ADMET={};
+
+// ---------------- carga inicial ----------------
+async function loadConfig(){
+  try{ CFG = await jget('config.json');
+    if(CFG.title) $('#tagline').textContent = CFG.title;
+    if(CFG.version) $('#mode').textContent = 'v'+CFG.version+' · somente leitura';
+    $('#foot').innerHTML = `Bundle gerado em ${esc(CFG.generated_at||'—')} · versão ${esc(CFG.version||'—')} ·
+      plataforma NQ-Docking Suite (IFRJ). A análise pesada roda no servidor local.`;
+  }catch(e){}
+}
+async function loadCompounds(){
+  try{ const d = await jget('data/compounds.json'); COMPOUNDS = d.compounds||d||[]; }catch(e){ COMPOUNDS=[]; }
+  const sel = $('#compoundSel');
+  sel.innerHTML = COMPOUNDS.map((c,i)=>`<option value="${i}">${esc(c.name)} — ${esc(c.display_name||'')}</option>`).join('')
+    || '<option>—</option>';
+  sel.onchange = ()=> showCompoundMeta(+sel.value);
+  showCompoundMeta(0);
+  renderCompoundsTable();
+}
+function showCompoundMeta(i){
+  const c = COMPOUNDS[i]; if(!c){ $('#compoundMeta').textContent=''; return; }
+  $('#compoundMeta').innerHTML = `<code>${esc(c.formula||'')}</code> · MW ${num(c.mw)} ·
+    <span class="hint">${esc(c.smiles||'')}</span>`;
+}
+
+async function loadBinding(){
+  try{ BINDING = await jget('data/binding_mode.json'); }catch(e){ BINDING={}; }
+  renderOverview(); renderBinding();
+}
+async function loadMD(){
+  try{ MDINDEX = await jget('data/md_index.json'); }catch(e){ MDINDEX={tags:[],figures:[]}; }
+  const tags = MDINDEX.tags||[];
+  const sel = $('#mdTagSel');
+  sel.innerHTML = tags.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('') || '<option>—</option>';
+  sel.onchange = ()=> renderMD(sel.value);
+  // corridas na sidebar = tags de MD
+  $('#runs').innerHTML = (tags.map(t=>`<div class="run" data-tag="${esc(t)}"><span>${esc(t)}</span>
+     <span class="st done">MD</span></div>`).join('')) || '<p class="hint">Sem corridas de MD.</p>';
+  $$('.run').forEach(el=> el.onclick = ()=>{ selectTab('md'); $('#mdTagSel').value = el.dataset.tag; renderMD(el.dataset.tag); });
+  if(tags.length) renderMD(tags[0]);
+}
+async function loadADMET(){
+  try{ const d = await jget('data/admet.json'); ADMET = d.admet||d||{}; }catch(e){ ADMET={}; }
+  renderADMET();
+}
+
+// ---------------- Visão geral ----------------
+function renderOverview(){
+  const sp = CFG.subproject||{};
+  $('#overviewKv').innerHTML = `
+    <div>Composto base</div><div>${esc(CFG.compound||'2-SCN-NQ')}</div>
+    <div>Título</div><div>${esc(CFG.paper_title||sp.titulo_paper||'—')}</div>
+    <div>Periódico-alvo</div><div>${esc(sp.periodico_alvo||'—')}</div>
+    <div>Fase atual</div><div>${esc(sp.fase_atual||'—')}</div>
+    <div>Alvos</div><div>${esc((CFG.targets||[]).join(', ')||'—')}</div>`;
+  // seletividade a partir do binding subversivo por alvo (se exportado) OU do resumo fixo
+  const rows = (CFG.selectivity||[]);
+  if(rows.length){
+    $('#selectivity').innerHTML = `<table><thead><tr><th>Alvo</th><th class="num">dist. lig–FAD (Å)</th><th class="num">n</th><th>tipo</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr><td>${esc(r.target)}</td>
+      <td class="num">${num(r.fad_dist)}${r.fad_sd?(' ± '+num(r.fad_sd)):''}</td>
+      <td class="num">${r.n||'—'}</td>
+      <td><span class="pill ${r.parasite?'ok':'no'}">${r.parasite?'TR parasitária':'GR humana'}</span></td></tr>`).join('')}</tbody></table>`;
+  } else {
+    $('#selectivity').innerHTML = '<p class="hint">Dados de seletividade não exportados.</p>';
+  }
+}
+
+// ---------------- Docking & Binding ----------------
+function bindCard(title, m, accent){
+  if(!m) return '';
+  return `<div class="card"><h3>${title}</h3>
+    <div class="metrics">
+      <div class="metric"><b>${num(m.lig_fad_mean)}</b><span>dist. lig–FAD (Å)</span></div>
+      <div class="metric"><b>${num(m.lig_dithiol_mean)}</b><span>dist. lig–ditiol (Å)</span></div>
+      <div class="metric"><b>${num(m.lig_rmsd_mean)}</b><span>RMSD ligante (Å)</span></div>
+      <div class="metric"><b>${m.n_frames||'—'}</b><span>frames</span></div>
+    </div>
+    <p class="hint" style="margin-top:8px">${esc(m.source||'')} · ${esc(m.date||'')}</p></div>`;
+}
+function renderBinding(){
+  const b = BINDING||{};
+  let html='';
+  if(b.subversive) html += bindCard('Modo subversivo (si-face do FAD)', b.subversive);
+  if(b.inhibitor)  html += bindCard('Modo inibidor clássico', b.inhibitor);
+  $('#bindingCards').innerHTML = html || '<p class="hint">Sem dados de binding mode exportados.</p>';
+  // contatos
+  const src = (b.subversive&&b.subversive.top_contacts)?b.subversive:(b.inhibitor||{});
+  const tc = src.top_contacts||[];
+  const cc = (b.subversive&&b.subversive.cys_contacts)||[];
+  $('#contacts').innerHTML = tc.length ? `
+    <div class="grid2">
+      <div><h4 class="hint">Top contatos (ocupância)</h4><table><tbody>
+        ${tc.map(([r,o])=>`<tr><td>${esc(r)}</td><td class="num">${(o*100).toFixed(0)}%</td></tr>`).join('')}
+      </tbody></table></div>
+      <div><h4 class="hint">Contatos com cisteínas catalíticas</h4>${cc.length?`<table><tbody>
+        ${cc.map(([r,o])=>`<tr><td>${esc(r)}</td><td class="num">${(o*100).toFixed(0)}%</td></tr>`).join('')}
+      </tbody></table>`:'<p class="hint">—</p>'}</div>
+    </div>` : '<p class="hint">Sem contatos exportados.</p>';
+}
+
+// ---------------- MD ----------------
+async function renderMD(tag){
+  if(!tag) return;
+  let s={};
+  try{ s = await jget(`data/md/${tag}.json`); }catch(e){ s={}; }
+  const m = s.summary||s||{};
+  const keys = [['rmsd_prot_final_A','RMSD proteína final (Å)'],['rmsf_mean_A','RMSF médio (Å)'],
+                ['rmsf_max_A','RMSF máx (Å)'],['rmsd_lig_pocket_final_A','RMSD ligante/bolsão (Å)'],
+                ['rmsd_lig_intra_final_A','RMSD ligante intra (Å)'],['n_frames','frames'],['t_total_ns','tempo (ns)']];
+  const cells = keys.filter(([k])=> m[k]!=null).map(([k,lab])=>`
+     <div class="metric"><b>${num(m[k])}</b><span>${lab}</span></div>`).join('');
+  $('#mdMetrics').innerHTML = cells || `<p class="hint">Resumo numérico não disponível para <code>${esc(tag)}</code>
+     (a série completa fica no servidor local).</p>`;
+  // figura
+  const fig = (MDINDEX.figures||[]).find(f=> f.tag===tag) || (MDINDEX.figures||[]).find(f=> (f.name||'').includes(tag));
+  $('#mdFig').innerHTML = fig ? `<img class="fig" src="${esc(fig.rel)}" alt="RMSD ${esc(tag)}">` :
+    '<p class="hint">Sem figura RMSD/RMSF exportada para esta corrida.</p>';
+}
+
+// ---------------- ADMET (pré-computado) ----------------
+function yn(v){ return v ? '<span class="pill ok">sim</span>' : '<span class="pill no">não</span>'; }
+function renderADMET(){
+  const a = ADMET||{};
+  if(!Object.keys(a).length){ $('#admetKv').innerHTML='<div>Sem dados ADMET.</div><div></div>'; }
+  else $('#admetKv').innerHTML = `
+    <div>MW / logP</div><div>${num(a.MW)} g/mol · ${num(a.LogP)}</div>
+    <div>HBD / HBA</div><div>${a.HBD} / ${a.HBA}</div>
+    <div>TPSA / rot. bonds</div><div>${num(a.TPSA,1)} Å² · ${a.RotBonds}</div>
+    <div>Lipinski / Veber</div><div>${yn(a.Lipinski_pass)} ${yn(a.Veber_pass)}</div>
+    <div>QED</div><div>${num(a.QED,3)}</div>
+    <div>Absorção GI / %HIA</div><div>${esc(a.GI_absorption||'—')} · ${num(a.hia_percent,1)}%</div>
+    <div>Caco-2</div><div>${esc(a.Caco2_class||'—')} (${num(a.Caco2_Papp_nm_s,0)} nm/s)</div>
+    <div>Solubilidade (logS)</div><div>${esc(a.Solubility_class||'—')} · ${num(a.logS_ESOL,2)}</div>
+    <div>BBB penetrante</div><div>${yn(a.bbb_penetrant)}</div>
+    <div>hERG / AMES</div><div>${esc(a.herg_risk||'—')} · ${a.ames_alert?'<span class="pill warn">alerta</span>':'<span class="pill ok">sem alerta</span>'}</div>
+    <div>LD50 camundongo</div><div>${num(a.LD50_mouse_mg_kg,0)} mg/kg · GHS ${a.Toxicity_class}</div>
+    <div>Alertas CYP</div><div class="hint">${(a.cyp_alerts||[]).map(esc).join('<br>')||'—'}</div>`;
+  // pré-preenche a calculadora com o composto base
+  fillCalc({MW:a.MW,logP:a.LogP,HBD:a.HBD,HBA:a.HBA,TPSA:a.TPSA,rotatable_bonds:a.RotBonds});
+}
+
+// ---------------- Calculadora ADMET client-side (Fase 4: roda online) ----------------
+// Reimplementa fielmente as fórmulas do admet_module.py (RDKit + QSAR clássico).
+function fillCalc(d){
+  if(d.MW!=null) $('#i_mw').value = d.MW;
+  if(d.logP!=null) $('#i_logp').value = d.logP;
+  if(d.HBD!=null) $('#i_hbd').value = d.HBD;
+  if(d.HBA!=null) $('#i_hba').value = d.HBA;
+  if(d.TPSA!=null) $('#i_tpsa').value = d.TPSA;
+  if(d.rotatable_bonds!=null) $('#i_rb').value = d.rotatable_bonds;
+  if(d.aromatic_rings!=null) $('#i_ar').value = d.aromatic_rings;
+  if(d.molar_refraction!=null) $('#i_mr').value = d.molar_refraction;
+}
+function admetCalc(p){
+  const {mw,logp,hbd,hba,tpsa,rb,ar,mr} = p;
+  const lipViol = (mw>500)+(logp>5)+(hbd>5)+(hba>10);
+  const out = {
+    lipinski:{pass:lipViol<=1, violations:lipViol},
+    veber:{pass:(tpsa<=140 && rb<=10)},
+    egan:{pass:(logp<=5.88 && tpsa<=131.6)},
+    ghose:{pass:(mw>=160&&mw<=480 && logp>=-0.4&&logp<=5.6 && (isNaN(mr)||(mr>=40&&mr<=130)))},
+    muegge:{pass:(mw>=200&&mw<=600 && logp>=-2&&logp<=5 && tpsa<=150 && rb<=15 && hbd<=5 && hba<=10)},
+  };
+  const logPapp = -0.0197*tpsa - 0.4496*hbd + 0.5234*logp - 2.7101;
+  out.caco2 = {logPapp:logPapp, class:(logPapp>-5.15?'High':logPapp>-5.85?'Medium':'Low')};
+  out.hia = Math.max(0,Math.min(100, -0.7416*tpsa + 97.22));
+  const logBB = 0.0148*logp - 0.0187*tpsa + 0.16;
+  out.bbb = {logBB:logBB, penetrant:logBB>-1.0};
+  const arv = isNaN(ar)?0:ar;
+  const logS = 0.16 - 0.63*logp - 0.0062*mw + 0.066*rb - 0.74*arv;
+  out.esol = {logS:logS, class:(logS>-1?'Muito solúvel':logS>-2?'Solúvel':logS>-4?'Moderadamente solúvel':logS>-6?'Pouco solúvel':'Praticamente insolúvel')};
+  const ppb = Math.min(100, 82 + 5*logp - 0.3*tpsa);
+  out.ppb = {percent:ppb, class:(ppb>90?'Alta (>90%)':ppb>70?'Moderada (70-90%)':'Baixa (<70%)')};
+  const vd = Math.pow(10, 0.5*logp - 0.01*tpsa + 0.5);
+  out.vd = {lkg:vd, class:(vd<1?'Baixo (<1 L/kg)':vd<3?'Moderado (1-3 L/kg)':'Alto (>3 L/kg)')};
+  return out;
+}
+function renderCalc(){
+  const p = { mw:+$('#i_mw').value, logp:+$('#i_logp').value, hbd:+$('#i_hbd').value,
+    hba:+$('#i_hba').value, tpsa:+$('#i_tpsa').value, rb:+$('#i_rb').value,
+    ar:parseFloat($('#i_ar').value), mr:parseFloat($('#i_mr').value) };
+  if([p.mw,p.logp,p.hbd,p.hba,p.tpsa,p.rb].some(x=>isNaN(x))){
+    $('#calcOut').innerHTML = '<p class="hint" style="color:var(--warn)">Preencha MW, logP, HBD, HBA, TPSA e ligações rotáveis.</p>'; return;
+  }
+  const r = admetCalc(p);
+  const rule = (name,o,extra='')=>`<tr><td>${name}</td><td>${o.pass?'<span class="pill ok">passa</span>':'<span class="pill no">falha</span>'}</td><td class="hint">${extra}</td></tr>`;
+  $('#calcOut').innerHTML = `
+    <table><thead><tr><th>Regra / propriedade</th><th>Resultado</th><th></th></tr></thead><tbody>
+      ${rule('Lipinski (Ro5)', r.lipinski, r.lipinski.violations+' violação(ões)')}
+      ${rule('Veber', r.veber, 'TPSA≤140 & RB≤10')}
+      ${rule('Ghose', r.ghose)}
+      ${rule('Egan', r.egan)}
+      ${rule('Muegge', r.muegge)}
+      <tr><td>Caco-2 (Hou 2004)</td><td><span class="pill ${r.caco2.class==='High'?'ok':r.caco2.class==='Medium'?'warn':'no'}">${r.caco2.class}</span></td><td class="hint">logPapp=${r.caco2.logPapp.toFixed(2)}</td></tr>
+      <tr><td>%HIA (Zhao)</td><td class="num">${r.hia.toFixed(1)}%</td><td></td></tr>
+      <tr><td>BBB (Clark 1999)</td><td>${r.bbb.penetrant?'<span class="pill ok">penetra</span>':'<span class="pill no">não penetra</span>'}</td><td class="hint">logBB=${r.bbb.logBB.toFixed(2)}</td></tr>
+      <tr><td>Solubilidade ESOL (Delaney)</td><td><span class="pill ${r.esol.logS>-4?'ok':'warn'}">${r.esol.class}</span></td><td class="hint">logS=${r.esol.logS.toFixed(2)}</td></tr>
+      <tr><td>PPB (Votano)</td><td>${r.ppb.class}</td><td class="hint">${r.ppb.percent.toFixed(0)}%</td></tr>
+      <tr><td>Vol. distribuição</td><td>${r.vd.class}</td><td class="hint">${r.vd.lkg.toFixed(2)} L/kg</td></tr>
+    </tbody></table>
+    <p class="hint" style="margin-top:8px">Modelos QSAR clássicos idênticos aos do módulo ADMET local (RDKit).
+      Cálculo executado no seu navegador — nenhum dado é enviado a servidor.</p>`;
+}
+
+// RDKit.js opcional (Camada B): se lib/RDKit_minimal.js existir, habilita SMILES→descritores.
+let RDKitReady=null;
+async function ensureRDKit(){
+  if(window.RDKit) return window.RDKit;
+  if(RDKitReady) return RDKitReady;
+  RDKitReady = new Promise((resolve,reject)=>{
+    const s=document.createElement('script'); s.src='lib/RDKit_minimal.js';
+    s.onload=()=>{ if(!window.initRDKitModule) return reject(new Error('sem initRDKitModule'));
+      window.initRDKitModule({locateFile:()=> 'lib/RDKit_minimal.wasm'}).then(m=>{window.RDKit=m;resolve(m);}).catch(reject); };
+    s.onerror=()=>reject(new Error('RDKit.js não encontrado em lib/'));
+    document.head.appendChild(s);
+  });
+  return RDKitReady;
+}
+async function smilesToDescriptors(){
+  const smi = $('#smiInput').value.trim(); if(!smi) return;
+  try{
+    const RD = await ensureRDKit();
+    const m = RD.get_mol(smi);
+    if(!m || !m.is_valid()){ alert('SMILES inválido'); return; }
+    const d = JSON.parse(m.get_descriptors());
+    fillCalc({MW:d.amw, logP:d.CrippenClogP, HBD:d.NumHBD, HBA:d.NumHBA, TPSA:d.tpsa,
+      rotatable_bonds:d.NumRotatableBonds, aromatic_rings:d.NumAromaticRings, molar_refraction:d.CrippenMR});
+    renderCalc(); m.delete();
+  }catch(e){
+    alert('RDKit.js não está disponível neste bundle (Camada B opcional).\nBaixe RDKit_minimal.js/.wasm para lib/ — veja README_DEPLOY.md.');
+  }
+}
+
+// ---------------- Compostos ----------------
+function renderCompoundsTable(){
+  const cols = [['name','Nome'],['display_name','Descrição'],['formula','Fórmula'],['mw','MW'],
+                ['heavy_atoms','Pesados'],['rotatable_bonds','Rot.'],['smiles','SMILES']];
+  $('#cmpTbl thead').innerHTML = '<tr>'+cols.map(([k,l])=>`<th class="${k==='mw'||k==='heavy_atoms'||k==='rotatable_bonds'?'num':''}">${l}</th>`).join('')+'</tr>';
+  $('#cmpTbl tbody').innerHTML = COMPOUNDS.map((c,i)=>`<tr data-i="${i}" style="cursor:pointer">
+    ${cols.map(([k])=>{const v=c[k]; const n=(k==='mw'||k==='heavy_atoms'||k==='rotatable_bonds');
+      return `<td class="${n?'num':''}">${n?num(v):esc(v)}</td>`;}).join('')}</tr>`).join('')
+    || '<tr><td class="hint">Sem compostos.</td></tr>';
+  $$('#cmpTbl tbody tr[data-i]').forEach(tr=> tr.onclick = ()=>{
+    const c = COMPOUNDS[+tr.dataset.i];
+    fillCalc({MW:c.mw, HBD:c.hbd, HBA:c.hba, rotatable_bonds:c.rotatable_bonds, logP:c.logp, TPSA:c.tpsa});
+    selectTab('admet');
+  });
+}
+
+// ---------------- Subprojetos ----------------
+async function loadSubprojects(){
+  let sp={};
+  try{ sp = await jget('data/subprojects.json'); }catch(e){}
+  $('#progTitle').textContent = sp.programa || 'Programa guarda-chuva';
+  const subs = sp.subprojetos||[];
+  $('#subprojList').innerHTML = subs.map(s=>`
+    <div class="card" style="margin:0 0 10px">
+      <div style="display:flex;gap:8px;align-items:center">
+        <b>${esc(s.id)}</b> <span class="st ${esc(s.status||'')}">${esc(s.status||'')}</span>
+        <span class="hint">${esc(s.sigla||'')}</span>
+        <span style="margin-left:auto" class="pill">${Math.round((s.progress||0)*100)}%</span>
+      </div>
+      <p style="margin:8px 0 4px">${esc(s.titulo_paper||'')}</p>
+      <p class="hint">${esc(s.fase_atual||'')} · alvo: ${esc(s.periodico_alvo||'—')} ·
+        ${s.n_etapas||'?'} etapas · ${s.n_scripts||'?'} scripts</p>
+    </div>`).join('') || '<p class="hint">Sem subprojetos.</p>';
+  try{ const svg = await tget('assets/pipeline_SUB01.svg'); $('#pipelineSvg').innerHTML = svg; }
+  catch(e){ $('#pipelineSvg').innerHTML = '<p class="hint">SVG do pipeline não exportado.</p>'; }
+}
+
+// ---------------- Ajuda ----------------
+let docsLoaded=false;
+async function renderDocs(){
+  let docs; try{ docs = await jget('docs/index.json'); }
+  catch(e){ $('#docnav').innerHTML='<p class="hint" style="padding:12px">Sem documentos no bundle.</p>'; return; }
+  docs = docs.docs||docs; docsLoaded=true;
+  $('#docnav').innerHTML = docs.map(d=>`<button data-file="${esc(d.file)}">${esc(d.title)}</button>`).join('');
+  $$('#docnav button').forEach(b=> b.onclick = ()=> openDoc(b.dataset.file, b));
+  const first = $('#docnav button'); if(first) openDoc(first.dataset.file, first);
+}
+async function openDoc(file, btn){
+  $$('#docnav button').forEach(x=>x.classList.remove('active')); if(btn) btn.classList.add('active');
+  $('#docview').innerHTML='<p class="hint">Carregando…</p>';
+  let md; try{ md = await tget('docs/'+file); }catch(e){ $('#docview').innerHTML='<p class="hint">Documento indisponível.</p>'; return; }
+  $('#docview').innerHTML = (window.marked ? marked.parse(md) : ('<pre>'+esc(md)+'</pre>'));
+}
+
+// ---------------- abas ----------------
+const TABS = ['visao','binding','md','admet','compostos','subprojetos','ajuda'];
+function selectTab(t){
+  $$('.tabs button').forEach(x=> x.classList.toggle('active', x.dataset.tab===t));
+  TABS.forEach(x=> $('#tab-'+x).classList.toggle('hidden', x!==t));
+  if(t==='ajuda' && !docsLoaded) renderDocs();
+}
+$$('.tabs button').forEach(b=> b.onclick = ()=> selectTab(b.dataset.tab));
+$('#calcBtn').onclick = renderCalc;
+$('#rdkitBtn').onclick = smilesToDescriptors;
+
+// ---------------- boot ----------------
+(async ()=>{
+  await loadConfig();
+  await Promise.all([loadCompounds(), loadBinding(), loadMD(), loadADMET(), loadSubprojects()]);
+})();
+</script>
+</body>
+</html>
