@@ -33,7 +33,11 @@ o repositório passa a conter, no mesmo lugar, a **fonte** da versão compacta d
 - **`/static_text` (seção `results_md`)**: removido `AttributeError` latente
   (`md_module = None; md_module.generate_md_text(...)`) que caía no fallback de *docking* (texto
   errado para a seção de MD). Agora retorna a mensagem de obsolescência do MD Clean, coerente com
-  `/generate_all_sections`.
+  `/generate_all_sections`. (Confirmado no servidor real em `localhost:5001` durante a auditoria.)
+- **Card "Proxy Reverso" da aba Ajuda (link quebrado)**: o `doc_map['proxy']` apontava para
+  `docs/PROXY_REVERSO_CLOUDFLARE.md`, que **não existia** → `/help_doc/proxy` retornava
+  "Arquivo não encontrado". Criado o guia (Cloudflare Tunnel para expor o dashboard completo com
+  IP dinâmico + domínio Hostinger); o card agora abre normalmente.
 
 ### Changed
 - `VERSION`: 2.5.0 → 2.6.0.
