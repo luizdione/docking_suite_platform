@@ -3,13 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Docking Suite IFRJ — versão hospedada (somente leitura)</title>
+<title>Docking Suite IFRJ — 2-SCN-NQ (versão hospedada, somente leitura)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<!-- Lib vendorizada (self-contained; sem CDN de dados; funciona atrás de Basic Auth/offline) -->
 <script src="lib/marked.min.js"></script>
 <style>
-/* ═══ DESIGN SYSTEM — Docking Suite | IFRJ 2026 (herdado do dashboard_v2) ═══ */
 :root{
   --bg-body:#060c16; --bg-surface:rgba(8,18,38,.88); --bg-card:rgba(10,22,46,.82);
   --bg-input:rgba(5,12,28,.9); --bg-hover:rgba(0,185,140,.07);
@@ -21,57 +19,43 @@
   --radius:10px; --radius-sm:6px; --shadow:0 4px 24px rgba(0,0,0,.55);
   --glow-green:0 0 18px rgba(0,185,140,.25); --glow-cyan:0 0 18px rgba(0,212,255,.2);
 }
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+*{margin:0;padding:0;box-sizing:border-box} html{scroll-behavior:smooth}
 body{font-family:var(--sans);font-size:15px;background:var(--bg-body);color:var(--text);min-height:100vh}
 a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
 em{color:var(--text-bright);font-style:italic}
 #molbg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55}
 .app{position:relative;z-index:1}
-
-/* ─── HEADER IFRJ ─── */
 .ifrj-header{background:linear-gradient(120deg,#071324 0%,#0a1c30 55%,#08182c 100%);
   border-bottom:1px solid var(--border);padding:15px 28px;position:relative;overflow:hidden}
 .ifrj-header::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;
   background:linear-gradient(90deg,transparent,var(--ifrj-green),var(--accent),transparent);opacity:.7}
 .header-inner{display:flex;align-items:center;gap:20px;max-width:1380px;margin:0 auto}
 .header-inner img{height:66px;width:auto;filter:drop-shadow(0 0 10px rgba(0,185,140,.25))}
-.header-title{font-size:clamp(19px,2.3vw,29px);font-weight:800;color:#fff;line-height:1.15;letter-spacing:.01em}
+.header-title{font-size:clamp(18px,2.2vw,28px);font-weight:800;color:#fff;line-height:1.15}
 .header-title span{color:var(--ifrj-green2)}
 .header-sub{color:var(--text-muted);font-size:12.5px;margin-top:5px;line-height:1.5}
 .header-badge{margin-left:auto;align-self:flex-start;font-size:11.5px;font-weight:600;
   padding:5px 12px;border:1px solid var(--border-accent);border-radius:999px;color:var(--ifrj-green2);
   background:rgba(0,185,140,.06);white-space:nowrap}
 .header-badge b{color:var(--accent)}
-
-/* ─── TAB BAR ─── */
-.tab-bar{display:flex;gap:2px;padding:0 18px;background:var(--bg-surface);
-  border-bottom:1px solid var(--border);backdrop-filter:blur(10px);position:sticky;top:0;z-index:20;overflow-x:auto}
-.tab-btn{padding:11px 17px;border:none;background:transparent;color:var(--text-muted);
-  font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;
-  border-bottom:3px solid transparent;margin-bottom:-1px;border-radius:var(--radius-sm) var(--radius-sm) 0 0;transition:all .2s}
+.tab-bar{display:flex;gap:2px;padding:0 18px;background:var(--bg-surface);border-bottom:1px solid var(--border);
+  backdrop-filter:blur(10px);position:sticky;top:0;z-index:20;overflow-x:auto}
+.tab-btn{padding:11px 16px;border:none;background:transparent;color:var(--text-muted);font:500 13px var(--sans);
+  cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-1px;
+  border-radius:var(--radius-sm) var(--radius-sm) 0 0;transition:all .2s}
 .tab-btn:hover{color:var(--text);background:var(--bg-hover)}
 .tab-btn.active{color:#fff;border-bottom-color:var(--ifrj-green);background:rgba(0,185,140,.08);font-weight:600}
-
-/* ─── COMPOUND BANNER ─── */
-.compound-banner{background:rgba(0,20,14,.85);border-bottom:1px solid rgba(0,185,140,.25);
-  padding:10px 28px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;backdrop-filter:blur(6px)}
-.compound-banner label{color:var(--text-muted);font-size:12px;font-weight:600}
-.compound-banner select{padding:7px 10px;border:1px solid var(--border-accent);border-radius:8px;
-  background:var(--bg-input);color:var(--text-bright);font:600 13px var(--mono)}
-.cb-meta{font-family:var(--mono);font-size:12px;color:var(--text-muted)}
-.cb-meta b{color:var(--text-bright)}
-.cb-badge{font-size:11px;font-weight:700;padding:2px 9px;border-radius:6px;
-  background:rgba(0,185,140,.14);color:var(--ifrj-green2);border:1px solid rgba(0,185,140,.35)}
+.compound-banner{background:rgba(0,20,14,.85);border-bottom:1px solid rgba(0,185,140,.25);padding:9px 28px;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;backdrop-filter:blur(6px);font-size:13px}
+.compound-banner b{color:var(--text-bright)} .cb-meta{font-family:var(--mono);color:var(--text-muted)}
+.cb-badge{font-size:11px;font-weight:700;padding:2px 9px;border-radius:6px;background:rgba(0,185,140,.14);
+  color:var(--ifrj-green2);border:1px solid rgba(0,185,140,.35)}
 .cb-right{margin-left:auto;font-size:12px;color:var(--text-muted)}
-
-/* ─── LAYOUT / CARDS ─── */
 .container{max-width:1380px;margin:0 auto;padding:22px 28px 40px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
-.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
-  padding:18px;backdrop-filter:blur(6px);box-shadow:var(--shadow);margin-bottom:16px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;
+  backdrop-filter:blur(6px);box-shadow:var(--shadow);margin-bottom:16px}
 .card-title{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;letter-spacing:.09em;
   text-transform:uppercase;color:var(--text-bright);margin-bottom:14px}
 .card-title::before{content:'';width:4px;height:15px;border-radius:3px;flex:none;
@@ -79,8 +63,6 @@ em{color:var(--text-bright);font-style:italic}
 .card-title small{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500;color:var(--text-muted)}
 .tab-panel{display:none} .tab-panel.active{display:block;animation:fadeUp .25s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-
-/* ─── HERO (visão geral) ─── */
 .hero{background:linear-gradient(135deg,rgba(0,185,140,.10),rgba(0,212,255,.05) 60%,transparent),var(--bg-card);
   border:1px solid var(--border-accent);border-radius:14px;padding:22px 24px;margin-bottom:16px;
   display:flex;gap:24px;align-items:center;flex-wrap:wrap;box-shadow:var(--glow-green)}
@@ -89,72 +71,59 @@ em{color:var(--text-bright);font-style:italic}
 .hero-struct img{max-width:100%;max-height:100%}
 .hero-body{flex:1;min-width:260px}
 .hero-kicker{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ifrj-green2);font-weight:700}
-.hero-title{font-size:22px;font-weight:800;color:#fff;margin:6px 0 4px;line-height:1.2}
+.hero-title{font-size:22px;font-weight:800;color:#fff;margin:6px 0 4px}
 .hero-sub{color:var(--text-muted);font-size:13px;line-height:1.6}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.chip{font:600 12px var(--mono);padding:4px 10px;border-radius:8px;background:var(--bg-input);
-  border:1px solid var(--border);color:var(--text)}
-
-/* ─── METRIC TILES ─── */
+.chip{font:600 12px var(--mono);padding:4px 10px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border);color:var(--text)}
 .metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.metric{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);
-  padding:16px 14px;text-align:center;position:relative;overflow:hidden}
+.metric{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 14px;
+  text-align:center;position:relative;overflow:hidden}
 .metric::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
   background:linear-gradient(90deg,transparent,var(--ifrj-green),transparent);opacity:.6}
-.metric .val{font-family:var(--mono);font-size:25px;font-weight:700;color:var(--text-bright);line-height:1.1}
+.metric .val{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--text-bright);line-height:1.1}
 .metric .val.good{color:var(--ifrj-green2)} .metric .val.bad{color:#ff6b78}
 .metric .unit{font-size:11px;color:var(--ifrj-green2);margin-top:2px}
 .metric .lab{font-size:11px;color:var(--text-muted);margin-top:3px}
-
-/* ─── BADGES / PILLS ─── */
-.pdb{font:700 11px var(--mono);padding:2px 8px;border-radius:6px}
+.pdb{font:700 11px var(--mono);padding:2px 8px;border-radius:6px;white-space:nowrap}
 .pdb.parasite{background:rgba(230,57,70,.15);color:#ff6b78;border:1px solid rgba(230,57,70,.4)}
 .pdb.leishmania{background:rgba(245,166,35,.15);color:#f5b657;border:1px solid rgba(245,166,35,.4)}
 .pdb.human{background:rgba(0,212,255,.13);color:#5fdcff;border:1px solid rgba(0,212,255,.4)}
 .cof{font:600 10.5px var(--mono);padding:1px 7px;border-radius:5px;background:rgba(0,185,140,.14);
   color:var(--ifrj-green2);border:1px solid rgba(0,185,140,.3)}
 .pill{font-size:11px;padding:2px 9px;border-radius:999px;border:1px solid var(--border);white-space:nowrap}
-.pill.ok{color:var(--ifrj-green2);border-color:var(--ifrj-green)}
-.pill.no{color:#ff6b78;border-color:var(--ifrj-red)}
+.pill.ok{color:var(--ifrj-green2);border-color:var(--ifrj-green)} .pill.no{color:#ff6b78;border-color:var(--ifrj-red)}
 .pill.warn{color:var(--warn);border-color:var(--warn)}
-
-/* ─── TABELAS ─── */
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--border)}
-th{color:var(--text-muted);font-weight:600;white-space:nowrap;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+th{color:var(--text-muted);font-weight:600;white-space:nowrap;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em}
 td.num,th.num{text-align:right;font-family:var(--mono)}
-tr.clickable{cursor:pointer} tr.clickable:hover td{background:var(--bg-hover)}
-.kv{display:grid;grid-template-columns:200px 1fr;gap:6px 14px;font-size:13.5px}
+tr.parasite td:first-child{box-shadow:inset 3px 0 var(--ifrj-red)} tr.human td:first-child{box-shadow:inset 3px 0 var(--accent)}
+tr.leishmania td:first-child{box-shadow:inset 3px 0 var(--amber)}
+.kv{display:grid;grid-template-columns:210px 1fr;gap:6px 14px;font-size:13.5px}
 .kv div:nth-child(odd){color:var(--text-muted)}
-
-/* ─── BOTÕES / INPUTS ─── */
-.btn{background:linear-gradient(180deg,var(--ifrj-green2),var(--ifrj-green));color:#03110c;border:0;
-  padding:9px 16px;border-radius:8px;font:700 13px var(--sans);cursor:pointer}
-.btn:hover{filter:brightness(1.08)}
+.btn{background:linear-gradient(180deg,var(--ifrj-green2),var(--ifrj-green));color:#03110c;border:0;padding:9px 16px;
+  border-radius:8px;font:700 13px var(--sans);cursor:pointer} .btn:hover{filter:brightness(1.08)}
 .btn-accent{background:linear-gradient(180deg,#4fe3ff,var(--accent));color:#04121a}
 .btn-ghost{background:var(--bg-input);color:var(--text);border:1px solid var(--border-accent);font-weight:600}
-input,select,textarea{padding:8px 10px;border:1px solid var(--border);border-radius:8px;
-  background:var(--bg-input);color:var(--text);font:inherit}
+input,select,textarea{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg-input);color:var(--text);font:inherit}
 input:focus,select:focus{outline:1px solid var(--border-accent)}
 label{display:block;font-size:12px;color:var(--text-muted);margin:9px 0 4px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
 .online{font-size:10px;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle}
+.paper-tag{font-size:10px;color:var(--ifrj-green2);border:1px solid var(--ifrj-green);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle}
 .hint{color:var(--text-muted);font-size:12px} code{background:var(--bg-input);padding:1px 5px;border-radius:5px;font-family:var(--mono)}
-.selwrap{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-.hidden{display:none}
-img.fig{max-width:100%;border:1px solid var(--border);border-radius:8px;background:#fff}
-
-/* ─── DOCS ─── */
+.selwrap{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px} .hidden{display:none}
+figure{margin:0} img.fig{max-width:100%;border:1px solid var(--border);border-radius:8px;background:#fff}
+figcaption{font-size:12px;color:var(--text-muted);margin-top:8px;line-height:1.5}
 .docwrap{display:grid;grid-template-columns:230px 1fr;min-height:58vh}
 .docnav{border-right:1px solid var(--border);padding:8px;overflow:auto}
-.docnav button{display:block;width:100%;text-align:left;background:transparent;border:0;color:var(--text);
-  padding:8px 10px;border-radius:6px;margin:0;font:inherit;cursor:pointer}
+.docnav button{display:block;width:100%;text-align:left;background:transparent;border:0;color:var(--text);padding:8px 10px;border-radius:6px;margin:0;font:inherit;cursor:pointer}
 .docnav button:hover{background:var(--bg-hover)} .docnav button.active{background:var(--bg-hover);color:var(--ifrj-green2);font-weight:600}
 .md{padding:6px 22px;overflow:auto;max-height:72vh;line-height:1.7}
 .md h1,.md h2,.md h3{border-bottom:1px solid var(--border);padding-bottom:5px;margin:16px 0 9px;color:var(--text-bright)}
 .md pre{background:var(--bg-input);padding:12px;border-radius:8px;overflow:auto;border:1px solid var(--border)}
 .md code{background:var(--bg-input);padding:1px 5px;border-radius:5px} .md table{width:auto} .md a{color:var(--accent)}
-.md blockquote{border-left:3px solid var(--ifrj-green);margin:10px 0;padding:2px 14px;color:var(--text-muted)}
+.pdfframe{width:100%;height:80vh;border:1px solid var(--border);border-radius:8px;background:#333}
 .foot{color:var(--text-muted);font-size:11.5px;margin:22px 4px;text-align:center}
 </style>
 </head>
@@ -166,8 +135,8 @@ img.fig{max-width:100%;border:1px solid var(--border);border-radius:8px;backgrou
     <img src="assets/logo-ifrj.png" alt="Logo IFRJ" onerror="this.style.display='none'">
     <div class="header-text" style="flex:1">
       <div class="header-title">Docking Suite &mdash; <span>Pipeline Computacional Antiparasitário</span></div>
-      <div class="header-sub" id="headerSub">&bull; <em>Trypanosoma cruzi</em> + <em>Leishmania amazonensis</em>
-        &bull; &#9879; Docking &bull; &#9889; MD &bull; &#128138; ADMET &bull; &#128209; Compostos &bull; &#9730; Subprojetos</div>
+      <div class="header-sub">&bull; <em>Trypanosoma cruzi</em> + <em>Leishmania amazonensis</em>
+        &bull; &#9879; Docking &bull; &#9889; MD &bull; &#128138; ADMET &bull; &#128196; Manuscrito</div>
     </div>
     <div class="header-badge">&#127760; versão hospedada &middot; <b>somente leitura</b></div>
   </div>
@@ -175,29 +144,29 @@ img.fig{max-width:100%;border:1px solid var(--border);border-radius:8px;backgrou
 
 <nav class="tab-bar" id="tabBar">
   <button class="tab-btn active" data-tab="visao">&#128300; Visão geral</button>
-  <button class="tab-btn" data-tab="binding">&#9879; Docking &amp; Binding</button>
-  <button class="tab-btn" data-tab="md">&#9889; MD (RMSD/RMSF)</button>
+  <button class="tab-btn" data-tab="docking">&#9879; Docking</button>
+  <button class="tab-btn" data-tab="md">&#9889; Dinâmica Molecular</button>
   <button class="tab-btn" data-tab="admet">&#128138; ADMET <span class="online">online</span></button>
+  <button class="tab-btn" data-tab="manuscrito">&#128196; Manuscrito</button>
   <button class="tab-btn" data-tab="compostos">&#128209; Compostos</button>
   <button class="tab-btn" data-tab="subprojetos">&#9730; Subprojetos</button>
   <button class="tab-btn" data-tab="ajuda">&#10067; Ajuda</button>
 </nav>
 
 <div class="compound-banner">
-  <label>&#129514; Composto ativo:</label>
-  <select id="compoundSel"></select>
-  <span class="cb-meta" id="compoundMeta"></span>
+  <span>&#129514; <b id="cbName">2-SCN-NQ</b></span>
+  <span class="cb-meta" id="cbMeta"></span>
+  <span class="cb-badge">dados = manuscrito submetido</span>
   <span class="cb-right" id="cbRight"></span>
 </div>
 
 <div class="container">
-
   <!-- VISÃO GERAL -->
   <section class="tab-panel active" id="tab-visao">
     <div class="hero">
       <div class="hero-struct" id="heroStruct"><span class="hint">estrutura</span></div>
       <div class="hero-body">
-        <div class="hero-kicker" id="heroKicker">Substrato subversivo da tripanotiona redutase</div>
+        <div class="hero-kicker">Substrato subversivo da tripanotiona redutase</div>
         <div class="hero-title" id="heroTitle">2-SCN-NQ</div>
         <div class="hero-sub" id="heroSub"></div>
         <div class="chips" id="heroChips"></div>
@@ -205,38 +174,43 @@ img.fig{max-width:100%;border:1px solid var(--border);border-radius:8px;backgrou
     </div>
     <div class="grid2">
       <div class="card">
-        <div class="card-title">Seletividade — distância ligante–FAD (modo subversivo)</div>
+        <div class="card-title">Seletividade dinâmica — distância ligante–FAD <span class="paper-tag">MD n=3</span></div>
         <div id="selectivity"><p class="hint">Carregando…</p></div>
-        <p class="hint" style="margin-top:10px">Menor distância ao FAD ⇒ pose subversiva estável (compete por
-          elétrons ⇒ ROS). A TR parasitária ancora perto do FAD; a GR humana permanece afastada ⇒ seletividade.</p>
+        <p class="hint" style="margin-top:10px" id="selNote"></p>
       </div>
       <div class="card">
-        <div class="card-title">Alvos do painel</div>
-        <div id="targetsList"><p class="hint">Carregando…</p></div>
+        <div class="card-title">Painel de alvos (docking)</div>
+        <div id="targetsMini"><p class="hint">Carregando…</p></div>
       </div>
     </div>
   </section>
 
-  <!-- DOCKING & BINDING -->
-  <section class="tab-panel" id="tab-binding">
-    <div class="grid2" id="bindingCards"><p class="hint">Carregando…</p></div>
+  <!-- DOCKING -->
+  <section class="tab-panel" id="tab-docking">
     <div class="card">
-      <div class="card-title">Contatos de resíduo <small>ocupância ao longo da MD</small></div>
-      <div id="contacts"><p class="hint">—</p></div>
+      <div class="card-title">Ranking de docking — AutoDock Vina 1.2.7 <small>Tabela do manuscrito (melhor pose)</small></div>
+      <div style="overflow:auto"><table id="dockTbl"><thead></thead><tbody></tbody></table></div>
+      <p class="hint" style="margin-top:10px" id="dockNote"></p>
+    </div>
+    <div class="card">
+      <figure><div class="card-title">Figura — ranking de afinidade, seletividade e convergência</div>
+        <div id="figDocking"></div></figure>
     </div>
   </section>
 
   <!-- MD -->
   <section class="tab-panel" id="tab-md">
     <div class="card">
-      <div class="card-title">Corrida de MD <small>análise pesada roda local (OpenMM/GPU)</small></div>
-      <div class="selwrap"><select id="mdTagSel"></select></div>
-      <div class="metrics" id="mdMetrics"></div>
+      <div class="card-title">Dinâmica molecular das TR — modo subversivo vs. inibidor <span class="paper-tag">n=3</span></div>
+      <div class="grid2">
+        <div><h4 class="hint" style="margin-bottom:8px">MODO SUBVERSIVO (face si do FAD)</h4><div class="metrics" id="mdSub"></div></div>
+        <div><h4 class="hint" style="margin-bottom:8px">MODO INIBIDOR (fenda periférica)</h4><div class="metrics" id="mdInh"></div></div>
+      </div>
+      <div class="kv" id="mdInfo" style="margin-top:14px"></div>
     </div>
-    <div class="card">
-      <div class="card-title">Figura RMSD / RMSF</div>
-      <div id="mdFig"><p class="hint">—</p></div>
-    </div>
+    <div class="card"><figure><div class="card-title">Figura — MD do complexo TcTR (RMSD + métricas)</div><div id="figMdTctr"></div></figure></div>
+    <div class="card"><figure><div class="card-title">Figura — seletividade dinâmica (matriz de competência redox)</div><div id="figMdMatrix"></div></figure></div>
+    <div class="card"><figure><div class="card-title">Figura — mapas de interação 3D (6 sistemas de MD)</div><div id="figMd3d"></div></figure></div>
   </section>
 
   <!-- ADMET -->
@@ -244,13 +218,12 @@ img.fig{max-width:100%;border:1px solid var(--border);border-radius:8px;backgrou
     <div class="metrics" id="admetTiles" style="margin-bottom:16px"></div>
     <div class="grid2">
       <div class="card">
-        <div class="card-title">Perfil ADMET pré-computado</div>
+        <div class="card-title">Perfil ADMET in silico <span class="paper-tag">manuscrito</span></div>
         <div class="kv" id="admetKv"><div>Carregando…</div><div></div></div>
       </div>
       <div class="card">
         <div class="card-title">Calculadora de drug-likeness <span class="online">roda no navegador</span></div>
-        <p class="hint">Regras/QSAR do módulo ADMET reimplementadas em JS (Lipinski, Veber, Ghose, Egan,
-          Muegge, Caco-2, %HIA, BBB, ESOL, PPB, Vd). <span id="rdkitHint"></span></p>
+        <p class="hint">Regras/QSAR do módulo ADMET reimplementadas em JS. Ajuste os descritores e recalcule. <span id="rdkitHint"></span></p>
         <div class="selwrap" style="gap:6px">
           <input id="smiInput" placeholder="SMILES (opcional; requer RDKit.js)" style="min-width:220px">
           <button class="btn-ghost" id="rdkitBtn">SMILES → descritores</button>
@@ -269,6 +242,17 @@ img.fig{max-width:100%;border:1px solid var(--border);border-radius:8px;backgrou
         <div id="calcOut" style="margin-top:12px"></div>
       </div>
     </div>
+    <div class="card"><figure><div class="card-title">Figura — perfil ADMET (drug-likeness, absorção/distribuição, segurança)</div><div id="figAdmet"></div></figure></div>
+  </section>
+
+  <!-- MANUSCRITO -->
+  <section class="tab-panel" id="tab-manuscrito">
+    <div class="card">
+      <div class="card-title">Manuscrito ACS — versão preliminar de submissão <small id="pdfMeta"></small></div>
+      <p class="hint" style="margin-bottom:12px">Todos os valores, tabelas e figuras deste viewer são idênticos aos deste manuscrito.
+        <span id="pdfDownload"></span></p>
+      <div id="pdfHost"><p class="hint">Carregando PDF…</p></div>
+    </div>
   </section>
 
   <!-- COMPOSTOS -->
@@ -281,24 +265,16 @@ img.fig{max-width:100%;border:1px solid var(--border);border-radius:8px;backgrou
 
   <!-- SUBPROJETOS -->
   <section class="tab-panel" id="tab-subprojetos">
-    <div class="card">
-      <div class="card-title" id="progTitle">Programa guarda-chuva</div>
-      <div id="subprojList"><p class="hint">Carregando…</p></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Pipeline (SUB01)</div>
-      <div id="pipelineSvg"><p class="hint">Carregando SVG…</p></div>
-    </div>
+    <div class="card"><div class="card-title" id="progTitle">Programa guarda-chuva</div><div id="subprojList"><p class="hint">Carregando…</p></div></div>
+    <div class="card"><div class="card-title">Pipeline (SUB01)</div><div id="pipelineSvg"><p class="hint">Carregando SVG…</p></div></div>
   </section>
 
   <!-- AJUDA -->
   <section class="tab-panel" id="tab-ajuda">
-    <div class="card" style="padding:0">
-      <div class="docwrap">
-        <nav id="docnav" class="docnav"><p class="hint" style="padding:12px">Carregando…</p></nav>
-        <article id="docview" class="md"><p class="hint">Selecione um documento à esquerda.</p></article>
-      </div>
-    </div>
+    <div class="card" style="padding:0"><div class="docwrap">
+      <nav id="docnav" class="docnav"><p class="hint" style="padding:12px">Carregando…</p></nav>
+      <article id="docview" class="md"><p class="hint">Selecione um documento à esquerda.</p></article>
+    </div></div>
   </section>
 
   <div class="foot" id="foot"></div>
@@ -306,277 +282,162 @@ img.fig{max-width:100%;border:1px solid var(--border);border-radius:8px;backgrou
 </div>
 
 <script>
-const $ = s => document.querySelector(s);
-const $$ = s => Array.from(document.querySelectorAll(s));
-async function jget(u){ const r = await fetch(u,{cache:'no-store'}); if(!r.ok) throw new Error(u); return r.json(); }
-async function tget(u){ const r = await fetch(u,{cache:'no-store'}); if(!r.ok) throw new Error(u); return r.text(); }
-const num = (v,d=2)=> (v==null||v===''||isNaN(+v))?'—':(Number.isInteger(+v)?+v:(+v).toFixed(d));
-const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let CFG={}, COMPOUNDS=[], BINDING={}, MDINDEX={tags:[]}, ADMET={};
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+async function jget(u){const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error(u);return r.json();}
+async function tget(u){const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error(u);return r.text();}
+const num=(v,d=2)=>(v==null||v===''||isNaN(+v))?'—':(Number.isInteger(+v)?+v:(+v).toFixed(d));
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let CFG={},DOCK={},MD={},ADMET={},COMPOUNDS=[];
 
-/* ── fundo de partículas moleculares (leve, canvas) ── */
-(function molbg(){
-  const c=$('#molbg'), x=c.getContext('2d'); let W,H,P=[];
-  function rz(){ W=c.width=innerWidth; H=c.height=innerHeight;
-    const n=Math.min(70,Math.floor(W*H/26000)); P=Array.from({length:n},()=>({
-      x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25})); }
-  function step(){ x.clearRect(0,0,W,H);
-    for(const p of P){ p.x+=p.vx;p.y+=p.vy; if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1; }
-    for(let i=0;i<P.length;i++){ for(let j=i+1;j<P.length;j++){
-      const dx=P[i].x-P[j].x,dy=P[i].y-P[j].y,d=Math.hypot(dx,dy);
-      if(d<120){ x.strokeStyle='rgba(0,185,140,'+(1-d/120)*.16+')';x.lineWidth=1;
-        x.beginPath();x.moveTo(P[i].x,P[i].y);x.lineTo(P[j].x,P[j].y);x.stroke(); } } }
-    for(const p of P){ x.fillStyle='rgba(0,212,255,.5)';x.beginPath();x.arc(p.x,p.y,1.4,0,7);x.fill(); }
-    requestAnimationFrame(step); }
-  addEventListener('resize',rz); rz(); step();
-})();
+(function molbg(){const c=$('#molbg'),x=c.getContext('2d');let W,H,P=[];
+  function rz(){W=c.width=innerWidth;H=c.height=innerHeight;const n=Math.min(70,Math.floor(W*H/26000));
+    P=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25}));}
+  function step(){x.clearRect(0,0,W,H);for(const p of P){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;}
+    for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const dx=P[i].x-P[j].x,dy=P[i].y-P[j].y,d=Math.hypot(dx,dy);
+      if(d<120){x.strokeStyle='rgba(0,185,140,'+(1-d/120)*.16+')';x.lineWidth=1;x.beginPath();x.moveTo(P[i].x,P[i].y);x.lineTo(P[j].x,P[j].y);x.stroke();}}
+    for(const p of P){x.fillStyle='rgba(0,212,255,.5)';x.beginPath();x.arc(p.x,p.y,1.4,0,7);x.fill();}requestAnimationFrame(step);}
+  addEventListener('resize',rz);rz();step();})();
 
-/* ── carga inicial ── */
+function figHTML(f){ return f&&f.rel?`<img class="fig" src="${esc(f.rel)}" alt=""><figcaption>${esc(f.caption||'')}</figcaption>`:'<p class="hint">Figura não exportada.</p>'; }
+
 async function loadConfig(){
-  try{ CFG = await jget('config.json'); }catch(e){ CFG={}; }
-  if(CFG.compound){ $('#heroTitle').textContent = CFG.compound; }
-  if(CFG.paper_title){ $('#heroKicker').textContent = CFG.paper_title.split(':')[0]; }
-  const sp = CFG.subproject||{};
-  $('#heroSub').innerHTML = esc(CFG.paper_title||'') +
-    (sp.periodico_alvo?`<br><b style="color:var(--text-bright)">Periódico-alvo:</b> ${esc(sp.periodico_alvo)} · ${esc(sp.fase_atual||'')}`:'');
-  $('#cbRight').innerHTML = 'v'+esc(CFG.version||'—')+' · hospedado (somente leitura)';
-  $('#foot').innerHTML = `Bundle gerado em ${esc(CFG.generated_at||'—')} · plataforma NQ-Docking Suite (IFRJ) ·
-    a análise pesada (docking Vina, MD OpenMM/GPU) roda no servidor local.`;
-  if(CFG.structure_svg){ $('#heroStruct').innerHTML = `<img src="${esc(CFG.structure_svg)}" alt="estrutura">`; }
-  renderTargets(); renderSelectivity();
+  try{CFG=await jget('config.json');}catch(e){CFG={};}
+  const c=CFG.compound||{};
+  $('#cbName').textContent=c.name||'2-SCN-NQ'; $('#heroTitle').textContent=c.name||'2-SCN-NQ';
+  $('#cbMeta').innerHTML=`<b>${esc(c.formula||'')}</b> · MW <b>${num(c.mw)}</b> g/mol`;
+  $('#cbRight').innerHTML='v'+esc(CFG.version||'—')+' · hospedado (somente leitura)';
+  $('#heroSub').innerHTML=esc(CFG.paper_title||'')+(CFG.periodico_alvo?`<br><b style="color:var(--text-bright)">Periódico-alvo:</b> ${esc(CFG.periodico_alvo)}`:'')+(CFG.ic50_note?`<br>${esc(CFG.ic50_note)}`:'');
+  $('#heroChips').innerHTML=`<span class="chip">${esc(c.formula||'')}</span><span class="chip">MW ${num(c.mw)}</span><span class="chip">${esc(c.smiles||'')}</span>`+(CFG.selectivity_cellular_max?`<span class="chip">SI celular até ${CFG.selectivity_cellular_max}</span>`:'');
+  const F=CFG.figs||{};
+  if(F.structure) $('#heroStruct').innerHTML=`<img src="${esc(F.structure.rel)}" alt="estrutura">`;
+  $('#figDocking').innerHTML=figHTML(F.docking); $('#figAdmet').innerHTML=figHTML(F.admet);
+  $('#figMdTctr').innerHTML=figHTML(F.md_tctr); $('#figMdMatrix').innerHTML=figHTML(F.md_matrix); $('#figMd3d').innerHTML=figHTML(F.interaction_3d);
+  $('#foot').innerHTML=`Bundle gerado em ${esc(CFG.generated_at||'—')} · ${esc(CFG.source||'')} · plataforma NQ-Docking Suite (IFRJ).`;
+  renderManuscript();
 }
-async function loadCompounds(){
-  try{ const d = await jget('data/compounds.json'); COMPOUNDS = d.compounds||d||[]; }catch(e){ COMPOUNDS=[]; }
-  const sel = $('#compoundSel');
-  sel.innerHTML = COMPOUNDS.map((c,i)=>`<option value="${i}">${esc(c.name)}</option>`).join('') || '<option>—</option>';
-  sel.onchange = ()=> showCompoundMeta(+sel.value);
-  showCompoundMeta(0); renderCompoundsTable();
-  const c0 = COMPOUNDS[0];
-  if(c0){ $('#heroTitle').textContent = c0.name; $('#heroChips').innerHTML =
-    `<span class="chip">${esc(c0.formula||'')}</span><span class="chip">MW ${num(c0.mw)}</span>
-     <span class="chip">HA ${c0.heavy_atoms||'—'}</span><span class="chip">${esc(c0.smiles||'')}</span>`; }
+async function loadDocking(){
+  try{DOCK=await jget('data/docking.json');}catch(e){DOCK={targets:[]};}
+  const T=DOCK.targets||[];
+  $('#dockTbl thead').innerHTML='<tr><th>Alvo</th><th>Organismo</th><th>PDB</th><th class="num">ΔG (kcal/mol)</th><th class="num">Ki (µM)</th><th class="num">Top-2 RMSD (Å)</th><th>Classe</th></tr>';
+  $('#dockTbl tbody').innerHTML=T.map(t=>`<tr class="${esc(t.category)}">
+    <td><b>${esc(t.label||t.code)}</b> ${(t.cofactors||[]).map(c=>`<span class="cof">${esc(c)}</span>`).join(' ')}</td>
+    <td><em>${esc(t.organism)}</em></td>
+    <td><span class="pdb ${esc(t.category)}">${esc(t.pdb)}</span></td>
+    <td class="num">${num(t.dg)}</td><td class="num">${num(t.ki_uM)}</td>
+    <td class="num">${t.rmsd2==null?'1 pose':num(t.rmsd2,1)}</td>
+    <td><span class="pill ${t.category==='human'?'no':'ok'}">${t.category==='human'?'humano':(t.category==='leishmania'?'Leishmania':'parasita')}</span></td></tr>`).join('');
+  $('#dockNote').textContent=DOCK.si_note||'';
+  // mini na visão geral
+  $('#targetsMini').innerHTML=`<table><tbody>${T.slice(0,9).map(t=>`<tr class="${esc(t.category)}">
+    <td><span class="pdb ${esc(t.category)}">${esc(t.pdb)}</span></td><td><b>${esc(t.code)}</b></td>
+    <td class="num">${num(t.dg)}</td><td class="hint">kcal/mol</td></tr>`).join('')}</tbody></table>`;
 }
-function showCompoundMeta(i){
-  const c = COMPOUNDS[i]; if(!c){ $('#compoundMeta').textContent=''; return; }
-  $('#compoundMeta').innerHTML = `<b>${esc(c.formula||'')}</b> · MW <b>${num(c.mw)}</b> g/mol
-    <span class="cb-badge">PDBQT</span>`;
-}
-async function loadBinding(){ try{ BINDING = await jget('data/binding_mode.json'); }catch(e){ BINDING={}; } renderBinding(); }
 async function loadMD(){
-  try{ MDINDEX = await jget('data/md_index.json'); }catch(e){ MDINDEX={tags:[],figures:[]}; }
-  const tags = MDINDEX.tags||[]; const sel=$('#mdTagSel');
-  sel.innerHTML = tags.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('') || '<option>—</option>';
-  sel.onchange = ()=> renderMD(sel.value);
-  if(tags.length) renderMD(tags[0]);
+  try{MD=await jget('data/md.json');}catch(e){MD={};}
+  $('#selectivity').innerHTML=`<div class="metrics">${(MD.subversive||[]).map(s=>`
+    <div class="metric"><div class="val ${s.category==='human'?'bad':'good'}">${num(s.fad)}</div>
+    <div class="unit">Å ± ${num(s.sd)}</div>
+    <div class="lab">${esc(s.target)} · ${s.category==='human'?'GR humana':'TR '+(s.category==='leishmania'?'Leishmania':'parasita')}<br>ditiol ${s.dithiol_pct}% frames</div></div>`).join('')}</div>`;
+  $('#selNote').textContent=(MD.criterion||'')+' '+(MD.stats||'');
+  $('#mdSub').innerHTML=(MD.subversive||[]).map(s=>`<div class="metric"><div class="val ${s.category==='human'?'bad':'good'}">${num(s.fad)}</div><div class="unit">Å ± ${num(s.sd)}</div><div class="lab">${esc(s.target)}</div></div>`).join('');
+  $('#mdInh').innerHTML=(MD.inhibitor||[]).map(s=>`<div class="metric"><div class="val">${num(s.fad)}</div><div class="unit">Å (lig–FAD)</div><div class="lab">${esc(s.target)}${s.dithiol?(' · ditiol '+num(s.dithiol)+' Å'):''}</div></div>`).join('');
+  $('#mdInfo').innerHTML=`<div>Protocolo</div><div>${esc(MD.protocol||'—')}</div>
+    <div>Critério redox</div><div>${esc(MD.criterion||'—')}</div>
+    <div>Estatística</div><div>${esc(MD.stats||'—')}</div>
+    <div>Fold / ligante</div><div>${esc(MD.fold_note||'—')}</div>
+    <div>Contatos catalíticos (TcTR)</div><div>${(MD.contacts_tctr||[]).map(c=>c[1]!=null?`${esc(c[0])} (${c[1]} Å)`:esc(c[0])).join(', ')}</div>`;
 }
-async function loadADMET(){ try{ const d = await jget('data/admet.json'); ADMET = d.admet||d||{}; }catch(e){ ADMET={}; } renderADMET(); }
-
-/* ── Visão geral ── */
-function renderTargets(){
-  const T = CFG.targets||[];
-  if(!T.length || typeof T[0]==='string'){
-    $('#targetsList').innerHTML = '<p class="hint">'+((T||[]).join(', ')||'—')+'</p>'; return;
-  }
-  $('#targetsList').innerHTML = `<table><tbody>${T.map(t=>`<tr>
-    <td><span class="pdb ${esc(t.category)}">${esc(t.pdb||'—')}</span></td>
-    <td><b>${esc(t.code)}</b><br><span class="hint">${esc(t.name||'')}</span></td>
-    <td><em>${esc(t.organism||'')}</em></td>
-    <td>${(t.cofactors||[]).map(c=>`<span class="cof">${esc(c)}</span>`).join(' ')}</td></tr>`).join('')}</tbody></table>`;
+function yn(v){return v?'<span class="pill ok">sim</span>':'<span class="pill no">não</span>';}
+async function loadADMET(){
+  try{const d=await jget('data/admet.json');ADMET=d.admet||d||{};}catch(e){ADMET={};}
+  const a=ADMET;
+  const tiles=[['MW',a.MW,'g/mol','Peso molecular'],['cLogP',a.cLogP,'','Lipofilicidade'],['QED',a.QED,'0–1','Drug-likeness'],
+    ['TPSA',a.TPSA,'Å²','Área polar'],['%HIA',a.hia,'%','Absorção intestinal'],['Lipinski',a.lipinski_viol,'viol.','Regra dos 5']];
+  $('#admetTiles').innerHTML=tiles.map(([l,v,u,d])=>`<div class="metric"><div class="val">${num(v)}</div><div class="unit">${u}</div><div class="lab">${d}</div></div>`).join('');
+  $('#admetKv').innerHTML=`
+    <div>HBD / HBA / rot.</div><div>${a.HBD} / ${a.HBA} / ${a.RB}</div>
+    <div>Filtros drug-likeness</div><div>Lipinski ${a.lipinski_viol===0?'<span class="pill ok">0 viol.</span>':a.lipinski_viol} · Veber ${yn(a.veber)} · Egan ${yn(a.egan)} · Muegge ${yn(a.muegge)} · Ghose ${yn(a.ghose)}</div>
+    <div>Biodisponibilidade</div><div>score ${num(a.bioavailability)}</div>
+    <div>Caco-2 / BBB</div><div>${esc(a.caco2||'—')} · ${a.bbb?'penetra':'não penetra'} (logBB ${num(a.logBB)})</div>
+    <div>Solubilidade (logS)</div><div>${num(a.logS)}</div>
+    <div>PPB / Vd</div><div>${num(a.ppb,1)}% · ${num(a.vd,1)} L/kg</div>
+    <div>hERG / AMES</div><div>${esc(a.herg||'—')} · ${a.ames?'<span class="pill warn">alerta</span>':'<span class="pill ok">sem alerta</span>'}</div>
+    <div>CYP / PAINS / t½</div><div>risco ${esc(a.cyp_risk||'—')} (${(a.cyp_motifs||[]).map(esc).join(', ')}) · ${a.pains} PAINS · ${a.t_half} h</div>`;
+  fillCalc({MW:a.MW,logP:a.cLogP,HBD:a.HBD,HBA:a.HBA,TPSA:a.TPSA,rotatable_bonds:a.RB});
 }
-function renderSelectivity(){
-  const rows = CFG.selectivity||[];
-  if(!rows.length){ $('#selectivity').innerHTML='<p class="hint">Dados de seletividade não exportados.</p>'; return; }
-  $('#selectivity').innerHTML = `<div class="metrics">${rows.map(r=>`
-    <div class="metric"><div class="val ${r.parasite?'good':'bad'}">${num(r.fad_dist)}</div>
-    <div class="unit">Å${r.fad_sd?(' ± '+num(r.fad_sd)):''}</div>
-    <div class="lab">${esc(r.target)} · ${r.parasite?'TR parasita':'GR humana'}${r.n?(' (n='+r.n+')'):''}</div></div>`).join('')}</div>`;
-}
-
-/* ── Docking & Binding ── */
-function bindCard(title, m){
-  if(!m) return '';
-  return `<div class="card"><div class="card-title">${title}</div>
-    <div class="metrics">
-      <div class="metric"><div class="val">${num(m.lig_fad_mean)}</div><div class="unit">Å</div><div class="lab">lig–FAD</div></div>
-      <div class="metric"><div class="val">${num(m.lig_dithiol_mean)}</div><div class="unit">Å</div><div class="lab">lig–ditiol</div></div>
-      <div class="metric"><div class="val">${num(m.lig_rmsd_mean)}</div><div class="unit">Å</div><div class="lab">RMSD ligante</div></div>
-      <div class="metric"><div class="val">${m.n_frames||'—'}</div><div class="unit"></div><div class="lab">frames</div></div>
-    </div><p class="hint" style="margin-top:8px">${esc(m.source||'')} · ${esc(m.date||'')}</p></div>`;
-}
-function renderBinding(){
-  const b=BINDING||{}; let html='';
-  if(b.subversive) html += bindCard('Modo subversivo — si-face do FAD', b.subversive);
-  if(b.inhibitor)  html += bindCard('Modo inibidor clássico', b.inhibitor);
-  $('#bindingCards').innerHTML = html || '<p class="hint">Sem dados de binding mode exportados.</p>';
-  const src=(b.subversive&&b.subversive.top_contacts)?b.subversive:(b.inhibitor||{});
-  const tc=src.top_contacts||[], cc=(b.subversive&&b.subversive.cys_contacts)||[];
-  $('#contacts').innerHTML = tc.length ? `<div class="grid2">
-    <div><h4 class="hint" style="margin-bottom:6px">TOP CONTATOS (OCUPÂNCIA)</h4><table><tbody>
-      ${tc.map(([r,o])=>`<tr><td>${esc(r)}</td><td class="num">${(o*100).toFixed(0)}%</td></tr>`).join('')}</tbody></table></div>
-    <div><h4 class="hint" style="margin-bottom:6px">CISTEÍNAS CATALÍTICAS</h4>${cc.length?`<table><tbody>
-      ${cc.map(([r,o])=>`<tr><td>${esc(r)}</td><td class="num">${(o*100).toFixed(0)}%</td></tr>`).join('')}</tbody></table>`:'<p class="hint">—</p>'}</div>
-    </div>` : '<p class="hint">Sem contatos exportados.</p>';
-}
-
-/* ── MD ── */
-async function renderMD(tag){
-  if(!tag) return; let s={};
-  try{ s = await jget(`data/md/${tag}.json`); }catch(e){ s={}; }
-  const m=s.summary||s||{};
-  const keys=[['rmsd_prot_final_A','RMSD prot. final','Å'],['rmsf_mean_A','RMSF médio','Å'],['rmsf_max_A','RMSF máx','Å'],
-    ['rmsd_lig_pocket_final_A','RMSD lig/bolsão','Å'],['rmsd_lig_intra_final_A','RMSD lig intra','Å'],
-    ['n_frames','frames',''],['t_total_ns','tempo','ns']];
-  const cells=keys.filter(([k])=>m[k]!=null).map(([k,lab,u])=>`
-    <div class="metric"><div class="val">${num(m[k])}</div><div class="unit">${u}</div><div class="lab">${lab}</div></div>`).join('');
-  $('#mdMetrics').innerHTML = cells || `<p class="hint">Resumo numérico não disponível para <code>${esc(tag)}</code>.</p>`;
-  const fig=(MDINDEX.figures||[]).find(f=>f.tag===tag)||(MDINDEX.figures||[]).find(f=>(f.name||'').includes(tag));
-  $('#mdFig').innerHTML = fig?`<img class="fig" src="${esc(fig.rel)}" alt="RMSD ${esc(tag)}">`
-    :'<p class="hint">Sem figura RMSD/RMSF exportada para esta corrida.</p>';
-}
-
-/* ── ADMET pré-computado ── */
-function yn(v){ return v?'<span class="pill ok">sim</span>':'<span class="pill no">não</span>'; }
-function renderADMET(){
-  const a=ADMET||{};
-  const tiles=[['MW',a.MW,'g/mol','Peso molecular'],['LogP',a.LogP,'cLogP','Lipofilicidade'],
-    ['QED',a.QED,'0–1','Drug-likeness'],['TPSA',a.TPSA,'Å²','Área polar'],
-    ['Caco2',a.Caco2_Papp_nm_s,'nm/s','Permeab.'],['Lipinski',a.Lipinski_pass?0:'>0','viol.','Regra dos 5']];
-  $('#admetTiles').innerHTML = tiles.map(([lab,v,u,d])=>`
-    <div class="metric"><div class="val">${num(v)}</div><div class="unit">${u}</div><div class="lab">${d}</div></div>`).join('');
-  if(!Object.keys(a).length){ $('#admetKv').innerHTML='<div>Sem dados ADMET.</div><div></div>'; }
-  else $('#admetKv').innerHTML = `
-    <div>HBD / HBA</div><div>${a.HBD} / ${a.HBA}</div>
-    <div>Lipinski / Veber</div><div>${yn(a.Lipinski_pass)} ${yn(a.Veber_pass)}</div>
-    <div>Absorção GI / %HIA</div><div>${esc(a.GI_absorption||'—')} · ${num(a.hia_percent,1)}%</div>
-    <div>Caco-2</div><div>${esc(a.Caco2_class||'—')}</div>
-    <div>Solubilidade (logS)</div><div>${esc(a.Solubility_class||'—')} · ${num(a.logS_ESOL,2)}</div>
-    <div>BBB penetrante</div><div>${yn(a.bbb_penetrant)}</div>
-    <div>hERG / AMES</div><div>${esc(a.herg_risk||'—')} · ${a.ames_alert?'<span class="pill warn">alerta</span>':'<span class="pill ok">sem alerta</span>'}</div>
-    <div>LD50 camundongo</div><div>${num(a.LD50_mouse_mg_kg,0)} mg/kg · GHS ${a.Toxicity_class}</div>
-    <div>Alertas CYP</div><div class="hint">${(a.cyp_alerts||[]).map(esc).join('<br>')||'—'}</div>`;
-  fillCalc({MW:a.MW,logP:a.LogP,HBD:a.HBD,HBA:a.HBA,TPSA:a.TPSA,rotatable_bonds:a.RotBonds});
-}
-
-/* ── Calculadora ADMET client-side (fiel ao admet_module.py) ── */
-function fillCalc(d){
-  const m={MW:'i_mw',logP:'i_logp',HBD:'i_hbd',HBA:'i_hba',TPSA:'i_tpsa',
-    rotatable_bonds:'i_rb',aromatic_rings:'i_ar',molar_refraction:'i_mr'};
-  for(const k in m){ if(d[k]!=null) $('#'+m[k]).value = d[k]; }
-}
-function admetCalc(p){
-  const {mw,logp,hbd,hba,tpsa,rb,ar,mr}=p;
-  const lipViol=(mw>500)+(logp>5)+(hbd>5)+(hba>10);
-  const o={ lipinski:{pass:lipViol<=1,violations:lipViol}, veber:{pass:(tpsa<=140&&rb<=10)},
-    egan:{pass:(logp<=5.88&&tpsa<=131.6)},
+function fillCalc(d){const m={MW:'i_mw',logP:'i_logp',HBD:'i_hbd',HBA:'i_hba',TPSA:'i_tpsa',rotatable_bonds:'i_rb',aromatic_rings:'i_ar',molar_refraction:'i_mr'};
+  for(const k in m){if(d[k]!=null)$('#'+m[k]).value=d[k];}}
+function admetCalc(p){const{mw,logp,hbd,hba,tpsa,rb,ar,mr}=p;const lv=(mw>500)+(logp>5)+(hbd>5)+(hba>10);
+  const o={lipinski:{pass:lv<=1,violations:lv},veber:{pass:(tpsa<=140&&rb<=10)},egan:{pass:(logp<=5.88&&tpsa<=131.6)},
     ghose:{pass:(mw>=160&&mw<=480&&logp>=-0.4&&logp<=5.6&&(isNaN(mr)||(mr>=40&&mr<=130)))},
-    muegge:{pass:(mw>=200&&mw<=600&&logp>=-2&&logp<=5&&tpsa<=150&&rb<=15&&hbd<=5&&hba<=10)} };
-  const logPapp=-0.0197*tpsa-0.4496*hbd+0.5234*logp-2.7101;
-  o.caco2={logPapp,class:(logPapp>-5.15?'High':logPapp>-5.85?'Medium':'Low')};
-  o.hia=Math.max(0,Math.min(100,-0.7416*tpsa+97.22));
-  const logBB=0.0148*logp-0.0187*tpsa+0.16; o.bbb={logBB,penetrant:logBB>-1.0};
-  const arv=isNaN(ar)?0:ar, logS=0.16-0.63*logp-0.0062*mw+0.066*rb-0.74*arv;
-  o.esol={logS,class:(logS>-1?'Muito solúvel':logS>-2?'Solúvel':logS>-4?'Moderadamente solúvel':logS>-6?'Pouco solúvel':'Praticamente insolúvel')};
-  const ppb=Math.min(100,82+5*logp-0.3*tpsa); o.ppb={percent:ppb,class:(ppb>90?'Alta (>90%)':ppb>70?'Moderada (70-90%)':'Baixa (<70%)')};
-  const vd=Math.pow(10,0.5*logp-0.01*tpsa+0.5); o.vd={lkg:vd,class:(vd<1?'Baixo (<1 L/kg)':vd<3?'Moderado (1-3 L/kg)':'Alto (>3 L/kg)')};
-  return o;
-}
-function renderCalc(){
-  const p={mw:+$('#i_mw').value,logp:+$('#i_logp').value,hbd:+$('#i_hbd').value,hba:+$('#i_hba').value,
+    muegge:{pass:(mw>=200&&mw<=600&&logp>=-2&&logp<=5&&tpsa<=150&&rb<=15&&hbd<=5&&hba<=10)}};
+  const lp=-0.0197*tpsa-0.4496*hbd+0.5234*logp-2.7101;o.caco2={logPapp:lp,class:(lp>-5.15?'High':lp>-5.85?'Medium':'Low')};
+  o.hia=Math.max(0,Math.min(100,-0.7416*tpsa+97.22));const lb=0.0148*logp-0.0187*tpsa+0.16;o.bbb={logBB:lb,penetrant:lb>-1.0};
+  const arv=isNaN(ar)?0:ar,ls=0.16-0.63*logp-0.0062*mw+0.066*rb-0.74*arv;
+  o.esol={logS:ls,class:(ls>-1?'Muito solúvel':ls>-2?'Solúvel':ls>-4?'Moderadamente solúvel':ls>-6?'Pouco solúvel':'Praticamente insolúvel')};
+  const ppb=Math.min(100,82+5*logp-0.3*tpsa);o.ppb={percent:ppb,class:(ppb>90?'Alta (>90%)':ppb>70?'Moderada (70-90%)':'Baixa (<70%)')};
+  const vd=Math.pow(10,0.5*logp-0.01*tpsa+0.5);o.vd={lkg:vd,class:(vd<1?'Baixo':vd<3?'Moderado':'Alto')};return o;}
+function renderCalc(){const p={mw:+$('#i_mw').value,logp:+$('#i_logp').value,hbd:+$('#i_hbd').value,hba:+$('#i_hba').value,
     tpsa:+$('#i_tpsa').value,rb:+$('#i_rb').value,ar:parseFloat($('#i_ar').value),mr:parseFloat($('#i_mr').value)};
-  if([p.mw,p.logp,p.hbd,p.hba,p.tpsa,p.rb].some(x=>isNaN(x))){
-    $('#calcOut').innerHTML='<p class="hint" style="color:var(--warn)">Preencha MW, logP, HBD, HBA, TPSA e lig. rotáveis.</p>'; return; }
-  const r=admetCalc(p);
-  const rule=(n,ob,ex='')=>`<tr><td>${n}</td><td>${ob.pass?'<span class="pill ok">passa</span>':'<span class="pill no">falha</span>'}</td><td class="hint">${ex}</td></tr>`;
+  if([p.mw,p.logp,p.hbd,p.hba,p.tpsa,p.rb].some(x=>isNaN(x))){$('#calcOut').innerHTML='<p class="hint" style="color:var(--warn)">Preencha MW, logP, HBD, HBA, TPSA e lig. rotáveis.</p>';return;}
+  const r=admetCalc(p);const rule=(n,ob,ex='')=>`<tr><td>${n}</td><td>${ob.pass?'<span class="pill ok">passa</span>':'<span class="pill no">falha</span>'}</td><td class="hint">${ex}</td></tr>`;
   $('#calcOut').innerHTML=`<table><thead><tr><th>Regra / propriedade</th><th>Resultado</th><th></th></tr></thead><tbody>
-    ${rule('Lipinski (Ro5)',r.lipinski,r.lipinski.violations+' violação(ões)')}
-    ${rule('Veber',r.veber,'TPSA≤140 & RB≤10')}${rule('Ghose',r.ghose)}${rule('Egan',r.egan)}${rule('Muegge',r.muegge)}
+    ${rule('Lipinski (Ro5)',r.lipinski,r.lipinski.violations+' violação(ões)')}${rule('Veber',r.veber)}${rule('Ghose',r.ghose)}${rule('Egan',r.egan)}${rule('Muegge',r.muegge)}
     <tr><td>Caco-2 (Hou 2004)</td><td><span class="pill ${r.caco2.class==='High'?'ok':r.caco2.class==='Medium'?'warn':'no'}">${r.caco2.class}</span></td><td class="hint">logPapp=${r.caco2.logPapp.toFixed(2)}</td></tr>
     <tr><td>%HIA (Zhao)</td><td class="num">${r.hia.toFixed(1)}%</td><td></td></tr>
     <tr><td>BBB (Clark 1999)</td><td>${r.bbb.penetrant?'<span class="pill ok">penetra</span>':'<span class="pill no">não</span>'}</td><td class="hint">logBB=${r.bbb.logBB.toFixed(2)}</td></tr>
     <tr><td>Solubilidade ESOL</td><td><span class="pill ${r.esol.logS>-4?'ok':'warn'}">${r.esol.class}</span></td><td class="hint">logS=${r.esol.logS.toFixed(2)}</td></tr>
-    <tr><td>PPB (Votano)</td><td>${r.ppb.class}</td><td class="hint">${r.ppb.percent.toFixed(0)}%</td></tr>
-    <tr><td>Vol. distribuição</td><td>${r.vd.class}</td><td class="hint">${r.vd.lkg.toFixed(2)} L/kg</td></tr>
-    </tbody></table><p class="hint" style="margin-top:8px">Modelos QSAR idênticos aos do módulo ADMET local (RDKit).
-    Cálculo no seu navegador — nada é enviado a servidor.</p>`;
+    <tr><td>PPB (Votano)</td><td>${r.ppb.class}</td><td class="hint">${r.ppb.percent.toFixed(0)}%</td></tr></tbody></table>
+    <p class="hint" style="margin-top:8px">Modelos QSAR idênticos aos do módulo ADMET local. Cálculo no navegador — nada é enviado a servidor.</p>`;
 }
-/* RDKit.js opcional (Camada B) */
 let RDKitReady=null;
-async function ensureRDKit(){
-  if(window.RDKit) return window.RDKit; if(RDKitReady) return RDKitReady;
-  RDKitReady=new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='lib/RDKit_minimal.js';
-    s.onload=()=>{ if(!window.initRDKitModule) return rej(0);
-      window.initRDKitModule({locateFile:()=>'lib/RDKit_minimal.wasm'}).then(m=>{window.RDKit=m;res(m);}).catch(rej); };
-    s.onerror=()=>rej(0); document.head.appendChild(s); });
-  return RDKitReady;
-}
-async function smilesToDescriptors(){
-  const smi=$('#smiInput').value.trim(); if(!smi) return;
-  try{ const RD=await ensureRDKit(); const m=RD.get_mol(smi);
-    if(!m||!m.is_valid()){ alert('SMILES inválido'); return; }
-    const d=JSON.parse(m.get_descriptors());
-    fillCalc({MW:d.amw,logP:d.CrippenClogP,HBD:d.NumHBD,HBA:d.NumHBA,TPSA:d.tpsa,
-      rotatable_bonds:d.NumRotatableBonds,aromatic_rings:d.NumAromaticRings,molar_refraction:d.CrippenMR});
-    renderCalc(); m.delete();
-  }catch(e){ alert('RDKit.js não está neste bundle (Camada B opcional). Veja README_DEPLOY.md.'); }
-}
+async function ensureRDKit(){if(window.RDKit)return window.RDKit;if(RDKitReady)return RDKitReady;
+  RDKitReady=new Promise((res,rej)=>{const s=document.createElement('script');s.src='lib/RDKit_minimal.js';
+    s.onload=()=>{if(!window.initRDKitModule)return rej(0);window.initRDKitModule({locateFile:()=>'lib/RDKit_minimal.wasm'}).then(m=>{window.RDKit=m;res(m);}).catch(rej);};
+    s.onerror=()=>rej(0);document.head.appendChild(s);});return RDKitReady;}
+async function smilesToDescriptors(){const smi=$('#smiInput').value.trim();if(!smi)return;
+  try{const RD=await ensureRDKit();const m=RD.get_mol(smi);if(!m||!m.is_valid()){alert('SMILES inválido');return;}
+    const d=JSON.parse(m.get_descriptors());fillCalc({MW:d.amw,logP:d.CrippenClogP,HBD:d.NumHBD,HBA:d.NumHBA,TPSA:d.tpsa,rotatable_bonds:d.NumRotatableBonds,aromatic_rings:d.NumAromaticRings,molar_refraction:d.CrippenMR});renderCalc();m.delete();
+  }catch(e){alert('RDKit.js não está neste bundle (Camada B opcional). Veja README_DEPLOY.md.');}}
 
-/* ── Compostos ── */
-function renderCompoundsTable(){
-  const cols=[['name','Nome'],['display_name','Descrição'],['formula','Fórmula'],['mw','MW'],
-    ['heavy_atoms','Pesados'],['rotatable_bonds','Rot.'],['smiles','SMILES']];
+function renderManuscript(){
+  const pdf=CFG.submission_pdf;
+  if(pdf){ $('#pdfHost').innerHTML=`<iframe class="pdfframe" src="${esc(pdf)}#view=FitH" title="Manuscrito ACS"></iframe>`;
+    $('#pdfDownload').innerHTML=`<a href="${esc(pdf)}" target="_blank" rel="noopener">Abrir/baixar o PDF em nova aba ↗</a>`;
+    $('#pdfMeta').textContent='2scnnq_acs_submission.pdf'; }
+  else { $('#pdfHost').innerHTML='<p class="hint">PDF de submissão não incluído no bundle.</p>'; }
+}
+async function loadCompounds(){
+  try{const d=await jget('data/compounds.json');COMPOUNDS=d.compounds||d||[];}catch(e){COMPOUNDS=[];}
+  const cols=[['name','Nome'],['display_name','Descrição'],['formula','Fórmula'],['mw','MW'],['heavy_atoms','Pesados'],['rotatable_bonds','Rot.'],['smiles','SMILES']];
   $('#cmpTbl thead').innerHTML='<tr>'+cols.map(([k,l])=>`<th class="${['mw','heavy_atoms','rotatable_bonds'].includes(k)?'num':''}">${l}</th>`).join('')+'</tr>';
-  $('#cmpTbl tbody').innerHTML=COMPOUNDS.map((c,i)=>`<tr class="clickable" data-i="${i}">
-    ${cols.map(([k])=>{const n=['mw','heavy_atoms','rotatable_bonds'].includes(k);return `<td class="${n?'num':''}">${n?num(c[k]):esc(c[k])}</td>`;}).join('')}</tr>`).join('')
-    || '<tr><td class="hint">Sem compostos.</td></tr>';
-  $$('#cmpTbl tbody tr[data-i]').forEach(tr=>tr.onclick=()=>{ const c=COMPOUNDS[+tr.dataset.i];
-    fillCalc({MW:c.mw,HBD:c.hbd,HBA:c.hba,rotatable_bonds:c.rotatable_bonds,logP:c.logp,TPSA:c.tpsa}); selectTab('admet'); });
+  $('#cmpTbl tbody').innerHTML=COMPOUNDS.map((c,i)=>`<tr data-i="${i}" style="cursor:pointer">${cols.map(([k])=>{const n=['mw','heavy_atoms','rotatable_bonds'].includes(k);return `<td class="${n?'num':''}">${n?num(c[k]):esc(c[k])}</td>`;}).join('')}</tr>`).join('')||'<tr><td class="hint">Sem compostos.</td></tr>';
+  $$('#cmpTbl tbody tr[data-i]').forEach(tr=>tr.onclick=()=>{const c=COMPOUNDS[+tr.dataset.i];fillCalc({MW:c.mw,HBD:c.hbd,HBA:c.hba,rotatable_bonds:c.rotatable_bonds,logP:c.logp,TPSA:c.tpsa});selectTab('admet');});
 }
-
-/* ── Subprojetos ── */
 async function loadSubprojects(){
-  let sp={}; try{ sp=await jget('data/subprojects.json'); }catch(e){}
-  $('#progTitle').textContent = sp.programa||'Programa guarda-chuva';
+  let sp={};try{sp=await jget('data/subprojects.json');}catch(e){}
+  $('#progTitle').textContent=sp.programa||'Programa guarda-chuva';
   $('#subprojList').innerHTML=(sp.subprojetos||[]).map(s=>`<div class="card" style="margin:0 0 10px;background:var(--bg-surface)">
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <b style="color:var(--text-bright)">${esc(s.id)}</b>
-      <span class="pill ${s.status==='em_desenvolvimento'?'warn':'ok'}">${esc(s.status||'')}</span>
-      <span class="hint">${esc(s.sigla||'')}</span>
-      <span style="margin-left:auto" class="cb-badge">${Math.round((s.progress||0)*100)}%</span></div>
-    <p style="margin:8px 0 4px">${esc(s.titulo_paper||'')}</p>
-    <p class="hint">${esc(s.fase_atual||'')} · alvo: ${esc(s.periodico_alvo||'—')} · ${s.n_etapas||'?'} etapas · ${s.n_scripts||'?'} scripts</p></div>`).join('')
-    || '<p class="hint">Sem subprojetos.</p>';
-  try{ $('#pipelineSvg').innerHTML = await tget('assets/pipeline_SUB01.svg'); }
-  catch(e){ $('#pipelineSvg').innerHTML='<p class="hint">SVG do pipeline não exportado.</p>'; }
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="color:var(--text-bright)">${esc(s.id)}</b>
+    <span class="pill ${s.status==='em_desenvolvimento'?'warn':'ok'}">${esc(s.status||'')}</span><span class="hint">${esc(s.sigla||'')}</span>
+    <span style="margin-left:auto" class="cb-badge">${Math.round((s.progress||0)*100)}%</span></div>
+    <p style="margin:8px 0 4px">${esc(s.titulo_paper||'')}</p><p class="hint">${esc(s.fase_atual||'')} · alvo: ${esc(s.periodico_alvo||'—')}</p></div>`).join('')||'<p class="hint">Sem subprojetos.</p>';
+  try{$('#pipelineSvg').innerHTML=await tget('assets/pipeline_SUB01.svg');}catch(e){$('#pipelineSvg').innerHTML='<p class="hint">SVG não exportado.</p>';}
 }
-
-/* ── Ajuda ── */
 let docsLoaded=false;
-async function renderDocs(){
-  let docs; try{ docs=await jget('docs/index.json'); }catch(e){ $('#docnav').innerHTML='<p class="hint" style="padding:12px">Sem documentos.</p>'; return; }
-  docs=docs.docs||docs; docsLoaded=true;
-  $('#docnav').innerHTML=docs.map(d=>`<button data-file="${esc(d.file)}">${esc(d.title)}</button>`).join('');
-  $$('#docnav button').forEach(b=>b.onclick=()=>openDoc(b.dataset.file,b));
-  const f=$('#docnav button'); if(f) openDoc(f.dataset.file,f);
-}
-async function openDoc(file,btn){
-  $$('#docnav button').forEach(x=>x.classList.remove('active')); if(btn) btn.classList.add('active');
-  $('#docview').innerHTML='<p class="hint">Carregando…</p>';
-  let md; try{ md=await tget('docs/'+file); }catch(e){ $('#docview').innerHTML='<p class="hint">Documento indisponível.</p>'; return; }
-  $('#docview').innerHTML=(window.marked?marked.parse(md):('<pre>'+esc(md)+'</pre>'));
-}
+async function renderDocs(){let docs;try{docs=await jget('docs/index.json');}catch(e){$('#docnav').innerHTML='<p class="hint" style="padding:12px">Sem documentos.</p>';return;}
+  docs=docs.docs||docs;docsLoaded=true;$('#docnav').innerHTML=docs.map(d=>`<button data-file="${esc(d.file)}">${esc(d.title)}</button>`).join('');
+  $$('#docnav button').forEach(b=>b.onclick=()=>openDoc(b.dataset.file,b));const f=$('#docnav button');if(f)openDoc(f.dataset.file,f);}
+async function openDoc(file,btn){$$('#docnav button').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');
+  $('#docview').innerHTML='<p class="hint">Carregando…</p>';let md;try{md=await tget('docs/'+file);}catch(e){$('#docview').innerHTML='<p class="hint">Indisponível.</p>';return;}
+  $('#docview').innerHTML=(window.marked?marked.parse(md):('<pre>'+esc(md)+'</pre>'));}
 
-/* ── abas ── */
-const TABS=['visao','binding','md','admet','compostos','subprojetos','ajuda'];
-function selectTab(t){
-  $$('.tab-btn').forEach(x=>x.classList.toggle('active',x.dataset.tab===t));
-  TABS.forEach(x=>$('#tab-'+x).classList.toggle('active',x===t));
-  if(t==='ajuda'&&!docsLoaded) renderDocs();
-}
+const TABS=['visao','docking','md','admet','manuscrito','compostos','subprojetos','ajuda'];
+function selectTab(t){$$('.tab-btn').forEach(x=>x.classList.toggle('active',x.dataset.tab===t));
+  TABS.forEach(x=>$('#tab-'+x).classList.toggle('active',x===t));if(t==='ajuda'&&!docsLoaded)renderDocs();}
 $$('.tab-btn').forEach(b=>b.onclick=()=>selectTab(b.dataset.tab));
-$('#calcBtn').onclick=renderCalc; $('#rdkitBtn').onclick=smilesToDescriptors;
-
-/* ── boot ── */
-(async ()=>{ await loadConfig(); await Promise.all([loadCompounds(),loadBinding(),loadMD(),loadADMET(),loadSubprojects()]); })();
+$('#calcBtn').onclick=renderCalc;$('#rdkitBtn').onclick=smilesToDescriptors;
+(async()=>{await loadConfig();await Promise.all([loadDocking(),loadMD(),loadADMET(),loadCompounds(),loadSubprojects()]);})();
 </script>
 </body>
 </html>

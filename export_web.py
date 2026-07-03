@@ -1,37 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""export_web.py - empacota um BUNDLE ESTATICO publicavel (NQ-Docking Viewer).
+"""export_web.py - empacota o BUNDLE ESTATICO publicavel (NQ-Docking Viewer).
 
-Gera um diretorio 100% estatico (HTML/JS/JSON) que reproduz o dashboard em modo
-**somente leitura** + uma calculadora ADMET que roda no navegador, SEM nenhuma
-dependencia de Python/GPU/rede no servidor. E o que se hospeda na Hostinger em
-`docking.ifrj-crj-geneticamolecular.online` (par do bonder/epigenoma).
+Gera um site 100% estatico (HTML/JS/JSON) publicavel na Hostinger
+(`docking.ifrj-crj-geneticamolecular.online` ou subpasta `/docking/`), em modo
+**somente leitura** + calculadora ADMET client-side, sem Python/GPU/rede no servidor.
 
-Ideia (igual ao bonder): a analise pesada roda LOCAL (dashboard em localhost:5001,
-docking com Vina, MD com OpenMM/GPU). Este exportador captura os RESULTADOS ja
-gerados pelas rotas de leitura do dashboard (via test_client), **sanitiza os
-caminhos absolutos locais** (nunca publica C:\\... ou E:\\...), copia so imagens
-leves (nunca .dcd/.chk/.pdb pesados) e monta o pacote para envio por FTP/hPanel.
-
-Estrutura do bundle:
-  index.html                viewer estatico (web/viewer/index.html)
-  lib/*.js                  marked (vendorizado; sem CDN)
-  .htaccess                 MIME + no-indexes (+ Basic Auth comentado)
-  README_DEPLOY.md          passo a passo do deploy na Hostinger
-  config.json               versao, composto, alvos, seletividade, subprojeto
-  data/compounds.json       biblioteca de compostos (sanitizada)
-  data/admet.json           perfil ADMET pre-computado
-  data/binding_mode.json    modos subversivo vs inibidor (sanitizado)
-  data/md_index.json        tags de MD + figuras RMSD disponiveis
-  data/md/<tag>.json        resumo por corrida de MD
-  data/subprojects.json     guarda-chuva (programa + subprojetos)
-  figures/*.png|svg         imagens leves (ADMET, estrutura, RMSD)
-  assets/pipeline_SUB01.svg SVG do pipeline do subprojeto ativo
-  docs/index.json + *.md    documentos da aba Ajuda
-
-Uso:
-  python export_web.py --out dist_web
-  python export_web.py --out dist_web --compound 2-SCN-NQ --max-img-mb 3
+FIDELIDADE AO PAPER (2026-07-03): os dados cientificos (docking, MD, ADMET, seletividade
+e as FIGURAS) sao os do **manuscrito ACS submetido** (`2scnnq_manuscript_EN.tex` /
+`2scnnq_acs_submission.pdf`), NAO os dados de trabalho do dashboard. Os valores abaixo
+foram extraidos e conferidos contra o .tex submetido (Tabela tab:dock e secoes
+Docking/MD/ADMET). Metadados nao-cientificos (biblioteca de compostos, subprojetos, docs
+da Ajuda) continuam vindo do dashboard via test_client.
 """
 from __future__ import annotations
 
@@ -40,45 +20,99 @@ import json
 import os
 import re
 import shutil
-import statistics
 import sys
 import time
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 VIEWER_DIR = SCRIPT_DIR / "web" / "viewer"
-BASE_DIR = Path(os.environ.get("NQ_DATA_DIR", r"E:\data\docking"))
 
-# chaves com caminhos/flags locais que NAO devem ir para o site publico
-DROP_KEYS = {
-    "_dir", "_has_mol2", "_has_pdbqt", "path", "docking_dir", "figures_dir",
-    "logs_dir", "results_file", "texts_dir", "kit_dir",
-}
-IMG_EXT = {".png", ".svg", ".jpg", ".jpeg", ".webp", ".gif"}
-_ABS_PATH = re.compile(r"^[A-Za-z]:[\\/]|^/(home|Users|mnt|data)/")
-
-# Painel de alvos (PDB/organismo/categoria/cofatores) — identidade visual do dashboard.
-# category: parasite (T. cruzi) | leishmania | human — controla a cor do badge PDB.
-TARGET_INFO = [
-    {"code": "TcTR", "pdb": "1BZL", "organism": "Trypanosoma cruzi", "name": "Trypanothione Reductase", "category": "parasite", "cofactors": ["FAD"]},
-    {"code": "TcCruzain", "pdb": "3KKU", "organism": "Trypanosoma cruzi", "name": "Cruzain", "category": "parasite", "cofactors": []},
-    {"code": "TcFeSOD", "pdb": "4DVH", "organism": "Trypanosoma cruzi", "name": "Fe-Superoxide Dismutase", "category": "parasite", "cofactors": ["FE", "FE2"]},
-    {"code": "LiTR", "pdb": "2JK6", "organism": "Leishmania infantum (proxy L. amazonensis)", "name": "Trypanothione Reductase", "category": "leishmania", "cofactors": ["FAD"]},
-    {"code": "LmPTR1", "pdb": "2QHX", "organism": "Leishmania major", "name": "Pteridine Reductase 1", "category": "leishmania", "cofactors": ["NAP", "NDP", "FAD"]},
-    {"code": "LmDHODH", "pdb": "3C61", "organism": "Leishmania donovani", "name": "Dihydroorotate Dehydrogenase", "category": "leishmania", "cofactors": ["FMN", "FAD"]},
-    {"code": "hGR", "pdb": "3DJJ", "organism": "Homo sapiens", "name": "Glutathione Reductase", "category": "human", "cofactors": ["FAD"]},
-    {"code": "hCatL", "pdb": "2XU3", "organism": "Homo sapiens", "name": "Cathepsin L", "category": "human", "cofactors": []},
-    {"code": "hDHODH", "pdb": "1D3H", "organism": "Homo sapiens", "name": "Dihydroorotate Dehydrogenase", "category": "human", "cofactors": ["FMN"]},
-    {"code": "hMnSOD", "pdb": "1LUV", "organism": "Homo sapiens", "name": "Mn-Superoxide Dismutase", "category": "human", "cofactors": ["MN"]},
+# --- Projeto do paper (fonte de verdade cientifica) --------------------------
+PAPER_DIR = Path(os.environ.get("NQ_PAPER_DIR", r"C:\Users\luizd\OneDrive\Data_Science\Projetos\2-SNC-NQ"))
+PAPER_FIGS_DIR = PAPER_DIR / "PAPER" / "figures"
+SUBMISSION_PDF_CANDIDATES = [
+    Path(r"C:\Users\luizd\OneDrive\Data_Science\Projetos\artigos_submissao\naftoquinona_2SCN-NQ\2scnnq_acs_submission.pdf"),
+    PAPER_DIR / "PAPER" / "2scnnq_acs_submission.pdf",
 ]
 
+# =============================================================================
+# DADOS CANONICOS DO MANUSCRITO SUBMETIDO (conferidos contra 2scnnq_manuscript_EN.tex)
+# =============================================================================
+PAPER = {
+    "compound": {
+        "name": "2-SCN-NQ",
+        "full": "2-Thiocyanato-1,4-naphthoquinone",
+        "formula": "C11H5NO2S",
+        "mw": 215.23,
+        "smiles": "O=C1C=C(SC#N)C(=O)c2ccccc21",
+    },
+    # Tabela tab:dock (manuscrito submetido), ordenada por dG. Ki em uM.
+    # rmsd2 = Top-2 pose RMSD (A); None quando so 1 pose (hDHODH).
+    "docking": [
+        {"code": "LiTR", "label": "TR (LiTR)", "organism": "L. infantum", "pdb": "2JK6", "dg": -7.55, "ki_uM": 2.90, "rmsd2": 22.9, "category": "leishmania", "cofactors": ["FAD"]},
+        {"code": "hGR", "label": "GR (hGR)", "organism": "H. sapiens", "pdb": "3DJJ", "dg": -7.16, "ki_uM": 5.64, "rmsd2": 4.8, "category": "human", "cofactors": ["FAD"]},
+        {"code": "TcTR", "label": "TR (TcTR)", "organism": "T. cruzi", "pdb": "1BZL", "dg": -6.86, "ki_uM": 9.42, "rmsd2": 2.7, "category": "parasite", "cofactors": ["FAD"]},
+        {"code": "hCatL", "label": "Cathepsin L", "organism": "H. sapiens", "pdb": "2XU3", "dg": -6.68, "ki_uM": 12.74, "rmsd2": 14.0, "category": "human", "cofactors": []},
+        {"code": "TcFeSOD", "label": "Fe-SOD (TcFeSOD)", "organism": "T. cruzi", "pdb": "4DVH", "dg": -6.26, "ki_uM": 25.89, "rmsd2": 4.6, "category": "parasite", "cofactors": ["FE"]},
+        {"code": "hDHODH", "label": "DHODH (hDHODH)", "organism": "H. sapiens", "pdb": "1D3H", "dg": -6.02, "ki_uM": 38.89, "rmsd2": None, "category": "human", "cofactors": ["FMN"]},
+        {"code": "TcCruzain", "label": "Cruzain", "organism": "T. cruzi", "pdb": "3KKU", "dg": -6.00, "ki_uM": 39.82, "rmsd2": 13.6, "category": "parasite", "cofactors": []},
+        {"code": "LdDHODH", "label": "DHODH (LdDHODH)", "organism": "L. donovani", "pdb": "3C61", "dg": -5.29, "ki_uM": 130.9, "rmsd2": 4.7, "category": "leishmania", "cofactors": ["FMN"]},
+        {"code": "hMnSOD", "label": "Mn-SOD (hMnSOD)", "organism": "H. sapiens", "pdb": "1LUV", "dg": -4.85, "ki_uM": 280.2, "rmsd2": 2.8, "category": "human", "cofactors": ["MN"]},
+    ],
+    # Dinamica molecular n=3 (secoes MD do manuscrito). Distancias em A.
+    "md": {
+        "subversive": [
+            {"target": "TcTR", "fad": 2.26, "sd": 0.07, "dithiol_pct": 97, "category": "parasite"},
+            {"target": "LiTR", "fad": 2.43, "sd": 0.23, "dithiol_pct": 95, "category": "leishmania"},
+            {"target": "hGR", "fad": 9.28, "sd": 1.44, "dithiol_pct": 0, "category": "human"},
+        ],
+        "inhibitor": [
+            {"target": "TcTR", "fad": 13.7, "dithiol": 16.7},
+            {"target": "LiTR", "fad": 11.2},
+        ],
+        "stats": "Welch ANOVA p = 0,012; hGR vs. cada TR parasitaria p = 0,038 (Welch t, Holm); as duas TRs entre si p = 0,33; Cohen d ~ 7.",
+        "criterion": "Redox-competente: media ligante-FAD < 3 A E contato com o ditiol catalitico em > 50% dos frames. So as poses subversivas das TRs parasitarias qualificam.",
+        "protocol": "AMBER ff14SB + TIP3P, 150 mM NaCl, 300 K; OpenMM 8.3 (HMR, passo 4 fs); 50 ns por corrida; subversivo em triplicata (n=3), inibidor n=1; 12 trajetorias.",
+        "contacts_tctr": [["Cys52", 2.5], ["Cys57", 2.5], ["Val58", None], ["Ser14", None], ["Gly56", None], ["Thr51", None], ["Pro59", None], ["Val55", None]],
+        "fold_note": "RMSD do backbone por cadeia ~1,4 A (fold preservado); RMSD intramolecular do ligante < 0,6 A (pose estavel).",
+    },
+    # ADMET in silico (secao ADMET do manuscrito).
+    "admet": {
+        "MW": 215.23, "cLogP": 2.16, "TPSA": 57.9, "HBD": 0, "HBA": 4, "RB": 1, "QED": 0.935,
+        "lipinski_viol": 0, "veber": True, "egan": True, "muegge": True, "ghose": False,
+        "bioavailability": 1.00, "hia": 54.3, "logS": -3.21, "logBB": -0.89, "ppb": 75.4, "vd": 10.1,
+        "herg": "baixa", "ames": False, "cyp_risk": "alto", "pains": 3, "t_half": 48,
+        "caco2": "alta", "bbb": True,
+        "cyp_motifs": ["naftoquinona", "tiocianato", "tioeter"],
+    },
+    "selectivity_cellular_max": 36.6,
+    "ic50_note": "Concordancia com a potencia celular: IC50 5,64 uM (L. amazonensis) e 10,6 uM (T. cruzi).",
+}
 
-def _looks_like_local_path(s: str) -> bool:
+# Figuras OFICIAIS do paper (arquivo -> rotulo). Atencao: no manuscrito a numeracao
+# de arquivo nao segue a ordem impressa (fig11=docking, fig12=ADMET, fig10=MD).
+PAPER_FIGS = {
+    "structure": ("2scnnq_structure.svg", "Estrutura 2D de 2-SCN-NQ"),
+    "docking": ("fig11.png", "Docking: ranking de afinidade (dG/Ki), indice de seletividade e convergencia de poses"),
+    "admet": ("fig12.png", "Perfil ADMET in silico (filtros de drug-likeness, absorcao/distribuicao, seguranca)"),
+    "md_tctr": ("fig10.png", "MD do complexo TcTR-2-SCN-NQ: RMSD e metricas do modo de ligacao"),
+    "md_matrix": ("fig_md_matrix.png", "Seletividade dinamica parasita-vs-humano: matriz de competencia redox e distancia ligante-FAD por sistema"),
+    "interaction_2d": ("fig13.png", "Mapas de interacao 3D no sitio da TcTR: modo inibidor (periferico) vs. subversivo (face si do FAD)"),
+    "interaction_3d": ("fig_md3d.png", "Mapas de interacao 3D dos seis sistemas de MD (enzima x modo)"),
+    "graphical_abstract": ("graphical_abstract.png", "Graphical abstract"),
+}
+
+# -----------------------------------------------------------------------------
+DROP_KEYS = {"_dir", "_has_mol2", "_has_pdbqt", "path", "docking_dir", "figures_dir",
+             "logs_dir", "results_file", "texts_dir", "kit_dir"}
+_ABS_PATH = re.compile(r"^[A-Za-z]:[\\/]|^/(home|Users|mnt|data)/")
+
+
+def _looks_like_local_path(s):
     return bool(_ABS_PATH.match(s)) or ("\\" in s and ":" in s)
 
 
 def sanitize(obj):
-    """Remove chaves de path e strings que sejam caminhos absolutos locais."""
     if isinstance(obj, dict):
         return {k: sanitize(v) for k, v in obj.items() if k not in DROP_KEYS}
     if isinstance(obj, list):
@@ -88,7 +122,7 @@ def sanitize(obj):
     return obj
 
 
-def _write_json(path: Path, obj) -> None:
+def _write_json(path, obj):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, indent=2, ensure_ascii=False), encoding="utf-8")
 
@@ -103,122 +137,72 @@ def _get_json(client, url):
         return None
 
 
-def _copy_image(src: Path, figures_out: Path, max_bytes: int) -> str | None:
-    """Copia uma imagem leve para figures/ (nome unico). Retorna o rel path ou None."""
-    if not src.exists() or src.suffix.lower() not in IMG_EXT:
-        return None
-    if src.stat().st_size > max_bytes:
-        return None
-    figures_out.mkdir(parents=True, exist_ok=True)
-    dest = figures_out / src.name
-    if dest.exists() and dest.stat().st_size == src.stat().st_size:
-        return f"figures/{dest.name}"
-    # evita colisao de nomes iguais com conteudos diferentes
-    if dest.exists():
-        dest = figures_out / f"{src.stem}_{abs(hash(str(src))) % 9999}{src.suffix}"
-    shutil.copyfile(src, dest)
-    return f"figures/{dest.name}"
+def _copy_paper_figures(out):
+    """Copia as figuras OFICIAIS do paper para figures/ e devolve o mapa rotulo->rel/legenda."""
+    figs_out = out / "figures"
+    figs_out.mkdir(parents=True, exist_ok=True)
+    result = {}
+    for key, (fname, caption) in PAPER_FIGS.items():
+        src = PAPER_FIGS_DIR / fname
+        if src.exists():
+            shutil.copyfile(src, figs_out / fname)
+            result[key] = {"rel": f"figures/{fname}", "caption": caption}
+    return result
 
 
-def export_bundle(out_dir: str, compound: str = "2-SCN-NQ", max_img_mb: float = 3.0) -> dict:
+def export_bundle(out_dir, compound="2-SCN-NQ"):
     out = Path(out_dir)
-    max_bytes = int(max_img_mb * 1024 * 1024)
-
-    # 1) viewer estatico + libs + assets de deploy (copia a arvore inteira)
     if not VIEWER_DIR.exists():
         raise FileNotFoundError(f"viewer nao encontrado em {VIEWER_DIR}")
     out.mkdir(parents=True, exist_ok=True)
     shutil.copytree(VIEWER_DIR, out, dirs_exist_ok=True)
 
-    figures_out = out / "figures"
-    summary = {"out_dir": str(out), "compound": compound, "figures": 0, "md_tags": 0, "docs": 0}
+    summary = {"out_dir": str(out), "figures": 0, "docs": 0, "pdf": False}
 
-    # 2) sobe o dashboard em test_client (rotas de leitura; SEM GPU)
+    # 1) DADOS CIENTIFICOS = manuscrito submetido -----------------------------
+    _write_json(out / "data" / "docking.json", {
+        "targets": PAPER["docking"],
+        "si_note": "Indice de seletividade in silico = Ki(humano) / Ki(parasita). "
+                   "A seletividade NAO decorre do docking energetico (hGR pontua entre as duas TRs); "
+                   "e uma propriedade estrutural do canal de substrato da TR, confirmada pela MD.",
+    })
+    _write_json(out / "data" / "md.json", PAPER["md"])
+    _write_json(out / "data" / "admet.json", {"admet": PAPER["admet"]})
+
+    # 2) figuras oficiais do paper --------------------------------------------
+    figs_map = _copy_paper_figures(out)
+    summary["figures"] = len(figs_map)
+
+    # 3) PDF de submissao ------------------------------------------------------
+    pdf_rel = None
+    for cand in SUBMISSION_PDF_CANDIDATES:
+        if cand.exists():
+            (out / "assets").mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(cand, out / "assets" / "2scnnq_acs_submission.pdf")
+            pdf_rel = "assets/2scnnq_acs_submission.pdf"
+            summary["pdf"] = True
+            break
+
+    # 4) metadados nao-cientificos do dashboard (compostos, subprojetos, docs) --
     sys.path.insert(0, str(SCRIPT_DIR))
     import dashboard_v2 as D
     client = D.app.test_client()
 
-    # --- compostos ---
     comp = _get_json(client, "/compounds") or {}
     _write_json(out / "data" / "compounds.json", sanitize(comp))
 
-    # --- ADMET (arquivo pre-computado tem prioridade; senao recalcula on-the-fly) ---
-    admet = None
-    admet_file = BASE_DIR / "results" / compound / "admet_profile.json"
-    if admet_file.exists():
-        try:
-            raw = json.loads(admet_file.read_text(encoding="utf-8"))
-            admet = raw if "admet" in raw else {"admet": raw}
-        except Exception:
-            admet = None
-    if admet is None:
-        admet = _get_json(client, "/admet_profile") or {"admet": {}}
-    _write_json(out / "data" / "admet.json", sanitize(admet))
-
-    # --- binding mode (subversivo vs inibidor) ---
-    binding_raw = _get_json(client, "/binding_mode_status") or {}
-    _write_json(out / "data" / "binding_mode.json", sanitize(binding_raw))
-
-    # --- MD: tags + resumo por tag + figuras RMSD ---
-    tags = (_get_json(client, "/md_rmsd_tags") or {}).get("tags", [])
-    md_figs = []
-    for tag in tags:
-        s = _get_json(client, f"/md_rmsd_summary/{tag}")
-        if s is not None:
-            _write_json(out / "data" / "md" / f"{tag}.json", sanitize(s))
-    # figuras RMSD: procura *rmsd*.png em figures/ (E:) e docking_project/figures/
-    search_roots = [BASE_DIR / "figures", SCRIPT_DIR / "docking_project" / "figures"]
-    seen = set()
-    for root in search_roots:
-        if not root.exists():
-            continue
-        for img in root.rglob("*.png"):
-            low = img.name.lower()
-            if "rmsd" not in low and "rmsf" not in low:
-                continue
-            if img.name in seen:
-                continue
-            rel = _copy_image(img, figures_out, max_bytes)
-            if rel:
-                seen.add(img.name)
-                # casa a figura a uma tag por substring, preferindo a tag mais especifica (longa)
-                tag_match = next((t for t in sorted(tags, key=len, reverse=True)
-                                  if t.lower() in low), None)
-                md_figs.append({"name": img.name, "rel": rel, "tag": tag_match})
-    _write_json(out / "data" / "md_index.json", {"tags": tags, "figures": md_figs})
-    summary["md_tags"] = len(tags)
-
-    # --- figuras do composto ativo (ADMET, estrutura) ---
-    figs = (_get_json(client, "/figures") or {}).get("figures", [])
-    n_img = len(md_figs)
-    for f in figs:
-        p = Path(f.get("path", ""))
-        if _copy_image(p, figures_out, max_bytes):
-            n_img += 1
-    summary["figures"] = n_img
-
-    # --- subprojetos + pipeline SVG ---
     sp = _get_json(client, "/api/subprojects") or {}
     _write_json(out / "data" / "subprojects.json", sanitize(sp))
-    active_sid = None
-    for s in sp.get("subprojetos", []):
-        active_sid = s.get("id")
-        break
+    active_sid = (sp.get("subprojetos") or [{}])[0].get("id")
     if active_sid:
         r = client.get(f"/api/subproject/{active_sid}/pipeline.svg")
         if r.status_code == 200:
             (out / "assets").mkdir(parents=True, exist_ok=True)
-            (out / "assets" / f"pipeline_{active_sid}.svg").write_bytes(r.get_data())
-            # o viewer procura assets/pipeline_SUB01.svg
-            if active_sid != "SUB01":
-                shutil.copyfile(out / "assets" / f"pipeline_{active_sid}.svg",
-                                out / "assets" / "pipeline_SUB01.svg")
+            (out / "assets" / "pipeline_SUB01.svg").write_bytes(r.get_data())
 
-    # --- docs (.md da aba Ajuda) ---
     docs_index = []
-    help_list = (_get_json(client, "/help_list") or {}).get("docs", [])
     (out / "docs").mkdir(parents=True, exist_ok=True)
-    for d in help_list:
+    for d in (_get_json(client, "/help_list") or {}).get("docs", []):
         fname = d.get("file")
         if not fname:
             continue
@@ -232,29 +216,24 @@ def export_bundle(out_dir: str, compound: str = "2-SCN-NQ", max_img_mb: float = 
     _write_json(out / "docs" / "index.json", {"docs": docs_index})
     summary["docs"] = len(docs_index)
 
-    # --- config.json (contexto para o viewer) ---
+    # 5) config.json -----------------------------------------------------------
     version = "0.0.0"
     vfile = SCRIPT_DIR / "VERSION"
     if vfile.exists():
         version = vfile.read_text(encoding="utf-8").strip()
-    subproject = sp.get("subprojetos", [{}])[0] if sp.get("subprojetos") else {}
-    # seletividade: distancia lig-FAD por alvo (modo subversivo), agregando n replicas
-    selectivity = _build_selectivity(binding_raw)
-    # figura de estrutura 2D (hero da Visao geral), se copiada para figures/
-    structure_svg = None
-    if figures_out.exists():
-        for cand in sorted(figures_out.glob("*structure*.svg")) + sorted(figures_out.glob("*struct*.svg")):
-            structure_svg = f"figures/{cand.name}"
-            break
+    subproject = (sp.get("subprojetos") or [{}])[0]
     config = {
-        "title": "Docking Suite IFRJ · naftoquinonas antiparasitárias (docking + MD + ADMET)",
+        "title": "Docking Suite IFRJ · 2-SCN-NQ, substrato subversivo da tripanotiona redutase",
         "version": version,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-        "compound": compound,
+        "source": "Dados e figuras identicos ao manuscrito ACS submetido (2-SCN-NQ). Vide aba Manuscrito.",
+        "compound": PAPER["compound"],
         "paper_title": subproject.get("titulo_paper"),
-        "structure_svg": structure_svg,
-        "targets": TARGET_INFO,
-        "selectivity": selectivity,
+        "periodico_alvo": subproject.get("periodico_alvo"),
+        "selectivity_cellular_max": PAPER["selectivity_cellular_max"],
+        "ic50_note": PAPER["ic50_note"],
+        "figs": figs_map,
+        "submission_pdf": pdf_rel,
         "subproject": {
             "id": subproject.get("id"),
             "titulo_paper": subproject.get("titulo_paper"),
@@ -264,60 +243,19 @@ def export_bundle(out_dir: str, compound: str = "2-SCN-NQ", max_img_mb: float = 
         },
     }
     _write_json(out / "config.json", config)
-
     return summary
 
 
-def _build_selectivity(binding_raw):
-    """Distancia lig-FAD (modo subversivo) por alvo, agregando as replicas n=1..3.
-
-    Le os binding_mode_<alvo>_subversive[/_r2/_r3].json do kit_dir (analise 3D do
-    projeto do paper, referenciado pela rota /binding_mode_status). Reproduz o achado
-    central: TR parasitaria (baixa dist. FAD) vs GR humana (alta dist.). Silencioso se
-    o kit_dir nao existir nesta maquina (selectivity fica []; o viewer lida com isso)."""
-    kit = (binding_raw or {}).get("kit_dir")
-    if not kit:
-        return []
-    kitp = Path(kit)
-    if not kitp.exists():
-        return []
-    out = []
-    for tgt, is_parasite in (("TcTR", True), ("LiTR", True), ("hGR", False)):
-        vals = []
-        for suffix in ("_subversive", "_subversive_50ns", "_subversive_r2", "_subversive_r3"):
-            f = kitp / f"binding_mode_{tgt}{suffix}.json"
-            if not f.exists():
-                continue
-            try:
-                d = json.loads(f.read_text(encoding="utf-8"))
-                m = (d.get("lig_fad_A") or {}).get("mean")
-                if m is not None:
-                    vals.append(float(m))
-            except Exception:
-                continue
-        if vals:
-            out.append({
-                "target": tgt,
-                "fad_dist": round(statistics.mean(vals), 2),
-                "fad_sd": round(statistics.pstdev(vals), 2) if len(vals) > 1 else 0.0,
-                "n": len(vals),
-                "parasite": is_parasite,
-            })
-    return out
-
-
 def main():
-    ap = argparse.ArgumentParser(description="Empacota o NQ-Docking Viewer estatico (Hostinger).")
-    ap.add_argument("--out", default="dist_web", help="diretorio de saida do bundle")
-    ap.add_argument("--compound", default="2-SCN-NQ", help="composto base do bundle")
-    ap.add_argument("--max-img-mb", type=float, default=3.0, help="tamanho maximo por imagem (MB)")
+    ap = argparse.ArgumentParser(description="Empacota o NQ-Docking Viewer estatico (fiel ao paper).")
+    ap.add_argument("--out", default="dist_web")
+    ap.add_argument("--compound", default="2-SCN-NQ")
     args = ap.parse_args()
-    s = export_bundle(args.out, compound=args.compound, max_img_mb=args.max_img_mb)
-    print("[OK] bundle gerado:")
+    s = export_bundle(args.out, compound=args.compound)
+    print("[OK] bundle gerado (fiel ao manuscrito submetido):")
     for k, v in s.items():
         print(f"     {k}: {v}")
-    print(f"\nProximo passo: envie o conteudo de {s['out_dir']}/ para o subdominio "
-          "docking.ifrj-crj-geneticamolecular.online (ver README_DEPLOY.md).")
+    print(f"\nEnvie o conteudo de {s['out_dir']}/ para o Hostinger (ver README_DEPLOY.md).")
 
 
 if __name__ == "__main__":

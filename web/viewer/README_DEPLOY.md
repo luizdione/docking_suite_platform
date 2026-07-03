@@ -1,83 +1,66 @@
-# Deploy do NQ-Docking Viewer na Hostinger (docking.ifrj-crj-geneticamolecular.online)
+# Deploy do NQ-Docking Viewer na Hostinger
 
-Versão **hospedada** e **leve** da plataforma docking: **somente leitura** dos
-resultados já gerados (docking, binding mode, MD/RMSD, ADMET, compostos,
-subprojetos) + **uma calculadora de drug-likeness que roda no próprio navegador**.
-A análise pesada (docking com Vina, dinâmica molecular OpenMM/GPU, geração de
-figuras) continua rodando **local** (dashboard em `localhost:5001`); aqui só
-publicamos os resultados. É um site 100% **estático** — funciona em qualquer plano
-Hostinger (inclusive o compartilhado), sem Python/Node/GPU no servidor.
+Versão **hospedada** e **somente leitura** da plataforma docking. Publica **exatamente os
+valores, tabelas e figuras do manuscrito ACS submetido** do 2-SCN-NQ (aba **Manuscrito** com
+o PDF preliminar embutido) + uma **calculadora ADMET que roda no navegador**. É um site 100%
+**estático** — funciona em qualquer plano Hostinger, sem Python/Node/GPU no servidor.
+
+> **Onde está publicado hoje:** `https://ifrj-crj-geneticamolecular.online/docking/`
+> (subpasta do domínio principal — os caminhos do viewer são relativos e funcionam nesse
+> layout). Se preferir um subdomínio `docking.ifrj-crj-geneticamolecular.online`, crie-o no
+> hPanel → Subdomínios e envie o mesmo conteúdo para a pasta raiz dele.
 
 ## 0. Gerar o pacote (na sua máquina)
 
 ```powershell
 # conda datascience; a partir da raiz do repo docking/
 python export_web.py --out dist_web
-# opcional: apenas alguns alvos de MD ou outro composto
-python export_web.py --out dist_web --compound 2-SCN-NQ
+# ativar a senha (Basic Auth) — a senha vira hash; nunca é gravada em texto:
+python enable_basic_auth.py --out dist_web --user darwin --password "SUA_SENHA"
 ```
 
-O `dist_web/` gerado já contém: `index.html`, `lib/`, `.htaccess`, `config.json`,
-`data/` (compostos, ADMET, binding_mode, md/*, subprojetos), `figures/`,
-`assets/pipeline_SUB01.svg` e `docs/` (com `index.json` + os .md da Ajuda).
+O exportador **lê os dados científicos do manuscrito** (`2-SNC-NQ/PAPER/…`, via `NQ_PAPER_DIR`)
+e copia as **figuras oficiais** (fig10–13, estrutura) e o **PDF de submissão**. O `dist_web/`
+resultante contém: `index.html`, `lib/`, `.htaccess`, `.htpasswd` (se ativou a senha),
+`config.json`, `data/`, `figures/`, `assets/` (logo, pipeline, PDF) e `docs/`.
 
-## 1. Criar o subdomínio (hPanel)
+## 1. Enviar os arquivos
 
-1. hPanel → **Domínios** → **Subdomínios**.
-2. Crie `docking` para `ifrj-crj-geneticamolecular.online`.
-3. Anote a **pasta raiz (document root)**, ex.:
-   `domains/ifrj-crj-geneticamolecular.online/public_html/docking`
-   (a Hostinger cria o registro DNS automaticamente; pode levar alguns minutos).
+Envie **o conteúdo** de `dist_web/` (não uma pasta por fora) para o document root — hoje
+`.../public_html/docking/`. Pelo **Gerenciador de Arquivos** do hPanel: compacte o conteúdo num
+`.zip`, faça upload e **extraia lá dentro**; garanta que `index.html` fique na raiz da pasta.
+Inclua os arquivos ocultos `.htaccess` e `.htpasswd`.
 
-## 2. Enviar os arquivos
+## 2. Senha (Basic Auth) — usuário `darwin`
 
-- **Gerenciador de Arquivos (hPanel)**: compacte o **conteúdo** de `dist_web/` num
-  `.zip`, envie para a pasta raiz do subdomínio e **extraia lá dentro**.
-  Garanta que `index.html` fique na RAIZ do subdomínio (não dentro de uma subpasta).
-- ou **FTP/SFTP** (FileZilla/WinSCP): copie tudo de `dist_web/` para a pasta raiz.
+Duas formas:
 
-Confira: `https://docking.ifrj-crj-geneticamolecular.online/` deve abrir o viewer.
+- **(A) Arquivos gerados** (feito por `enable_basic_auth.py`): o `.htaccess` já vem com
+  `AuthType Basic` + `AuthUserFile` apontando para o caminho absoluto do `.htpasswd`.
+  Se der **erro 401/500**, o caminho do `AuthUserFile` está errado: acesse
+  `.../docking/_auth_path.php` **uma vez**, copie o caminho que ele imprime para o
+  `AuthUserFile` do `.htaccess`, salve e **apague o `_auth_path.php`**.
+- **(B) GUI do hPanel** (infalível, sem mexer em caminho): hPanel → **Avançado** →
+  **Proteção por senha de diretórios** → selecione a pasta `docking` → crie o usuário `darwin`
+  com a senha. Se usar esta via, pode remover o `.htpasswd`/bloco Basic Auth do `.htaccess`.
 
-## 3. Proteger por senha (a "área interna")
+## 3. Atualizar
 
-**(A) Recomendado — GUI:** hPanel → **Avançado** →
-**Proteção por senha de diretórios** → selecione a pasta do subdomínio →
-crie usuário e senha. Pronto (a Hostinger cuida do `.htaccess`/`.htpasswd`).
+Rode `python export_web.py --out dist_web` (+ `enable_basic_auth.py`) de novo e reenvie
+`data/`, `figures/`, `assets/` e `config.json`. O `index.html`/`lib/` raramente mudam.
 
-**(B) Manual:** edite o `.htaccess` do bundle, descomente o bloco *Basic Auth* e
-aponte `AuthUserFile` para o caminho ABSOLUTO do seu `.htpasswd` no servidor.
+## Fidelidade ao paper
 
-> O `.htaccess` incluído já vem **seguro por padrão** (não ativa a senha sozinho,
-> para evitar erro 500); ele só define MIME correto (inclui `.wasm`), desliga a
-> listagem de diretórios e cacheia os assets. A senha é ativada por (A) ou (B).
+Os dados de **docking** (ΔG/Ki/PDB por alvo), **MD** (distâncias ligante–FAD n=3, contatos,
+estatística) e **ADMET** vêm do manuscrito submetido (`2scnnq_manuscript_EN.tex`), não dos dados
+de trabalho. As figuras são as **oficiais** do paper (`PAPER/figures/`). A aba **Manuscrito**
+mostra o PDF de submissão embutido, para conferência direta.
 
-## 4. Atualizar os resultados (nas próximas corridas)
+## O que roda ONLINE (sem servidor)
 
-Rode `python export_web.py --out dist_web` de novo e reenvie **apenas** as pastas
-`data/`, `figures/` e o `config.json` (o `index.html`/`lib/` raramente mudam).
+| Aba | No Hostinger |
+|---|---|
+| Visão geral · Docking · Dinâmica Molecular · Manuscrito · Subprojetos · Ajuda | leitura (dados/figuras do paper) |
+| **ADMET · Compostos** | **leitura + calculadora client-side (online)** |
 
-## O que roda ONLINE (sem servidor) vs. só LOCAL
-
-| Módulo / aba              | No Hostinger (estático)                        | Observação |
-|---------------------------|------------------------------------------------|------------|
-| Visão geral / Seletividade| **leitura** (resultados exportados)            | — |
-| Docking & Binding         | **leitura** (binding_mode.json)                | docking com Vina roda local |
-| MD (RMSD/RMSF)            | **leitura** (resumos + figuras)                | MD OpenMM exige **GPU** → só local |
-| **ADMET**                | **leitura + calculadora client-side (online)** | regras QSAR reimplementadas em JS |
-| **Compostos**            | **leitura + descritores → calculadora**        | validação de SMILES via RDKit.js opcional |
-| Subprojetos / Ajuda       | **leitura** (SVG + docs .md)                    | — |
-
-### Camada B opcional — SMILES → descritores no navegador (RDKit.js/WASM)
-
-A calculadora ADMET já roda online a partir dos descritores (MW/logP/HBD/HBA/TPSA/RB).
-Para aceitar **um SMILES novo** e derivar os descritores automaticamente (+ desenho 2D),
-coloque os dois arquivos do [RDKit MinimalLib](https://www.npmjs.com/package/@rdkit/rdkit)
-em `lib/`:
-
-```
-lib/RDKit_minimal.js
-lib/RDKit_minimal.wasm
-```
-
-O viewer detecta e habilita o botão **"SMILES → descritores"** automaticamente.
-Sem esses arquivos, a calculadora continua funcionando com entrada manual de descritores.
+Camada B opcional (SMILES → descritores): coloque `lib/RDKit_minimal.js` e `.wasm` para habilitar.

@@ -7,6 +7,35 @@ Brasília (BRT). Documentos históricos (briefings, status reports) foram arquiv
 
 ---
 
+## [2.7.0] — 2026-07-03
+
+Fidelidade ao manuscrito submetido + publicacao na Hostinger. O viewer hospedado passou a
+refletir **exatamente** os dados/figuras do artigo ACS do 2-SCN-NQ, ganhou aba com o PDF de
+submissao e protecao por senha.
+
+### Added
+- **Aba "Manuscrito"** no viewer: PDF preliminar de submissao (`2scnnq_acs_submission.pdf`)
+  embutido, para conferencia direta.
+- **`enable_basic_auth.py`**: ativa Basic Auth num bundle (`.htpasswd` com hash bcrypt — a senha
+  nunca e gravada em texto — + `.htaccess` + helper `_auth_path.php` p/ achar o caminho absoluto).
+  Sem credenciais no codigo (usuario/senha via argumento; `.htpasswd` fica no `dist_web/`, gitignored).
+
+### Changed / Fixed (fidelidade ao paper)
+- **`export_web.py` reescrito**: os dados cientificos (docking, MD, ADMET) e as **figuras** passam
+  a vir do **manuscrito submetido** (`2scnnq_manuscript_EN.tex` + `PAPER/figures/`), nao dos dados
+  de trabalho do dashboard. Camada canonica `PAPER` com os valores conferidos contra o .tex.
+- **Seletividade (MD n=3)**: desvio-padrao corrigido para **amostral (n−1)** — TcTR 2,26±0,07,
+  LiTR 2,43±0,23, hGR 9,28±1,44 A (antes usava desvio populacional: ±0,06/±0,19/±1,18).
+- **Painel de alvos**: removido **LmPTR1 (2QHX)**, ausente do paper; **hGR = 3DJJ** (ΔG −7,16) e
+  **LdDHODH = 3C61** (L. donovani) conforme a Tabela de docking submetida (o `docking_table.tsv`
+  estava desatualizado: 3GRS/3MHU). Adicionados ΔG/Ki/Top-2 RMSD por alvo.
+- Viewer reorganizado em abas Docking / Dinamica Molecular / ADMET com as figuras oficiais
+  (fig11 docking, fig12 ADMET, fig10 MD, fig13/fig_md3d interacao 3D).
+- `README_DEPLOY.md`: deploy em subpasta `/docking/`, Basic Auth e fidelidade ao paper.
+- `VERSION`: 2.6.0 → 2.7.0.
+
+---
+
 ## [2.6.0] — 2026-07-03
 
 Versão **hospedada (somente leitura)** para publicar os resultados na Hostinger
