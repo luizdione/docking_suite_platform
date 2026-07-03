@@ -19,7 +19,10 @@ o repositório passa a conter, no mesmo lugar, a **fonte** da versão compacta d
   abas Visão geral (seletividade lig–FAD n=3), Docking & Binding (subversivo vs inibidor),
   MD (RMSD/RMSF + figuras), ADMET, Compostos, Subprojetos e Ajuda/Glossário. Lib `marked`
   vendorizada (sem CDN); `.htaccess` seguro por padrão (MIME + no-indexes + Basic Auth comentado);
-  `README_DEPLOY.md` com o passo a passo do subdomínio.
+  `README_DEPLOY.md` com o passo a passo do subdomínio. **Identidade visual herdada do próprio
+  `dashboard_v2.py`** (só o *método* de deploy veio do bonder, não o design): header IFRJ
+  (logo vendorizado), tab bar horizontal, compound banner, metric tiles, badges PDB por
+  categoria (parasita/leishmania/humano) + cofatores, paleta IFRJ e fundo de partículas moleculares.
 - **`export_web.py`** — exportador do bundle publicável (`dist_web/`): captura os resultados das
   rotas de leitura via `test_client`, **sanitiza caminhos absolutos locais** (nunca publica
   `C:\…`/`E:\…`), copia só imagens leves (nunca `.dcd`/`.chk`/`.pdb` pesados) e agrega a

@@ -57,6 +57,21 @@ DROP_KEYS = {
 IMG_EXT = {".png", ".svg", ".jpg", ".jpeg", ".webp", ".gif"}
 _ABS_PATH = re.compile(r"^[A-Za-z]:[\\/]|^/(home|Users|mnt|data)/")
 
+# Painel de alvos (PDB/organismo/categoria/cofatores) — identidade visual do dashboard.
+# category: parasite (T. cruzi) | leishmania | human — controla a cor do badge PDB.
+TARGET_INFO = [
+    {"code": "TcTR", "pdb": "1BZL", "organism": "Trypanosoma cruzi", "name": "Trypanothione Reductase", "category": "parasite", "cofactors": ["FAD"]},
+    {"code": "TcCruzain", "pdb": "3KKU", "organism": "Trypanosoma cruzi", "name": "Cruzain", "category": "parasite", "cofactors": []},
+    {"code": "TcFeSOD", "pdb": "4DVH", "organism": "Trypanosoma cruzi", "name": "Fe-Superoxide Dismutase", "category": "parasite", "cofactors": ["FE", "FE2"]},
+    {"code": "LiTR", "pdb": "2JK6", "organism": "Leishmania infantum (proxy L. amazonensis)", "name": "Trypanothione Reductase", "category": "leishmania", "cofactors": ["FAD"]},
+    {"code": "LmPTR1", "pdb": "2QHX", "organism": "Leishmania major", "name": "Pteridine Reductase 1", "category": "leishmania", "cofactors": ["NAP", "NDP", "FAD"]},
+    {"code": "LmDHODH", "pdb": "3C61", "organism": "Leishmania donovani", "name": "Dihydroorotate Dehydrogenase", "category": "leishmania", "cofactors": ["FMN", "FAD"]},
+    {"code": "hGR", "pdb": "3DJJ", "organism": "Homo sapiens", "name": "Glutathione Reductase", "category": "human", "cofactors": ["FAD"]},
+    {"code": "hCatL", "pdb": "2XU3", "organism": "Homo sapiens", "name": "Cathepsin L", "category": "human", "cofactors": []},
+    {"code": "hDHODH", "pdb": "1D3H", "organism": "Homo sapiens", "name": "Dihydroorotate Dehydrogenase", "category": "human", "cofactors": ["FMN"]},
+    {"code": "hMnSOD", "pdb": "1LUV", "organism": "Homo sapiens", "name": "Mn-Superoxide Dismutase", "category": "human", "cofactors": ["MN"]},
+]
+
 
 def _looks_like_local_path(s: str) -> bool:
     return bool(_ABS_PATH.match(s)) or ("\\" in s and ":" in s)
@@ -225,14 +240,20 @@ def export_bundle(out_dir: str, compound: str = "2-SCN-NQ", max_img_mb: float = 
     subproject = sp.get("subprojetos", [{}])[0] if sp.get("subprojetos") else {}
     # seletividade: distancia lig-FAD por alvo (modo subversivo), agregando n replicas
     selectivity = _build_selectivity(binding_raw)
+    # figura de estrutura 2D (hero da Visao geral), se copiada para figures/
+    structure_svg = None
+    if figures_out.exists():
+        for cand in sorted(figures_out.glob("*structure*.svg")) + sorted(figures_out.glob("*struct*.svg")):
+            structure_svg = f"figures/{cand.name}"
+            break
     config = {
-        "title": "NQ-Docking · naftoquinonas antiparasitárias (docking + MD + ADMET)",
+        "title": "Docking Suite IFRJ · naftoquinonas antiparasitárias (docking + MD + ADMET)",
         "version": version,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "compound": compound,
         "paper_title": subproject.get("titulo_paper"),
-        "targets": ["TcTR", "LiTR", "hGR", "TcCruzain", "hCatL", "LmDHODH",
-                     "hDHODH", "TcFeSOD", "hMnSOD"],
+        "structure_svg": structure_svg,
+        "targets": TARGET_INFO,
         "selectivity": selectivity,
         "subproject": {
             "id": subproject.get("id"),
