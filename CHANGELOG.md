@@ -7,6 +7,76 @@ Brasília (BRT). Documentos históricos (briefings, status reports) foram arquiv
 
 ---
 
+## [2.7.0] — 2026-07-03
+
+Fidelidade ao manuscrito submetido + publicacao na Hostinger. O viewer hospedado passou a
+refletir **exatamente** os dados/figuras do artigo ACS do 2-SCN-NQ, ganhou aba com o PDF de
+submissao e protecao por senha.
+
+### Added
+- **Aba "Manuscrito"** no viewer: PDF preliminar de submissao (`2scnnq_acs_submission.pdf`)
+  embutido, para conferencia direta.
+- **`enable_basic_auth.py`**: ativa Basic Auth num bundle (`.htpasswd` com hash bcrypt — a senha
+  nunca e gravada em texto — + `.htaccess` + helper `_auth_path.php` p/ achar o caminho absoluto).
+  Sem credenciais no codigo (usuario/senha via argumento; `.htpasswd` fica no `dist_web/`, gitignored).
+
+### Changed / Fixed (fidelidade ao paper)
+- **`export_web.py` reescrito**: os dados cientificos (docking, MD, ADMET) e as **figuras** passam
+  a vir do **manuscrito submetido** (`2scnnq_manuscript_EN.tex` + `PAPER/figures/`), nao dos dados
+  de trabalho do dashboard. Camada canonica `PAPER` com os valores conferidos contra o .tex.
+- **Seletividade (MD n=3)**: desvio-padrao corrigido para **amostral (n−1)** — TcTR 2,26±0,07,
+  LiTR 2,43±0,23, hGR 9,28±1,44 A (antes usava desvio populacional: ±0,06/±0,19/±1,18).
+- **Painel de alvos**: removido **LmPTR1 (2QHX)**, ausente do paper; **hGR = 3DJJ** (ΔG −7,16) e
+  **LdDHODH = 3C61** (L. donovani) conforme a Tabela de docking submetida (o `docking_table.tsv`
+  estava desatualizado: 3GRS/3MHU). Adicionados ΔG/Ki/Top-2 RMSD por alvo.
+- Viewer reorganizado em abas Docking / Dinamica Molecular / ADMET com as figuras oficiais
+  (fig11 docking, fig12 ADMET, fig10 MD, fig13/fig_md3d interacao 3D).
+- `README_DEPLOY.md`: deploy em subpasta `/docking/`, Basic Auth e fidelidade ao paper.
+- `VERSION`: 2.6.0 → 2.7.0.
+
+---
+
+## [2.6.0] — 2026-07-03
+
+Versão **hospedada (somente leitura)** para publicar os resultados na Hostinger
+(`docking.ifrj-crj-geneticamolecular.online`), espelhando o padrão já usado no *bonder*.
+A plataforma completa continua rodando **local** (`dashboard_v2.py`, :5001, com docking/MD/GPU);
+o repositório passa a conter, no mesmo lugar, a **fonte** da versão compacta de leitura.
+
+### Added
+- **`web/viewer/`** — viewer estático (SPA HTML/JS, sem Python/GPU/rede no servidor):
+  abas Visão geral (seletividade lig–FAD n=3), Docking & Binding (subversivo vs inibidor),
+  MD (RMSD/RMSF + figuras), ADMET, Compostos, Subprojetos e Ajuda/Glossário. Lib `marked`
+  vendorizada (sem CDN); `.htaccess` seguro por padrão (MIME + no-indexes + Basic Auth comentado);
+  `README_DEPLOY.md` com o passo a passo do subdomínio. **Identidade visual herdada do próprio
+  `dashboard_v2.py`** (só o *método* de deploy veio do bonder, não o design): header IFRJ
+  (logo vendorizado), tab bar horizontal, compound banner, metric tiles, badges PDB por
+  categoria (parasita/leishmania/humano) + cofatores, paleta IFRJ e fundo de partículas moleculares.
+- **`export_web.py`** — exportador do bundle publicável (`dist_web/`): captura os resultados das
+  rotas de leitura via `test_client`, **sanitiza caminhos absolutos locais** (nunca publica
+  `C:\…`/`E:\…`), copia só imagens leves (nunca `.dcd`/`.chk`/`.pdb` pesados) e agrega a
+  seletividade n=3 (dist. lig–FAD por alvo: TR parasitária vs GR humana).
+- **Calculadora de drug-likeness client-side (roda ONLINE no Hostinger)** — reimplementação em
+  JS puro das regras/QSAR do `admet_module` (Lipinski, Veber, Ghose, Egan, Muegge, Caco-2, %HIA,
+  BBB, ESOL, PPB, Vd). Habilita o uso do módulo ADMET sem servidor; hook opcional para
+  `RDKit.js` (SMILES → descritores) documentado.
+
+### Fixed
+- **`/static_text` (seção `results_md`)**: removido `AttributeError` latente
+  (`md_module = None; md_module.generate_md_text(...)`) que caía no fallback de *docking* (texto
+  errado para a seção de MD). Agora retorna a mensagem de obsolescência do MD Clean, coerente com
+  `/generate_all_sections`. (Confirmado no servidor real em `localhost:5001` durante a auditoria.)
+- **Card "Proxy Reverso" da aba Ajuda (link quebrado)**: o `doc_map['proxy']` apontava para
+  `docs/PROXY_REVERSO_CLOUDFLARE.md`, que **não existia** → `/help_doc/proxy` retornava
+  "Arquivo não encontrado". Criado o guia (Cloudflare Tunnel para expor o dashboard completo com
+  IP dinâmico + domínio Hostinger); o card agora abre normalmente.
+
+### Changed
+- `VERSION`: 2.5.0 → 2.6.0.
+- `.gitignore`: ignora `dist_web/` (bundle publicável) e `.claude/` (config local).
+
+---
+
 ## [2.5.0] — 2026-06-22
 
 Fase 3 da curadoria (melhorias). Investigação por workflow multiagente (6 scouts + síntese);

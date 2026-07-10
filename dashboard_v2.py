@@ -6058,10 +6058,13 @@ def static_text():
             import admet_module
             return jsonify({"text": admet_module.generate_admet_text(admet_module.calculate_admet(), lang=lang)})
         if section == "results_md":
-            # md_module aposentado; placeholder vazio
-            all_md = {t: {"target":t,"deprecated":True} for t in ["TcTR","LiTR","hGR"]}
-            md_module = None
-            return jsonify({"text": md_module.generate_md_text(all_md, lang=lang)})
+            # md_module aposentado em 2026-05-12 — as metricas de MD vem do MD Clean.
+            # (Antes havia um AttributeError latente: md_module=None.generate_md_text.)
+            msg = ("[deprecated] md_module aposentado em 2026-05-12 — as metricas de "
+                   "RMSD/RMSF sao geradas pelo MD Clean (aba MD Simulation)." if lang != "pt" else
+                   "[obsoleto] md_module aposentado em 2026-05-12 — as metricas de "
+                   "RMSD/RMSF sao geradas pelo MD Clean (aba Simulacao de MD).")
+            return jsonify({"text": msg})
         if section == "results_cd":
             import cyclodex_module
             return jsonify({"text": cyclodex_module.generate_cd_text(cyclodex_module.predict_cd_inclusion(), lang=lang)})
