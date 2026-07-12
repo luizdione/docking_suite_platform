@@ -699,6 +699,7 @@ def genetic_algorithm_optimize(
     print(f"{'='*55}")
 
     # ── Inicializar população ─────────────────────────────────────────────────
+    n_evaluated = 0  # contador real de individuos gerados/avaliados
     population = []
     for i, smi in enumerate(seed_smiles_list[:pop_size]):
         mol = Chem.MolFromSmiles(smi) if RDKIT_OK else None
@@ -717,6 +718,7 @@ def genetic_algorithm_optimize(
             "fitness":    round(fitness, 4),
             "generation": 0,
         })
+        n_evaluated += 1
 
     # Complementar com variantes FBDD do melhor semente
     if population and len(population) < pop_size:
@@ -736,6 +738,7 @@ def genetic_algorithm_optimize(
                     "fitness":    _ga_fitness(v["admet"], v["dg_estimated"], v["sas"]),
                     "generation": 0,
                 })
+                n_evaluated += 1
 
     if not population:
         return {"error": "Não foi possível inicializar a população. "
@@ -774,6 +777,7 @@ def genetic_algorithm_optimize(
                             "fitness":    _ga_fitness(h["admet"], h["dg_estimated"], h["sas"]),
                             "generation": gen,
                         })
+                        n_evaluated += 1
             else:
                 # Mutação por R-group
                 cat = random.choice(["halogen", "nitrogen", "sulfur", "oxygen",
@@ -795,6 +799,7 @@ def genetic_algorithm_optimize(
                                                           v["sas"]),
                                 "generation": gen,
                             })
+                            n_evaluated += 1
 
         new_pop.sort(key=lambda x: x["fitness"], reverse=True)
         population = new_pop[:pop_size]
@@ -855,7 +860,7 @@ def genetic_algorithm_optimize(
         "top_candidates": top_candidates,
         "candidates":     top_candidates,  # alias para compatibilidade com frontend
         "best":           top_candidates[0] if top_candidates else {},
-        "n_evaluated":    sum(p.get("generation", 0) for p in unique_top[:1]) * pop_size,
+        "n_evaluated":    n_evaluated,
         "timestamp":      datetime.now().isoformat(),
     }
 
@@ -1114,7 +1119,6 @@ def fig_design_comparison(
              for c in top3[:len(mols)]]
     if mols:
         try:
-            from rdkit.Chem.Draw import MolDrawing
             img = Draw.MolsToGridImage(mols, molsPerRow=3,
                                         subImgSize=(440, 300), legends=lbls,
                                         returnPNG=False)

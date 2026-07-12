@@ -15,6 +15,7 @@ import sys
 import json
 import math
 import argparse
+import threading
 from pathlib import Path
 from datetime import datetime
 
@@ -51,6 +52,9 @@ except ImportError:
 SMILES_DEFAULT  = "O=C1C=C(SC#N)C(=O)c2ccccc21"
 COMPOUND_NAME   = "2-Thiocyanato-1,4-naphthoquinone"
 COMPOUND_ABBR   = "2-SCN-NQ"
+# Serializa a secao critica que muta/usa/restaura os globals COMPOUND_NAME/ABBR
+# (run_admet) para evitar race condition sob Flask multithread.
+_LOCK = threading.Lock()
 COMPOUND_FORMULA = "C₁₁H₅NO₂S"
 
 # ─── Lipinski / ADMET thresholds ─────────────────────────────────────────────
@@ -683,7 +687,6 @@ def _admet_text_en(pc, ab, di, me, ex, to, dl):
     veber = dl["veber"]
     n_rules_pass = sum([lip["pass"], veber["pass"], dl["ghose"]["pass"],
                         dl["egan"]["pass"], dl["muegge"]["pass"]])
-    cyp_str = "; ".join(me.get("cyp_risk_alerts", me.get("cyp_alerts", []))) or "none identified"
 
     text = f"""In Silico ADMET Profiling
 
@@ -788,70 +791,73 @@ def run_admet(smiles: str = SMILES_DEFAULT, output_dir: str = "docking_project/f
 
     # Override module-level name with user-provided compound name
     global COMPOUND_NAME, COMPOUND_ABBR
-    _orig_name = COMPOUND_NAME
-    _orig_abbr = COMPOUND_ABBR
-    if compound_name:
-        COMPOUND_NAME = compound_name
-        COMPOUND_ABBR = compound_abbr or compound_name
-    try:
-        print(f"\n{'='*60}")
-        print(f"  ADMET Analysis: {COMPOUND_NAME}")
-        print(f"  SMILES: {smiles}")
-        print(f"{'='*60}\n")
-
-        admet = calculate_admet(smiles)
-        if "error" in admet:
-            print(f"[ERRO] {admet['error']}")
-            return admet
-
-        # Print summary
-        pc = admet["physicochemical"]
-        dl = admet["drug_likeness"]
-        ab = admet["absorption"]
-
-        print(f"  MW    = {pc['MW']:.2f} Da       | logP = {pc['logP']:.2f}")
-        print(f"  HBD   = {pc['HBD']}              | HBA  = {pc['HBA']}")
-        print(f"  TPSA  = {pc['TPSA']:.1f} Å²     | RB   = {pc['rotatable_bonds']}")
-        print(f"  QED   = {dl['qed']:.3f}          | SAS  = {dl['sas']:.2f}")
-        lip_ok = dl["lipinski"]["pass"]
-        print(f"  Lipinski: {'PASS ✓' if lip_ok else 'FAIL ✗'}  |  Veber: {'PASS ✓' if dl['veber']['pass'] else 'FAIL ✗'}")
-        print(f"  Bioavailability: {ab['bioavailability_score']:.2f}  |  Caco-2: {ab['caco2_class']}")
-
-        # Generate figures
-        print("\n  Generating ADMET figures...")
+    # Serializa a regiao de mutacao/uso/restauracao dos globals para evitar
+    # entrelacamento de rotulos sob Flask multithread (race condition).
+    with _LOCK:
+        _orig_name = COMPOUND_NAME
+        _orig_abbr = COMPOUND_ABBR
+        if compound_name:
+            COMPOUND_NAME = compound_name
+            COMPOUND_ABBR = compound_abbr or compound_name
         try:
-            f1 = fig_radar_chart(admet, out_dir)
-            print(f"  [OK] {f1.name}")
-            f2 = fig_lipinski_dashboard(admet, out_dir)
-            print(f"  [OK] {f2.name}")
-            f3 = fig_admet_summary(admet, out_dir)
-            print(f"  [OK] {f3.name}")
-        except Exception as e:
-            print(f"  [WARN] Figure generation error: {e}")
+            print(f"\n{'='*60}")
+            print(f"  ADMET Analysis: {COMPOUND_NAME}")
+            print(f"  SMILES: {smiles}")
+            print(f"{'='*60}\n")
 
-        # Generate SVG molecular structure
-        safe_abbr = COMPOUND_ABBR.replace(" ", "_").replace("-", "").replace(",", "")
-        mol_svg = out_dir / f"{safe_abbr}_structure.svg"
-        if generate_mol_image(smiles, mol_svg):
-            print(f"  [OK] {mol_svg.name}")
+            admet = calculate_admet(smiles)
+            if "error" in admet:
+                print(f"[ERRO] {admet['error']}")
+                return admet
 
-        # Generate text
-        text = generate_admet_text(admet, lang=lang)
-        text_file = out_dir / f"admet_text_{lang}.txt"
-        text_file.write_text(text, encoding='utf-8')
-        print(f"  [OK] {text_file.name}")
+            # Print summary
+            pc = admet["physicochemical"]
+            dl = admet["drug_likeness"]
+            ab = admet["absorption"]
 
-        # Save JSON
-        json_file = out_dir / "admet_results.json"
-        json_file.write_text(json.dumps(admet, indent=2, ensure_ascii=False), encoding='utf-8')
-        print(f"  [OK] {json_file.name}")
+            print(f"  MW    = {pc['MW']:.2f} Da       | logP = {pc['logP']:.2f}")
+            print(f"  HBD   = {pc['HBD']}              | HBA  = {pc['HBA']}")
+            print(f"  TPSA  = {pc['TPSA']:.1f} Å²     | RB   = {pc['rotatable_bonds']}")
+            print(f"  QED   = {dl['qed']:.3f}          | SAS  = {dl['sas']:.2f}")
+            lip_ok = dl["lipinski"]["pass"]
+            print(f"  Lipinski: {'PASS ✓' if lip_ok else 'FAIL ✗'}  |  Veber: {'PASS ✓' if dl['veber']['pass'] else 'FAIL ✗'}")
+            print(f"  Bioavailability: {ab['bioavailability_score']:.2f}  |  Caco-2: {ab['caco2_class']}")
 
-        print(f"\n  All ADMET outputs saved to: {out_dir}")
-        return admet
-    finally:
-        # Restore original global names to avoid side effects across calls
-        COMPOUND_NAME = _orig_name
-        COMPOUND_ABBR = _orig_abbr
+            # Generate figures
+            print("\n  Generating ADMET figures...")
+            try:
+                f1 = fig_radar_chart(admet, out_dir)
+                print(f"  [OK] {f1.name}")
+                f2 = fig_lipinski_dashboard(admet, out_dir)
+                print(f"  [OK] {f2.name}")
+                f3 = fig_admet_summary(admet, out_dir)
+                print(f"  [OK] {f3.name}")
+            except Exception as e:
+                print(f"  [WARN] Figure generation error: {e}")
+
+            # Generate SVG molecular structure
+            safe_abbr = COMPOUND_ABBR.replace(" ", "_").replace("-", "").replace(",", "")
+            mol_svg = out_dir / f"{safe_abbr}_structure.svg"
+            if generate_mol_image(smiles, mol_svg):
+                print(f"  [OK] {mol_svg.name}")
+
+            # Generate text
+            text = generate_admet_text(admet, lang=lang)
+            text_file = out_dir / f"admet_text_{lang}.txt"
+            text_file.write_text(text, encoding='utf-8')
+            print(f"  [OK] {text_file.name}")
+
+            # Save JSON
+            json_file = out_dir / "admet_results.json"
+            json_file.write_text(json.dumps(admet, indent=2, ensure_ascii=False), encoding='utf-8')
+            print(f"  [OK] {json_file.name}")
+
+            print(f"\n  All ADMET outputs saved to: {out_dir}")
+            return admet
+        finally:
+            # Restore original global names to avoid side effects across calls
+            COMPOUND_NAME = _orig_name
+            COMPOUND_ABBR = _orig_abbr
 
 
 # =============================================================================

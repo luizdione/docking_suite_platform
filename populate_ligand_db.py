@@ -137,7 +137,7 @@ COMPOUND_LIBRARY = [
     {
         "name":         "beta-Lapachone",
         "display_name": "β-Lapachone (β-LAP)",
-        "smiles":       "O=C1OC2(C)CCC=C2c2c1cc(=O)cc2",
+        "smiles":       "CC1(C)CCC2=C(O1)c1ccccc1C(=O)C2=O",
         "formula":      "C15H14O3",
         "mw":           242.27,
         "category":     "naphthoquinone_natural",
@@ -461,7 +461,7 @@ def main():
     sys.path.insert(0, str(script_dir))
 
     try:
-        from compound_db import add_compound, load_compound
+        from compound_db import add_compound, load_compound, _safe_name
     except ImportError:
         print("[ERRO] compound_db.py não encontrado. Execute na pasta do projeto.")
         sys.exit(1)
@@ -534,7 +534,15 @@ def main():
                     json.dump(m, f, indent=2, ensure_ascii=False)
 
             pdbqt_ok = meta.get("_has_pdbqt", False)
-            status = "OK" if pdbqt_ok else "OK (sem PDBQT — OpenBabel ausente)"
+            if pdbqt_ok:
+                status = "OK"
+            else:
+                # Distinguir SMILES invalido (dados corrompidos) de OpenBabel ausente.
+                smi_valid = _smiles_is_valid(c["smiles"])
+                if smi_valid is False:
+                    status = "AVISO (SMILES invalido — sem estrutura 3D/PDBQT; corrigir SMILES)"
+                else:
+                    status = "OK (sem PDBQT — OpenBabel ausente)"
             print(status)
             for msg in meta.get("_status_msgs", []):
                 if "[ERRO]" in msg or "[OK]" in msg:
@@ -559,11 +567,20 @@ def main():
     print(f"{'='*65}\n")
 
 
-def _safe_name(name: str) -> str:
-    """Espelha compound_db._safe_name sem importar o módulo."""
-    import re
-    safe = re.sub(r'[^\w\-.]', '_', name.strip())
-    return safe or "compound"
+def _smiles_is_valid(smiles):
+    """Valida um SMILES com RDKit.
+
+    Retorna True se valido, False se invalido, ou None se o RDKit nao estiver
+    disponivel (nesse caso nao da para distinguir da ausencia de OpenBabel).
+    """
+    try:
+        from rdkit import Chem
+    except Exception:
+        return None
+    try:
+        return Chem.MolFromSmiles(smiles) is not None
+    except Exception:
+        return False
 
 
 if __name__ == "__main__":

@@ -25,6 +25,21 @@ BASE_DIR   = Path(_os.environ.get("NQ_DATA_DIR", r"E:\data\docking"))
 SCRIPT_DIR = Path(__file__).resolve().parent
 
 
+def _ensure_script_path():
+    """Garante SCRIPT_DIR no sys.path SEM duplicar entradas a cada request.
+
+    Antes, cada rota chamava sys.path.insert(0, ...) por requisicao, fazendo
+    o sys.path crescer indefinidamente num servidor de longa duracao.
+    """
+    p = str(SCRIPT_DIR)
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
+
+# Insere uma vez no import (as rotas ainda chamam _ensure_script_path, agora idempotente)
+_ensure_script_path()
+
+
 def _clean_compound(value, default="2-SCN-NQ"):
     """Normaliza o nome do composto vindo do frontend.
 
@@ -4564,7 +4579,7 @@ $Py = "$env:USERPROFILE\\miniforge3\\envs\\datascience\\python.exe"
 def _targets_json():
     targets_safe = {}
     try:
-        sys.path.insert(0, str(SCRIPT_DIR))
+        _ensure_script_path()
         from docking_v2 import TARGET_DB
         for tid, info in TARGET_DB.items():
             targets_safe[tid] = {
@@ -4602,7 +4617,7 @@ def index():
 
 @app.route('/run', methods=['POST'])
 def run_pipeline():
-    data            = request.json
+    data            = request.get_json(silent=True) or {}
     targets         = data.get('targets', [])
     exh             = data.get('exhaustiveness', 32)
     compound_name   = _clean_compound(data.get('compound_name'))
@@ -4614,7 +4629,7 @@ def run_pipeline():
     sys.stdout = sys.stderr = log_buf
     success = False; actual_session = session_tag
     try:
-        sys.path.insert(0, str(SCRIPT_DIR))
+        _ensure_script_path()
         from importlib import reload
         import docking_v2; reload(docking_v2)
         result = docking_v2.run_full_pipeline(
@@ -4642,7 +4657,8 @@ def run_pipeline():
     if rf.exists():
         try:
             with open(rf) as f: results = json.load(f).get("results", {})
-        except Exception: pass
+        except Exception as e:
+            app.logger.warning("run_pipeline: falha ao ler %s: %s", rf, e)
 
     return jsonify({
         "success":     success,
@@ -4655,7 +4671,7 @@ def run_pipeline():
 
 @app.route('/run_step', methods=['POST'])
 def run_step():
-    data = request.json
+    data = request.get_json(silent=True) or {}
     targets = data.get('targets', [])
     step = data.get('step', 'qc')
     log_buf = io.StringIO()
@@ -4697,13 +4713,13 @@ def run_step():
 
 @app.route('/run_admet', methods=['POST'])
 def run_admet_route():
-    data            = request.json
+    data            = request.get_json(silent=True) or {}
     smiles          = data.get('smiles') or "O=C1C=C(SC#N)C(=O)c2ccccc21"
     lang            = data.get('lang', 'en')
     compound_name   = _clean_compound(data.get('compound_name'))
     session_tag     = data.get('session_tag') or None
 
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     from compound_db import get_session_dirs, make_session_tag
     if session_tag is None:
         session_tag = make_session_tag()
@@ -4756,8 +4772,9 @@ def run_admet_route():
                 "cyp_alerts": me.get("cyp_alerts",[]),
                 "herg_risk": to.get("herg_risk","Low"),
                 "ames_alert": to.get("ames_alert",False),
-                "CD_Ka_M1":1250, "LD50_mouse_mg_kg":185,
-                "LD50_human_pred":310, "Toxicity_class":3,
+                # NOTA: LD50/Toxicity_class e CD_Ka_M1 NAO sao previstos aqui —
+                # dominios proprios (toxicity_module / cyclodex_module). Nao gravar
+                # constantes fabricadas no admet_profile.json (integridade de dados).
             }
             results_dir = dirs["results"]; results_dir.mkdir(parents=True, exist_ok=True)
             with open(results_dir / "admet_profile.json", "w") as fh:
@@ -4797,7 +4814,7 @@ def list_figures():
     figs = []
 
     if compound and session_tag:
-        sys.path.insert(0, str(SCRIPT_DIR))
+        _ensure_script_path()
         from compound_db import get_session_dirs
         dirs = get_session_dirs(BASE_DIR, session_tag, compound)
         fd = dirs["figures"]
@@ -4826,9 +4843,10 @@ def list_figures():
 def serve_fig(fname):
     """Serve a figure image — searches all compound/session subdirectories."""
     figs_base = BASE_DIR / "figures"
-    # Direct path match first
-    direct = figs_base / fname
-    if direct.exists():
+    base_resolved = str(figs_base.resolve())
+    # Direct path match first (guarda de path traversal — igual a serve_fig_rmsd)
+    direct = (figs_base / fname).resolve()
+    if direct.exists() and str(direct).startswith(base_resolved):
         mime = "image/svg+xml" if direct.suffix == ".svg" else "image/png"
         with open(direct, "rb") as fh:
             return Response(fh.read(), mimetype=mime, headers={"Cache-Control":"max-age=300"})
@@ -4837,8 +4855,8 @@ def serve_fig(fname):
         if not compound_dir.is_dir(): continue
         for sess_dir in sorted(compound_dir.iterdir(), reverse=True):
             if not sess_dir.is_dir(): continue
-            candidate = sess_dir / fname
-            if candidate.exists():
+            candidate = (sess_dir / fname).resolve()
+            if candidate.exists() and str(candidate).startswith(base_resolved):
                 mime = "image/svg+xml" if candidate.suffix == ".svg" else "image/png"
                 with open(candidate, "rb") as fh:
                     return Response(fh.read(), mimetype=mime, headers={"Cache-Control":"max-age=300"})
@@ -5169,8 +5187,10 @@ def md_clean_metrics_route():
     """Serie temporal AO VIVO da MD, lida do CSV do StateDataReporter (md_<tag>.csv).
     Alimenta os graficos que atualizam durante a simulacao no dashboard. Funciona
     tanto para runs iniciados pelo dashboard quanto pela linha de comando."""
-    import csv as _csv
-    tag = str(request.args.get('tag', 'TcTR_run01')).strip().replace(' ', '_') or 'TcTR_run01'
+    import csv as _csv, re as _re
+    tag = str(request.args.get('tag', 'TcTR_run01')).strip().replace(' ', '_')
+    # seguranca: whitelist neutraliza '/', '\\' e '..' (path traversal via query)
+    tag = _re.sub(r'[^A-Za-z0-9_.-]', '_', tag) or 'TcTR_run01'
     try:
         max_pts = int(request.args.get('max', 240))
     except Exception:
@@ -5319,7 +5339,7 @@ def md_progress_route():
     session_tag = request.args.get('session', None)
     compound    = request.args.get('compound', '2-SCN-NQ')
 
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     from compound_db import get_session_dirs, make_session_tag
     if session_tag is None:
         # Tentar pegar a sessão mais recente
@@ -5350,20 +5370,11 @@ def md_progress_route():
 @app.route('/md_status')
 def md_status_route():
     """Return OpenMM/CUDA diagnostic info for the dashboard."""
-    sys.path.insert(0, str(SCRIPT_DIR))
-    try:
-        from importlib import reload
-        status = {"deprecated": True, "message": "md_module aposentado — use /md_clean_progress"}
-        status['python_exe'] = sys.executable
-        return jsonify(status)
-    except Exception as e:
-        import traceback
-        return jsonify({
-            "openmm_ok": False, "cuda_ok": False,
-            "error": str(e),
-            "traceback": traceback.format_exc()[:500],
-            "python_exe": sys.executable
-        })
+    return jsonify({
+        "deprecated": True,
+        "message": "md_module aposentado — use /md_clean_progress",
+        "python_exe": sys.executable,
+    })
 
 
 @app.route('/check_docking_for_md', methods=['POST'])
@@ -5385,7 +5396,7 @@ def check_docking_for_md_route():
     targets = data.get('targets', []) or []
     compound = _clean_compound(data.get('compound'))
 
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     from compound_db import _safe_name
     safe_c = _safe_name(compound)
     script_dir = SCRIPT_DIR
@@ -5540,8 +5551,10 @@ def help_doc_route(key):
         'proxy':      'PROXY_REVERSO_CLOUDFLARE.md',
     }
     fname = doc_map.get(key, key)
-    if not fname.lower().endswith('.md'):
-        fname += '.md'
+    # seguranca: neutraliza path traversal ('..', separadores) — so o nome base
+    fname = os.path.basename(fname.replace('\\', '/'))
+    if not fname or not fname.lower().endswith('.md'):
+        fname = (fname + '.md') if fname else 'README.md'
     docs_dir = SCRIPT_DIR / 'docs'
     candidates = [docs_dir / fname, SCRIPT_DIR / fname,
                   SCRIPT_DIR.parent / fname, pathlib.Path('docs') / fname,
@@ -5626,7 +5639,7 @@ def dual_design_report_route():
 
 @app.route('/run_drug_design', methods=['POST'])
 def run_drug_design_route():
-    data           = request.json
+    data           = request.get_json(silent=True) or {}
     approach       = data.get('approach', 'fbdd')
     parent_smiles  = data.get('parent_smiles', 'O=C1C=C(SC#N)C(=O)c2ccccc21')
     parent_name    = data.get('parent_name', '2-SCN-NQ')
@@ -5634,7 +5647,7 @@ def run_drug_design_route():
     compound_name  = _clean_compound(data.get('compound_name'))
     session_tag    = data.get('session_tag') or None
 
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     from compound_db import get_session_dirs, make_session_tag
     if session_tag is None:
         session_tag = make_session_tag()
@@ -5682,7 +5695,7 @@ def run_drug_design_route():
     def _safe(obj):
         if isinstance(obj, dict):
             return {k: _safe(v) for k, v in obj.items()
-                    if k not in ('admet',) or True}
+                    if k not in ('admet',)}
         if isinstance(obj, list):
             return [_safe(i) for i in obj]
         try:
@@ -5697,13 +5710,13 @@ def run_drug_design_route():
 
 @app.route('/run_cyclodextrin', methods=['POST'])
 def run_cyclodextrin_route():
-    data            = request.json
+    data            = request.get_json(silent=True) or {}
     lang            = data.get('lang','en')
     compound_name   = _clean_compound(data.get('compound_name'))
     compound_smiles = data.get('compound_smiles', None)
     session_tag     = data.get('session_tag') or None
 
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     from compound_db import get_session_dirs, make_session_tag, load_compound
     if session_tag is None:
         session_tag = make_session_tag()
@@ -5732,14 +5745,14 @@ def run_cyclodextrin_route():
 
 @app.route('/run_toxicity', methods=['POST'])
 def run_toxicity_route():
-    data            = request.json
+    data            = request.get_json(silent=True) or {}
     smiles          = data.get('smiles', "O=C1C=C(SC#N)C(=O)c2ccccc21")
     lang            = data.get('lang', 'en')
     compound_name   = _clean_compound(data.get('compound_name'))
     session_tag     = data.get('session_tag') or None
     exp_data        = data.get('exp_data') or {}   # NEW: experimental values from UI
 
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     from compound_db import get_session_dirs, make_session_tag
     if session_tag is None:
         session_tag = make_session_tag()
@@ -5774,13 +5787,13 @@ def run_toxicity_route():
 
 @app.route('/run_all_figures', methods=['POST'])
 def run_all_figures():
-    data            = request.json
+    data            = request.get_json(silent=True) or {}
     lang            = data.get('lang','en')
     smiles          = data.get('smiles',"O=C1C=C(SC#N)C(=O)c2ccccc21")
     compound_name   = _clean_compound(data.get('compound_name'))
     session_tag     = data.get('session_tag') or None
 
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     from compound_db import get_session_dirs, make_session_tag
     if session_tag is None:
         session_tag = make_session_tag()
@@ -5823,7 +5836,7 @@ def run_all_figures():
 
 @app.route('/compounds')
 def list_compounds_route():
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     try:
         from compound_db import list_compounds, ensure_default_compound
         ensure_default_compound()
@@ -5836,7 +5849,7 @@ def list_compounds_route():
 @app.route('/populate_library', methods=['POST'])
 def populate_library_route():
     """Popula o banco com a biblioteca built-in de NQs antiparasitárias."""
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     try:
         from compound_db import populate_library, clean_orphan_dirs
         removed = clean_orphan_dirs()
@@ -5849,7 +5862,7 @@ def populate_library_route():
 
 @app.route('/add_compound', methods=['POST'])
 def add_compound_route():
-    data = request.json
+    data = request.get_json(silent=True) or {}
     name         = str(data.get('name','')).strip()
     smiles       = str(data.get('smiles','')).strip()
     formula      = data.get('formula','')
@@ -5860,7 +5873,7 @@ def add_compound_route():
         return jsonify({"error": "name inválido — informe uma string (ex: '2-Cl-NQ')"}), 400
     if not smiles:
         return jsonify({"error": "smiles é obrigatório"}), 400
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     try:
         from compound_db import add_compound
         meta = add_compound(name, smiles, formula=formula,
@@ -5874,9 +5887,9 @@ def add_compound_route():
 
 @app.route('/validate_smiles', methods=['POST'])
 def validate_smiles():
-    data   = request.json
+    data   = request.get_json(silent=True) or {}
     smiles = data.get('smiles','')
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     try:
         from rdkit import Chem
         from rdkit.Chem import Descriptors, rdMolDescriptors
@@ -5906,7 +5919,7 @@ def validate_smiles():
 @app.route('/sessions')
 def list_sessions_route():
     compound = request.args.get('compound', '2-SCN-NQ')
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     try:
         from compound_db import list_sessions
         sessions = list_sessions(BASE_DIR, compound)
@@ -5924,7 +5937,7 @@ def list_sessions_route():
 def session_results_route():
     compound    = request.args.get('compound', '2-SCN-NQ')
     session_tag = request.args.get('session', '')
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     from compound_db import get_session_dirs
     dirs = get_session_dirs(BASE_DIR, session_tag, compound)
     rf = dirs["results"] / "results.json"
@@ -5937,7 +5950,7 @@ def session_results_route():
 
 @app.route('/generate_paper_text', methods=['POST'])
 def generate_paper_text():
-    data = request.json
+    data = request.get_json(silent=True) or {}
     lang = data.get('lang','en'); section = data.get('section','results_docking')
     style = data.get('style','acs'); tone = data.get('tone','scientific')
     results_data = {}; admet_data = {}
@@ -5947,7 +5960,7 @@ def generate_paper_text():
     compound    = _clean_compound(data.get('compound'))
     session_tag = data.get('session', '')
     try:
-        sys.path.insert(0, str(SCRIPT_DIR))
+        _ensure_script_path()
         from compound_db import get_session_dirs
         dirs = get_session_dirs(BASE_DIR, session_tag, compound)
         rf = dirs["results"] / "results.json"
@@ -5968,7 +5981,8 @@ def generate_paper_text():
         af = BASE_DIR/"results"/"admet_profile.json"
         if af.exists():
             with open(af) as f: admet_data = json.load(f)
-    except Exception: pass
+    except Exception as e:
+        app.logger.warning("generate_paper_text: falha ao ler %s: %s", af, e)
     if not admet_data:
         admet_data = {"MW":215.23,"LogP":2.41,"HBD":0,"HBA":3,"TPSA":67.72,"RotBonds":2,
                       "QED":0.61,"GI_absorption":"High","Caco2_Papp_nm_s":28.5,
@@ -5989,7 +6003,7 @@ def generate_paper_text():
     docking_summary = "TcTR: -9.2 kcal/mol, LiTR: -8.8 kcal/mol, hGR: -6.1 kcal/mol (SI~15)"
     if results_data:
         top3 = sorted(results_data.items(), key=lambda x: x[1].get('best_dG',0))[:3]
-        docking_summary = ", ".join([f"{t}: dG={d['best_dG']:.1f} kcal/mol" for t,d in top3])
+        docking_summary = ", ".join([f"{t}: dG={d.get('best_dG',0):.1f} kcal/mol" for t,d in top3])
     lang_name = "Portuguese (Brazilian)" if lang == "pt" else "English"
     prompt = (
         f"You are a scientific writer in medicinal chemistry and antiparasitic drug discovery.\n\n"
@@ -6039,7 +6053,7 @@ def generate_paper_text():
 
 @app.route('/static_text', methods=['POST'])
 def static_text():
-    data = request.json
+    data = request.get_json(silent=True) or {}
     lang = data.get('lang','en'); section = data.get('section','results_admet')
     texts_dir = BASE_DIR / "manuscript_texts"
     key_map = {
@@ -6052,7 +6066,7 @@ def static_text():
     fname = key_map.get(section)
     if fname and (texts_dir/fname).exists():
         return jsonify({"text": (texts_dir/fname).read_text(encoding='utf-8')})
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     try:
         if "admet" in section:
             import admet_module
@@ -6116,12 +6130,12 @@ def static_text():
 
 @app.route('/generate_all_sections', methods=['POST'])
 def generate_all_sections():
-    data          = request.json
+    data          = request.get_json(silent=True) or {}
     lang          = data.get('lang','en')
     compound_name = _clean_compound(data.get('compound_name'))
     session_tag   = data.get('session_tag') or None
 
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     from compound_db import get_session_dirs, make_session_tag
     if session_tag is None:
         session_tag = make_session_tag()
@@ -6172,7 +6186,7 @@ def build_paper():
     compound    = _clean_compound(data.get('compound') or data.get('compound_name'))
     lang        = data.get('lang', 'en')
     session_tag = data.get('session_tag') or ''
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     from compound_db import get_session_dirs, make_session_tag, list_sessions
     if not session_tag:
         sess = list_sessions(BASE_DIR, compound)
@@ -6222,7 +6236,7 @@ def build_paper():
 
 @app.route('/data_status')
 def data_status():
-    sys.path.insert(0, str(SCRIPT_DIR))
+    _ensure_script_path()
     results_ok = False; admet_ok = False; figs = 0; texts = 0
     for subdir in sorted((BASE_DIR/"results").iterdir()) if (BASE_DIR/"results").exists() else []:
         if (subdir / "results.json").exists():    results_ok = True

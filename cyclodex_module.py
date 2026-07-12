@@ -66,15 +66,21 @@ BETA_CD_PROPERTIES = {
 # PHYSICOCHEMICAL PREDICTION (no docking required)
 # =============================================================================
 
-def predict_cd_inclusion(ligand_smiles: str = SMILES_LIGAND) -> dict:
+def predict_cd_inclusion(ligand_smiles: str = None) -> dict:
     """
     Predict β-CD inclusion complex properties using physicochemical criteria.
     Literature-validated approach (Loftsson & Brewster 1996; Hirayama & Uekama 1999).
     """
+    # Resolve o SMILES no momento da chamada (le a global atual em vez de
+    # congelar o valor do import), permitindo analisar o composto selecionado.
+    if ligand_smiles is None:
+        ligand_smiles = SMILES_LIGAND
     props = {}
 
     if RDKIT_OK:
         mol = Chem.MolFromSmiles(ligand_smiles)
+        if mol is None:
+            return {"error": f"Invalid SMILES: {ligand_smiles}"}
         mw      = Descriptors.MolWt(mol)
         logp    = Descriptors.MolLogP(mol)
         tpsa    = Descriptors.TPSA(mol)
@@ -85,16 +91,22 @@ def predict_cd_inclusion(ligand_smiles: str = SMILES_LIGAND) -> dict:
         # Estimate molecular dimensions using Van der Waals radii
         # Naphthoquinone: ~8.5 Å long × 5.9 Å wide × 3.4 Å thick
         mol_3d = Chem.AddHs(mol)
-        AllChem.EmbedMolecule(mol_3d, randomSeed=42)
-        AllChem.MMFFOptimizeMolecule(mol_3d)
+        # EmbedMolecule retorna -1 quando falha a geracao do conformer 3D;
+        # nesse caso nao ha conformer e GetConformer() lancaria excecao.
+        embed_ok = AllChem.EmbedMolecule(mol_3d, randomSeed=42)
+        if embed_ok == 0:
+            AllChem.MMFFOptimizeMolecule(mol_3d)
 
-        # Get conformer extents
-        conf = mol_3d.GetConformer()
-        positions = conf.GetPositions()
-        if len(positions) > 0:
-            dims = np.ptp(positions, axis=0)  # extent in x, y, z
-            mol_dims = sorted(dims)  # smallest to largest
+            # Get conformer extents
+            conf = mol_3d.GetConformer()
+            positions = conf.GetPositions()
+            if len(positions) > 0:
+                dims = np.ptp(positions, axis=0)  # extent in x, y, z
+                mol_dims = sorted(dims)  # smallest to largest
+            else:
+                mol_dims = [3.4, 5.9, 8.5]
         else:
+            # Falha de embedding 3D: usa dimensoes de fallback (naphthoquinone)
             mol_dims = [3.4, 5.9, 8.5]
 
         props = {
@@ -443,7 +455,9 @@ def run_cyclodextrin(output_dir: str = "docking_project/figures",
         print(f"  Cyclodextrin Complexation: {COMPOUND_ABBR} + β-CD")
         print(f"{'='*60}\n")
 
-        cd_data = predict_cd_inclusion()
+        cd_data = predict_cd_inclusion(SMILES_LIGAND)
+        if isinstance(cd_data, dict) and cd_data.get("error"):
+            return cd_data
         inc = cd_data["inclusion_complex"]
 
         print(f"  Feasible: {'Yes ✓' if inc['feasible'] else 'No ✗'}")

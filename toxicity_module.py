@@ -13,6 +13,7 @@ import sys
 import json
 import math
 import argparse
+import threading
 from pathlib import Path
 from datetime import datetime
 
@@ -40,6 +41,9 @@ try:
     RDKIT_OK = True
 except ImportError:
     pass
+
+# Serializa a secao critica que muta/le os globals COMPOUND_NAME/ABBR sob Flask multithread
+_LOCK = threading.Lock()
 
 COMPOUND_NAME = "2-Thiocyanato-1,4-naphthoquinone"
 COMPOUND_ABBR = "2-SCN-NQ"
@@ -97,6 +101,14 @@ EXPERIMENTAL_DEFAULTS = {
 # TOXICITY PREDICTION ENGINE
 # =============================================================================
 
+def _to_float(v):
+    """Coage um valor possivelmente string ('>50', '150', None) para float, ou None."""
+    try:
+        return float(str(v).replace(">", "").replace("<", "").strip())
+    except (ValueError, TypeError):
+        return None
+
+
 def predict_toxicity(smiles: str = SMILES_DEFAULT,
                      exp_data: dict = None) -> dict:
     """
@@ -122,8 +134,8 @@ def predict_toxicity(smiles: str = SMILES_DEFAULT,
     tpsa = Descriptors.TPSA(mol)
 
     # ── If user provided real LD50, use it; otherwise predict via QSAR ─────────
-    user_ld50_mouse = _exp.get("ld50_mouse_oral_mg_kg") or                       _exp.get("ld50_mouse_ip_mg_kg")   or                       MOUSE_EXPERIMENTAL["LD50_oral_mg_kg"]
-    user_ld50_rat   = _exp.get("ld50_rat_oral_mg_kg")
+    user_ld50_mouse = _to_float(_exp.get("ld50_mouse_oral_mg_kg")) or                       _to_float(_exp.get("ld50_mouse_ip_mg_kg"))   or                       MOUSE_EXPERIMENTAL["LD50_oral_mg_kg"]
+    user_ld50_rat   = _to_float(_exp.get("ld50_rat_oral_mg_kg"))
 
     # ── LD50 Human Prediction (ProTox-II-style regression) ────────────────────
     # Model: Drwal et al. 2014; based on toxicophores + physicochemical descriptors
@@ -184,10 +196,6 @@ def predict_toxicity(smiles: str = SMILES_DEFAULT,
 
     # ── Therapeutic index + Selectivity Index (use real data if available) ──────
     # Priority: user experimental IC50 > literature estimate
-    def _to_float(v):
-        try: return float(str(v).replace(">","").replace("<","").strip())
-        except (ValueError, TypeError): return None
-
     ic50_tc_best  = _to_float(_exp.get("ic50_tc_trypo_intra_uM")) or                     _to_float(_exp.get("ic50_tc_epi_uM")) or 0.5
     ic50_lm_best  = _to_float(_exp.get("ic50_lm_amast_intra_uM")) or                     _to_float(_exp.get("ic50_lm_promas_uM")) or 1.0
     cc50_best     = _to_float(_exp.get("cc50_vero_uM")) or                     _to_float(_exp.get("cc50_thp1_uM"))  or                     _to_float(_exp.get("cc50_j774_uM"))  or None
@@ -708,49 +716,52 @@ def run_toxicity(smiles: str = SMILES_DEFAULT,
 
     # Override module-level name with user-provided compound name
     global COMPOUND_NAME, COMPOUND_ABBR
-    _orig_name = COMPOUND_NAME
-    _orig_abbr = COMPOUND_ABBR
-    if compound_name:
-        COMPOUND_NAME = compound_name
-        COMPOUND_ABBR = compound_abbr or compound_name
-    try:
-        print(f"\n{'='*60}")
-        print(f"  Toxicity Analysis: {COMPOUND_NAME}")
-        print(f"{'='*60}\n")
+    # Serializa mutacao-uso-restauracao dos globals para evitar entrelacamento
+    # entre requisicoes concorrentes sob Flask multithread (race condition).
+    with _LOCK:
+        _orig_name = COMPOUND_NAME
+        _orig_abbr = COMPOUND_ABBR
+        if compound_name:
+            COMPOUND_NAME = compound_name
+            COMPOUND_ABBR = compound_abbr or compound_name
+        try:
+            print(f"\n{'='*60}")
+            print(f"  Toxicity Analysis: {COMPOUND_NAME}")
+            print(f"{'='*60}\n")
 
-        tox = predict_toxicity(smiles, exp_data=exp_data)
-        if "error" in tox:
-            print(f"[ERRO] {tox['error']}")
+            tox = predict_toxicity(smiles, exp_data=exp_data)
+            if "error" in tox:
+                print(f"[ERRO] {tox['error']}")
+                return tox
+
+            ld = tox["ld50"]
+            ov = tox["overall"]
+            print(f"  LD50 (human pred.): {ld['human_predicted_mg_kg']:.0f} mg/kg | GHS Class {ld['ghs_class']} ({ld['ghs_label']})")
+            print(f"  LD50 (mouse expt.): {MOUSE_EXPERIMENTAL['LD50_oral_mg_kg']} mg/kg")
+            print(f"  Hepatotoxicity: {tox['hepatotoxicity']['risk']}")
+            print(f"  AMES: {'Positive ⚠' if tox['mutagenicity']['ames_predicted_positive'] else 'Negative ✓'}")
+            print(f"  Overall: {ov['assessment']}")
+
+            # Figure
+            fig_path = fig_toxicity_dashboard(tox, out_dir)
+            print(f"  [OK] {fig_path.name}")
+
+            # Paper text
+            text = generate_toxicity_text(tox, lang=lang)
+            tf   = out_dir / f"toxicity_text_{lang}.txt"
+            tf.write_text(text, encoding='utf-8')
+            print(f"  [OK] {tf.name}")
+
+            # JSON
+            jf = out_dir / "toxicity_results.json"
+            jf.write_text(json.dumps(tox, indent=2, ensure_ascii=False), encoding='utf-8')
+            print(f"  [OK] {jf.name}")
+
             return tox
-
-        ld = tox["ld50"]
-        ov = tox["overall"]
-        print(f"  LD50 (human pred.): {ld['human_predicted_mg_kg']:.0f} mg/kg | GHS Class {ld['ghs_class']} ({ld['ghs_label']})")
-        print(f"  LD50 (mouse expt.): {MOUSE_EXPERIMENTAL['LD50_oral_mg_kg']} mg/kg")
-        print(f"  Hepatotoxicity: {tox['hepatotoxicity']['risk']}")
-        print(f"  AMES: {'Positive ⚠' if tox['mutagenicity']['ames_predicted_positive'] else 'Negative ✓'}")
-        print(f"  Overall: {ov['assessment']}")
-
-        # Figure
-        fig_path = fig_toxicity_dashboard(tox, out_dir)
-        print(f"  [OK] {fig_path.name}")
-
-        # Paper text
-        text = generate_toxicity_text(tox, lang=lang)
-        tf   = out_dir / f"toxicity_text_{lang}.txt"
-        tf.write_text(text, encoding='utf-8')
-        print(f"  [OK] {tf.name}")
-
-        # JSON
-        jf = out_dir / "toxicity_results.json"
-        jf.write_text(json.dumps(tox, indent=2, ensure_ascii=False), encoding='utf-8')
-        print(f"  [OK] {jf.name}")
-
-        return tox
-    finally:
-        # Restore original global names to avoid side effects across calls
-        COMPOUND_NAME = _orig_name
-        COMPOUND_ABBR = _orig_abbr
+        finally:
+            # Restore original global names to avoid side effects across calls
+            COMPOUND_NAME = _orig_name
+            COMPOUND_ABBR = _orig_abbr
 
 
 if __name__ == "__main__":

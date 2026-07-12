@@ -22,6 +22,11 @@ import argparse
 from pathlib import Path
 from datetime import datetime
 
+# Module-level logger (used by module-level functions such as _convert_to_pdbqt).
+# run_full_pipeline may rebind a local `log` to its own logger; this default
+# ensures module functions never hit NameError when called outside that scope.
+log = logging.getLogger("docking_v2")
+
 # =====================================================================
 # COFACTORS AND ESSENTIAL HETEROATOMS TO KEEP
 # =====================================================================
@@ -285,9 +290,13 @@ def analyze_pdb(pdb_path, target_info):
                 elif resname in ESSENTIAL_METALS or len(resname) <= 2:
                     # Metals are typically 1-2 char residue names
                     atoms = list(residue.get_atoms())
-                    if len(atoms) == 1:  # single atom = metal ion
+                    if len(atoms) == 1:  # single atom = potential metal ion
                         metal_name = atoms[0].element.strip()
-                        if metal_name and metal_name not in report["metals_found"]:
+                        # Only count as metal when the real element is an
+                        # essential metal; otherwise ions like CL/NA/K/BR
+                        # (short resnames) polluted the QC metals report.
+                        if (metal_name.upper() in ESSENTIAL_METALS
+                                and metal_name not in report["metals_found"]):
                             report["metals_found"].append(metal_name)
                 elif resname in REMOVE_RESIDUES:
                     pass  # buffer, will be removed
@@ -430,7 +439,10 @@ def _calculate_grid_center(structure, target_info):
                         resname = residue.get_resname().strip()
                         resnum = str(residue.id[1])
                         full_name = f"{resname}{resnum}"
-                        if any(fb.replace(" ", "") in full_name for fb in fallback_res):
+                        # Exact residue-identity match (resname+num), NOT substring:
+                        # substring made "CYS52" also match "CYS520"/"CYS523", pulling
+                        # wrong CA atoms into the grid-center average.
+                        if any(fb.replace(" ", "") == full_name for fb in fallback_res):
                             for atom in residue:
                                 if atom.name == "CA":
                                     all_coords.append(atom.get_vector().get_array())
@@ -461,6 +473,12 @@ def _convert_to_pdbqt(pdb_path, pdbqt_path):
 
     Vina receptors devem ter apenas ATOM/HETATM/REMARK/END (sem ROOT/BRANCH).
     """
+
+    # Motivos de falha por rota. None = rota nao tentada; string = motivo real
+    # (excecao ou saida invalida). Assim a mensagem final distingue "nao tentado"
+    # de "tentado mas produziu saida pequena/invalida".
+    _err_ob = None
+    _err_rdk = None
 
     # ── Rota A: OpenBabel ──────────────────────────────────────────────────
     try:
@@ -500,6 +518,7 @@ def _convert_to_pdbqt(pdb_path, pdbqt_path):
 
         if pdbqt_path.exists() and pdbqt_path.stat().st_size > 500:
             return True, f"OpenBabel OK: {kept_lines} linhas, {removed_lines} tags removidas"
+        _err_ob = "saida <=500 bytes ou arquivo ausente"
     except Exception as e_ob:
         _err_ob = str(e_ob)
 
@@ -646,12 +665,13 @@ def _convert_to_pdbqt(pdb_path, pdbqt_path):
                     f"corrompido. Investigue _convert_to_pdbqt rota B."
                 )
             return True, f"RDKit fallback OK: {n_atoms} atomos"
+        _err_rdk = "saida <=500 bytes ou arquivo ausente"
     except Exception as e_rdk:
         _err_rdk = str(e_rdk)
 
     # Se ambas falharam:
-    return False, (f"OpenBabel: {_err_ob if '_err_ob' in dir() else 'nao tentado'} | "
-                   f"RDKit: {_err_rdk if '_err_rdk' in dir() else 'nao tentado'}")
+    return False, (f"OpenBabel: {_err_ob if _err_ob is not None else 'nao tentado'} | "
+                   f"RDKit: {_err_rdk if _err_rdk is not None else 'nao tentado'}")
 
 
 # =====================================================================

@@ -78,7 +78,7 @@ def check_fad_xml() -> dict:
     hbf_bonds = []
     if hbf:
         hbf_bonds = re.findall(
-            r'<Bond class1="(FAD\d+)" class2="(FAD\d+)" length="[^"]+" k="[^"]+"/>',
+            r'<Bond (?:class1|type1)="(FAD\d+)" (?:class2|type2)="(FAD\d+)" length="[^"]+" k="[^"]+"\s*/>',
             hbf.group(1))
 
     out["n_atoms"] = len(a2t)

@@ -414,19 +414,25 @@ def main():
     OUT_XML.write_text(xml, encoding="utf-8")
     print(f"\nGravado: {OUT_XML.name}")
 
-    # Sincroniza os arquivos ORIGINAIS (que o md_clean usa por default) com o v3.
+    ok = self_validate()
+
+    # Sincroniza os arquivos ORIGINAIS (que o md_clean usa por default) com o v3,
+    # SO se a auto-validacao passou (espelha regen_ligand_xml.py). Assim nao
+    # clobbera um original bom quando a regeneracao falha.
     # Evita o caso topologia-v3 (correta) + force-field-antigo (embaralhado) ->
     # "No template found ... bonds are different". Faz backup do original 1x.
-    import shutil
-    for _v3, _orig in [(OUT_XML, SMOKE / "cofactor_FAD_TcTR.xml"),
-                       (OUT_PDB, SMOKE / "cofactor_FAD_TcTR.pdb")]:
-        _bak = _orig.with_suffix(_orig.suffix + ".broken_bak")
-        if _orig.exists() and not _bak.exists():
-            shutil.copy2(_orig, _bak)
-        shutil.copy2(_v3, _orig)
-        print(f"  [sync] {_orig.name} <- {_v3.name}")
+    if ok:
+        import shutil
+        for _v3, _orig in [(OUT_XML, SMOKE / "cofactor_FAD_TcTR.xml"),
+                           (OUT_PDB, SMOKE / "cofactor_FAD_TcTR.pdb")]:
+            _bak = _orig.with_suffix(_orig.suffix + ".broken_bak")
+            if _orig.exists() and not _bak.exists():
+                shutil.copy2(_orig, _bak)
+            shutil.copy2(_v3, _orig)
+            print(f"  [sync] {_orig.name} <- {_v3.name}")
+    else:
+        print("  [sync] PULADO (validacao falhou; nao sobrescrevo os originais).")
 
-    ok = self_validate()
     print("\n" + "=" * 64)
     print("PROXIMO PASSO: rodar a MD (o md_simulation.py ja prefere os arquivos *_v3.*):")
     print('  python md_simulation.py --fresh --ns 1 --tag prod_v3 --platform CUDA')
