@@ -78,6 +78,8 @@ RELATORIO_n3.md
 
 # --- Bundle estatico publicavel (gerado por export_web.py; vai para o Hostinger) ---
 dist_web/
+docking_hostinger/
+docking_hostinger*.zip
 
 # --- Config local do Claude Code (launch.json com caminhos absolutos, worktrees) ---
 .claude/

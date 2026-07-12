@@ -1,0 +1,13 @@
+{
+  "name": "2-OMe-NQ",
+  "display_name": "2-Metóxi-1,4-naftoquinona",
+  "smiles": "O=C1C=C(OC)C(=O)c2ccccc21",
+  "formula": "C11H8O3",
+  "mw": 188.182,
+  "heavy_atoms": 14,
+  "rotatable_bonds": 1,
+  "charge": 0,
+  "optimization": "MMFF94 (1000 steps conjugate gradients)",
+  "date_added": "2026-07-04",
+  "notes": "Lopes et al. 1978; ativa vs T. cruzi epimastigotas."
+}

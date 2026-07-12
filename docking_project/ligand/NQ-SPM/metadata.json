@@ -1,0 +1,13 @@
+{
+  "name": "NQ-SPM",
+  "display_name": "NQ-Espermidina (design dual)",
+  "smiles": "O=C1C=C(SCCCNCCCCNCCCN)C(=O)c2ccccc21",
+  "formula": "C20H29N3O2S",
+  "mw": 375.538,
+  "heavy_atoms": 26,
+  "rotatable_bonds": 13,
+  "charge": 0,
+  "optimization": "MMFF94 (1000 steps conjugate gradients)",
+  "date_added": "2026-07-04",
+  "notes": "Dual design: NQ + cauda espermidina; substrato subversivo + inibidor TR."
+}

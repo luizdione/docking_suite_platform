@@ -1,0 +1,13 @@
+{
+  "name": "plumbagin",
+  "display_name": "Plumbagina",
+  "smiles": "O=C1c2c(O)cccc2C(=O)C=C1C",
+  "formula": "C11H8O3",
+  "mw": 188.182,
+  "heavy_atoms": 14,
+  "rotatable_bonds": 0,
+  "charge": 0,
+  "optimization": "MMFF94 (1000 steps conjugate gradients)",
+  "date_added": "2026-07-04",
+  "notes": "5-Hidroxi-2-metil-NQ; atividade antiparasitária e antitumoral."
+}
