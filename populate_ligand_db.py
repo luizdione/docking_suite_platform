@@ -328,9 +328,9 @@ COMPOUND_LIBRARY = [
     {
         "name":         "NQ1-nor-beta-lapachone-triazole-Br",
         "display_name": "NQ1 Nor-β-lapachone Triazole Brominated (FIOCRUZ dual-quinone)",
-        "smiles":       "O=C1OCC2=C1c1c(Br)c(=O)c3ccccc3c1CC2n1cc(-c2ccccc2)nn1",
-        "formula":      "C24H16BrN3O3",
-        "mw":           490.31,
+        "smiles":       "CC1(C)OC2=C(C(=O)C(=O)c3c(Br)cccc32)C1n1cc(-c2ccccc2)nn1",
+        "formula":      "C22H16BrN3O3",
+        "mw":           450.29,
         "category":     "derivative_fiocruz",
         "activity": {
             "ic50_tc_trypo_uM":        "0.8–2.0",
@@ -387,9 +387,9 @@ COMPOUND_LIBRARY = [
     {
         "name":         "Dunnione",
         "display_name": "Dunnione (β-dunnione, 2-acetyl-furanaphthoquinone)",
-        "smiles":       "O=C1OC(C)(C)C2=C1c1cc(=O)cc(=O)c1C2=O",
-        "formula":      "C13H10O5",
-        "mw":           250.21,
+        "smiles":       "CC1OC2=C(C1(C)C)C(=O)C(=O)c1ccccc12",
+        "formula":      "C15H14O3",
+        "mw":           242.27,
         "category":     "naphthoquinone_synthetic",
         "activity": {
             "ic50_tc_epi_uM":          "2–8",
