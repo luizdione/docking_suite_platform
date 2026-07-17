@@ -173,15 +173,8 @@ def export_bundle(out_dir, compound="2-SCN-NQ"):
     figs_map = _copy_paper_figures(out)
     summary["figures"] = len(figs_map)
 
-    # 3) PDF de submissao ------------------------------------------------------
+    # 3) PDF de submissao: NAO incluir no viewer (o manuscrito nao e distribuido pela plataforma)
     pdf_rel = None
-    for cand in SUBMISSION_PDF_CANDIDATES:
-        if cand.exists():
-            (out / "assets").mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(cand, out / "assets" / "2scnnq_acs_submission.pdf")
-            pdf_rel = "assets/2scnnq_acs_submission.pdf"
-            summary["pdf"] = True
-            break
 
     # 4) metadados nao-cientificos do dashboard (compostos, subprojetos, docs) --
     sys.path.insert(0, str(SCRIPT_DIR))
@@ -226,7 +219,7 @@ def export_bundle(out_dir, compound="2-SCN-NQ"):
         "title": "Docking Suite IFRJ · 2-SCN-NQ, substrato subversivo da tripanotiona redutase",
         "version": version,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-        "source": "Dados e figuras identicos ao manuscrito ACS submetido (2-SCN-NQ). Vide aba Manuscrito.",
+        "source": "Resultados in silico (docking, dinâmica molecular e ADMET) do 2-SCN-NQ.",
         "compound": PAPER["compound"],
         "paper_title": subproject.get("titulo_paper"),
         "periodico_alvo": subproject.get("periodico_alvo"),

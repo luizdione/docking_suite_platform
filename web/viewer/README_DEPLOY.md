@@ -1,8 +1,8 @@
 # Deploy do NQ-Docking Viewer na Hostinger
 
 Versão **hospedada** e **somente leitura** da plataforma docking. Publica **exatamente os
-valores, tabelas e figuras do manuscrito ACS submetido** do 2-SCN-NQ (aba **Manuscrito** com
-o PDF preliminar embutido) + uma **calculadora ADMET que roda no navegador**. É um site 100%
+resultados **in silico** (docking, dinâmica molecular, ADMET) do 2-SCN-NQ + uma **calculadora
+ADMET que roda no navegador**. É um site 100%
 **estático** — funciona em qualquer plano Hostinger, sem Python/Node/GPU no servidor.
 
 > **Onde está publicado hoje:** `https://ifrj-crj-geneticamolecular.online/docking/`
@@ -19,10 +19,10 @@ python export_web.py --out dist_web
 python enable_basic_auth.py --out dist_web --user darwin --password "SUA_SENHA"
 ```
 
-O exportador **lê os dados científicos do manuscrito** (`2-SNC-NQ/PAPER/…`, via `NQ_PAPER_DIR`)
-e copia as **figuras oficiais** (fig10–13, estrutura) e o **PDF de submissão**. O `dist_web/`
+O exportador **lê os dados científicos in silico** (via `NQ_PAPER_DIR`)
+e copia as **figuras de resultado** (fig10–13, estrutura). O `dist_web/`
 resultante contém: `index.html`, `lib/`, `.htaccess`, `.htpasswd` (se ativou a senha),
-`config.json`, `data/`, `figures/`, `assets/` (logo, pipeline, PDF) e `docs/`.
+`config.json`, `data/`, `figures/`, `assets/` (logo, pipeline) e `docs/`.
 
 ## 1. Enviar os arquivos
 
@@ -49,18 +49,17 @@ Duas formas:
 Rode `python export_web.py --out dist_web` (+ `enable_basic_auth.py`) de novo e reenvie
 `data/`, `figures/`, `assets/` e `config.json`. O `index.html`/`lib/` raramente mudam.
 
-## Fidelidade ao paper
+## Origem dos dados
 
 Os dados de **docking** (ΔG/Ki/PDB por alvo), **MD** (distâncias ligante–FAD n=3, contatos,
-estatística) e **ADMET** vêm do manuscrito submetido (`2scnnq_manuscript_EN.tex`), não dos dados
-de trabalho. As figuras são as **oficiais** do paper (`PAPER/figures/`). A aba **Manuscrito**
-mostra o PDF de submissão embutido, para conferência direta.
+estatística) e **ADMET** são os **resultados in silico** validados. As figuras de resultado
+ficam em `PAPER/figures/`.
 
 ## O que roda ONLINE (sem servidor)
 
 | Aba | No Hostinger |
 |---|---|
-| Visão geral · Docking · Dinâmica Molecular · Manuscrito · Subprojetos · Ajuda | leitura (dados/figuras do paper) |
+| Visão geral · Docking · Dinâmica Molecular · Subprojetos · Ajuda | leitura (dados/figuras in silico) |
 | **ADMET · Compostos** | **leitura + calculadora client-side (online)** |
 
 Camada B opcional (SMILES → descritores): coloque `lib/RDKit_minimal.js` e `.wasm` para habilitar.

@@ -136,7 +136,7 @@ figcaption{font-size:12px;color:var(--text-muted);margin-top:8px;line-height:1.5
     <div class="header-text" style="flex:1">
       <div class="header-title">Docking Suite &mdash; <span>Pipeline Computacional Antiparasitário</span></div>
       <div class="header-sub">&bull; <em>Trypanosoma cruzi</em> + <em>Leishmania amazonensis</em>
-        &bull; &#9879; Docking &bull; &#9889; MD &bull; &#128138; ADMET &bull; &#128196; Manuscrito</div>
+        &bull; &#9879; Docking &bull; &#9889; MD &bull; &#128138; ADMET</div>
     </div>
     <div class="header-badge">&#127760; versão hospedada &middot; <b>somente leitura</b></div>
   </div>
@@ -147,7 +147,6 @@ figcaption{font-size:12px;color:var(--text-muted);margin-top:8px;line-height:1.5
   <button class="tab-btn" data-tab="docking">&#9879; Docking</button>
   <button class="tab-btn" data-tab="md">&#9889; Dinâmica Molecular</button>
   <button class="tab-btn" data-tab="admet">&#128138; ADMET <span class="online">online</span></button>
-  <button class="tab-btn" data-tab="manuscrito">&#128196; Manuscrito</button>
   <button class="tab-btn" data-tab="compostos">&#128209; Compostos</button>
   <button class="tab-btn" data-tab="subprojetos">&#9730; Subprojetos</button>
   <button class="tab-btn" data-tab="ajuda">&#10067; Ajuda</button>
@@ -156,7 +155,7 @@ figcaption{font-size:12px;color:var(--text-muted);margin-top:8px;line-height:1.5
 <div class="compound-banner">
   <span>&#129514; <b id="cbName">2-SCN-NQ</b></span>
   <span class="cb-meta" id="cbMeta"></span>
-  <span class="cb-badge">dados = manuscrito submetido</span>
+  <span class="cb-badge">dados = cálculo in silico</span>
   <span class="cb-right" id="cbRight"></span>
 </div>
 
@@ -188,7 +187,7 @@ figcaption{font-size:12px;color:var(--text-muted);margin-top:8px;line-height:1.5
   <!-- DOCKING -->
   <section class="tab-panel" id="tab-docking">
     <div class="card">
-      <div class="card-title">Ranking de docking — AutoDock Vina 1.2.7 <small>Tabela do manuscrito (melhor pose)</small></div>
+      <div class="card-title">Ranking de docking — AutoDock Vina 1.2.7 <small>melhor pose</small></div>
       <div style="overflow:auto"><table id="dockTbl"><thead></thead><tbody></tbody></table></div>
       <p class="hint" style="margin-top:10px" id="dockNote"></p>
     </div>
@@ -218,7 +217,7 @@ figcaption{font-size:12px;color:var(--text-muted);margin-top:8px;line-height:1.5
     <div class="metrics" id="admetTiles" style="margin-bottom:16px"></div>
     <div class="grid2">
       <div class="card">
-        <div class="card-title">Perfil ADMET in silico <span class="paper-tag">manuscrito</span></div>
+        <div class="card-title">Perfil ADMET in silico</div>
         <div class="kv" id="admetKv"><div>Carregando…</div><div></div></div>
       </div>
       <div class="card">
@@ -245,15 +244,6 @@ figcaption{font-size:12px;color:var(--text-muted);margin-top:8px;line-height:1.5
     <div class="card"><figure><div class="card-title">Figura — perfil ADMET (drug-likeness, absorção/distribuição, segurança)</div><div id="figAdmet"></div></figure></div>
   </section>
 
-  <!-- MANUSCRITO -->
-  <section class="tab-panel" id="tab-manuscrito">
-    <div class="card">
-      <div class="card-title">Manuscrito ACS — versão preliminar de submissão <small id="pdfMeta"></small></div>
-      <p class="hint" style="margin-bottom:12px">Todos os valores, tabelas e figuras deste viewer são idênticos aos deste manuscrito.
-        <span id="pdfDownload"></span></p>
-      <div id="pdfHost"><p class="hint">Carregando PDF…</p></div>
-    </div>
-  </section>
 
   <!-- COMPOSTOS -->
   <section class="tab-panel" id="tab-compostos">
@@ -313,7 +303,6 @@ async function loadConfig(){
   $('#figDocking').innerHTML=figHTML(F.docking); $('#figAdmet').innerHTML=figHTML(F.admet);
   $('#figMdTctr').innerHTML=figHTML(F.md_tctr); $('#figMdMatrix').innerHTML=figHTML(F.md_matrix); $('#figMd3d').innerHTML=figHTML(F.interaction_3d);
   $('#foot').innerHTML=`Bundle gerado em ${esc(CFG.generated_at||'—')} · ${esc(CFG.source||'')} · plataforma NQ-Docking Suite (IFRJ).`;
-  renderManuscript();
 }
 async function loadDocking(){
   try{DOCK=await jget('data/docking.json');}catch(e){DOCK={targets:[]};}
@@ -400,13 +389,6 @@ async function smilesToDescriptors(){const smi=$('#smiInput').value.trim();if(!s
     const d=JSON.parse(m.get_descriptors());fillCalc({MW:d.amw,logP:d.CrippenClogP,HBD:d.NumHBD,HBA:d.NumHBA,TPSA:d.tpsa,rotatable_bonds:d.NumRotatableBonds,aromatic_rings:d.NumAromaticRings,molar_refraction:d.CrippenMR});renderCalc();m.delete();
   }catch(e){alert('RDKit.js não está neste bundle (Camada B opcional). Veja README_DEPLOY.md.');}}
 
-function renderManuscript(){
-  const pdf=CFG.submission_pdf;
-  if(pdf){ $('#pdfHost').innerHTML=`<iframe class="pdfframe" src="${esc(pdf)}#view=FitH" title="Manuscrito ACS"></iframe>`;
-    $('#pdfDownload').innerHTML=`<a href="${esc(pdf)}" target="_blank" rel="noopener">Abrir/baixar o PDF em nova aba ↗</a>`;
-    $('#pdfMeta').textContent='2scnnq_acs_submission.pdf'; }
-  else { $('#pdfHost').innerHTML='<p class="hint">PDF de submissão não incluído no bundle.</p>'; }
-}
 async function loadCompounds(){
   try{const d=await jget('data/compounds.json');COMPOUNDS=d.compounds||d||[];}catch(e){COMPOUNDS=[];}
   const cols=[['name','Nome'],['display_name','Descrição'],['formula','Fórmula'],['mw','MW'],['heavy_atoms','Pesados'],['rotatable_bonds','Rot.'],['smiles','SMILES']];
@@ -432,7 +414,7 @@ async function openDoc(file,btn){$$('#docnav button').forEach(x=>x.classList.rem
   $('#docview').innerHTML='<p class="hint">Carregando…</p>';let md;try{md=await tget('docs/'+file);}catch(e){$('#docview').innerHTML='<p class="hint">Indisponível.</p>';return;}
   $('#docview').innerHTML=(window.marked?marked.parse(md):('<pre>'+esc(md)+'</pre>'));}
 
-const TABS=['visao','docking','md','admet','manuscrito','compostos','subprojetos','ajuda'];
+const TABS=['visao','docking','md','admet','compostos','subprojetos','ajuda'];
 function selectTab(t){$$('.tab-btn').forEach(x=>x.classList.toggle('active',x.dataset.tab===t));
   TABS.forEach(x=>$('#tab-'+x).classList.toggle('active',x===t));if(t==='ajuda'&&!docsLoaded)renderDocs();}
 $$('.tab-btn').forEach(b=>b.onclick=()=>selectTab(b.dataset.tab));
