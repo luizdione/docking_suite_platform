@@ -48,29 +48,92 @@ def _site_residues(req):
         return []
 
 
-def build_ambig_tbl(residues, *, receptor_segid="A", ligand_resid=1,
-                    ligand_segid="C"):
-    """ambig.tbl (restricoes AIR no formato CNS) a partir dos residuos do sitio."""
+def build_ambig_tbl(residues, partner_residues=None, *, receptor_segid="A",
+                    ligand_resid=1, ligand_segid="C"):
+    """ambig.tbl (restricoes AIR no formato CNS) a partir dos residuos do sitio.
+
+    Dois modos:
+    - proteina-ligante pequeno (retrocompatibilidade, default):
+      `partner_residues` None. Cada residuo ativo do receptor (`residues`,
+      segid=receptor_segid) aponta para o UNICO resid do ligante
+      (`ligand_resid`, segid=ligand_segid) -- o ligante pequeno e tratado como
+      1 residuo so (comportamento original, inalterado).
+    - proteina-proteina (2 cadeias, `partner_residues` fornecido -- lista de
+      residuos ativos do PARCEIRO, ex.: TcFLA-1BP): AIR ativo-ativo
+      BIDIRECIONAL -- cada residuo ativo do receptor aponta para o OR logico
+      de TODOS os residuos de `partner_residues` (segid=ligand_segid), e cada
+      residuo de `partner_residues` aponta de volta para o OR logico de todos
+      os residuos ativos do receptor (segid=receptor_segid). E o formato AIR
+      classico do HADDOCK (ativo-ativo, sem expansao por raio de passivos).
+      Para restricoes mais ricas (active+passive por raio de contato, como no
+      run real do fla_fla/run1-ecto), prefira o CLI oficial
+      `haddock3-restraints active_passive_to_ambig` -- esta funcao e o minimo
+      necessario para a PLATAFORMA gerar algo sozinha, sem depender do CLI
+      externo.
+    """
     lines = [
         "! AIRs HADDOCK3 geradas automaticamente a partir do registry (sites.*).",
         "! Numeracao = a do registry; pode exigir ajuste a numeracao do PDB.",
         "",
     ]
-    for rn in residues:
-        lines += [
-            f"assign ( resid {rn} and segid {receptor_segid} )",
-            "       (",
-            f"        ( resid {ligand_resid} and segid {ligand_segid} )",
-            "       )  2.0 2.0 0.0",
-            "",
-        ]
+    if partner_residues:
+        def _or_block(resids, segid):
+            parts = [f"( resid {r} and segid {segid} )" for r in resids]
+            return "\n     or ".join(parts)
+
+        for rn in residues:
+            lines += [
+                f"assign ( resid {rn} and segid {receptor_segid} )",
+                "       (",
+                "        " + _or_block(partner_residues, ligand_segid),
+                "       )  2.0 2.0 0.0",
+                "",
+            ]
+        for rn in partner_residues:
+            lines += [
+                f"assign ( resid {rn} and segid {ligand_segid} )",
+                "       (",
+                "        " + _or_block(residues, receptor_segid),
+                "       )  2.0 2.0 0.0",
+                "",
+            ]
+    else:
+        for rn in residues:
+            lines += [
+                f"assign ( resid {rn} and segid {receptor_segid} )",
+                "       (",
+                f"        ( resid {ligand_resid} and segid {ligand_segid} )",
+                "       )  2.0 2.0 0.0",
+                "",
+            ]
     return "\n".join(lines)
 
 
 def build_cfg(run_dir_name, receptor_pdb, ligand_pdb, protocol_params, *,
-              ambig_fname="ambig.tbl"):
-    """run.cfg do HADDOCK3 a partir do protocolo do registry."""
+              ambig_fname="ambig.tbl", protein_protein=False,
+              caprieval_reference=None):
+    """run.cfg do HADDOCK3 a partir do protocolo do registry.
+
+    protein_protein: True pula `ligand_param_fname`/`ligand_top_fname` no
+    modulo `topoaa` -- essas linhas so existem porque um ligante pequeno e um
+    residuo NAO-padrao que precisa de topologia/parametro CNS explicitos; duas
+    proteinas (cadeias de aminoacido padrao) tem a topologia resolvida sozinha
+    pelo HADDOCK3, sem arquivo extra. Pode ser passado explicitamente ou ligado
+    implicitamente por `protocol_params["protein_protein"] = true` no registry.
+    Default False preserva o comportamento antigo (proteina-ligante).
+
+    caprieval_reference: se fornecido (caminho pro PDB/CIF de referencia, ex.:
+    o modelo do Boltz), adiciona um bloco [caprieval] FINAL (depois do ultimo
+    modulo do protocolo) com `reference_fname` apontando pra ele. E o que faz
+    o irmsd/lrmsd/dockq do capri_clt.tsv final virarem RMSD/DockQ VS. essa
+    referencia, em vez de auto-referenciados (comparados contra o proprio
+    melhor modelo do HADDOCK -- ver ressalva em haddock_analysis.parse_capri_clt
+    e haddock_analysis.decide). Sem isso (default None), nenhum bloco extra e
+    adicionado -- comportamento antigo preservado.
+    """
     pp = protocol_params or {}
+    protein_protein = bool(protein_protein) or bool(pp.get("protein_protein"))
+    caprieval_reference = caprieval_reference or pp.get("caprieval_reference")
     modules = pp.get("modules") or [
         "topoaa", "rigidbody", "caprieval", "flexref", "emref", "caprieval"]
     sampling = pp.get("sampling_rigidbody", 1000)
@@ -94,7 +157,9 @@ def build_cfg(run_dir_name, receptor_pdb, ligand_pdb, protocol_params, *,
     for m in modules:
         out.append(f"[{m}]")
         if m == "topoaa":
-            out += ['ligand_param_fname = "lig.param"', 'ligand_top_fname = "lig.top"']
+            if not protein_protein:
+                out += ['ligand_param_fname = "lig.param"',
+                        'ligand_top_fname = "lig.top"']
         elif m == "rigidbody":
             out += [f'ambig_fname = "{ambig_fname}"', f"sampling = {sampling}"]
         elif m in ("flexref", "emref"):
@@ -106,6 +171,13 @@ def build_cfg(run_dir_name, receptor_pdb, ligand_pdb, protocol_params, *,
         elif m == "flexref_select":
             out += [f"select = {select_fr}"]
         out.append("")
+
+    if caprieval_reference:
+        out += [
+            "[caprieval]",
+            f'reference_fname = "{caprieval_reference}"',
+            "",
+        ]
     return "\n".join(out)
 
 
@@ -128,8 +200,14 @@ class Haddock3Engine(Engine):
         receptor = req.inputs.get("receptor_pdb", f"{req.target}_receptor.pdb")
         ligand = req.inputs.get("ligand_pdb", f"ligand_{req.ligand}.pdb")
         run_dir_name = f"run-{req.target}-{req.ligand}"
-        cfg = build_cfg(run_dir_name, receptor, ligand, pp)
-        tbl = build_ambig_tbl(residues)
+        params = req.params or {}
+        protein_protein = bool(params.get("protein_protein"))
+        caprieval_reference = params.get("caprieval_reference")
+        partner_residues = _residue_numbers(params.get("partner_active_residues"))
+        cfg = build_cfg(run_dir_name, receptor, ligand, pp,
+                        protein_protein=protein_protein,
+                        caprieval_reference=caprieval_reference)
+        tbl = build_ambig_tbl(residues, partner_residues or None)
         req.outputs["_cfg_preview"] = cfg
         req.outputs["_tbl_preview"] = tbl
         req.outputs["_n_restraints"] = len(residues)

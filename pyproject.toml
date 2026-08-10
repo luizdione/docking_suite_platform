@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docking-suite-haddock-analysis"
+version = "0.1.0"
+description = "Parsing/scoring utilities for HADDOCK3 outputs (clustfcc.tsv, capri_clt.tsv) shared across docking_suite_platform, fla_fla and tcactina -- avoids each project duplicating the parser."
+requires-python = ">=3.9"
+dependencies = []
+
+# Convencao FLAT do repo (modulos .py soltos na raiz, sem pacote aninhado).
+# So os 2 modulos de analise HADDOCK sao expostos como pacote instalavel --
+# o resto do repo (scripts de docking proteina-ligante) nao e empacotado.
+[tool.setuptools]
+py-modules = ["haddock_analysis", "haddock_config"]
