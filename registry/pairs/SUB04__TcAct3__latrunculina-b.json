@@ -1,0 +1,74 @@
+{
+  "schema_version": "2.0",
+  "campaign": "SUB04",
+  "target": "TcAct3",
+  "ligand": "latrunculina-b",
+  "site": "latrunculina",
+  "role": "primary_target",
+  "assembly_state": {
+    "required": "monomer",
+    "min_protomers": 1,
+    "site_topology": "intraprotomer",
+    "rationale": "Docking prospectivo e redocking rodados no monomero (G-actina). Ver validation.experimental_kd para o efeito de ate 3 ordens de grandeza do estado (monomero x extremidade barbada do filamento)."
+  },
+  "cofactor_requirement": {
+    "required": [],
+    "rationale": "Sem cofator obrigatorio identificado na fonte para este sistema (actina + droga do citoesqueleto). Estado nucleotidico (ATP/ADP) da actina e variavel relevante para afinidade (ver experimental_kd[].state), mas nao modelado como cofator explicito nesta ingestao."
+  },
+  "experimental_kd": [],
+  "_experimental_kd_note": "Kd de literatura (PubMed), state obrigatorio por peculiaridade cientifica real: a afinidade varia ate 3 ordens de grandeza com o estado da actina.",
+  "state_controls": [],
+  "engines": {
+    "primary_pose": "vina",
+    "secondary_pose": "boltz2",
+    "affinity_estimator_reliable": false,
+    "affinity_estimator_note": "calibracao_afinidade.json: a cabeca de afinidade do Boltz-2 inverte a ordem experimental em pelo menos 1 caso medido (fator de erro ate 6x p/ latrunculina A). Score/afinidade do Boltz-2 NAO confiavel para ranking absoluto neste sistema."
+  },
+  "validation": {
+    "redock_gate": [
+      {
+        "reference_pdb": "2Q0U",
+        "rmsd_best_A": 1.3,
+        "rmsd_top1_A": 4.76,
+        "passed": false,
+        "rmsd_function": "menor RMSD entre 20 poses vs cristal (equivalente a CalcRMS -- nunca GetBestRMS, que alinha antes de medir e mascara pose errada)"
+      }
+    ],
+    "boltz2_geometry": {
+      "verdict": "sitio_e_pose",
+      "ptm": 0.959,
+      "iptm": 0.978,
+      "complex_plddt": 0.891
+    }
+  },
+  "docking_prospective": {
+    "citocalasina": {
+      "is_native_site": false,
+      "dG_top1_kcal_mol": -5.434
+    },
+    "latrunculina": {
+      "is_native_site": true,
+      "dG_top1_kcal_mol": -4.994
+    }
+  },
+  "protocols": {
+    "docking": "vina_exh32"
+  },
+  "status": {
+    "docking": "done",
+    "structure_prediction": "done",
+    "note": "Ingerido de Rho_OCRL/in_silico/drogas_citoesqueleto. Execucao nativa pela plataforma = Fase 7.2, pendente."
+  },
+  "provenance": {
+    "mode": "ingested",
+    "reproducible": false,
+    "generated_from": "Rho_OCRL/in_silico/drogas_citoesqueleto/analysis/*.json",
+    "generator": "tools/ingest_campaign.py",
+    "original_scripts": [
+      "prep_docking_receptors.py",
+      "redock_gate.py",
+      "run_boltz.py",
+      "build_factin_complexes.py"
+    ]
+  }
+}

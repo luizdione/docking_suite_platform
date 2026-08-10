@@ -1,0 +1,49 @@
+{
+  "schema_version": "2.0",
+  "id": "latrunculina-a",
+  "name": "latrunculina_A",
+  "display_name": "LATRUNCULIN A",
+  "smiles": "C[C@H]\\1CC[C@@H]2C[C@H](C[C@@](O)(O2)[C@@H]3CSC(=O)N3)OC(=O)\\C=C(C)/CC\\C=C\\C=C\\1",
+  "formula": "C22H31NO5S",
+  "mw_g_mol": 421.55,
+  "heavy_atoms": null,
+  "charge": 0,
+  "class": "macrociclo natural (droga do citoesqueleto)",
+  "chemotype_tags": [
+    "cytoskeleton_drug",
+    "macrocycle"
+  ],
+  "topology": {
+    "is_macrocycle": true,
+    "largest_ring_size": 16,
+    "ring_sizes": [
+      16,
+      6,
+      5
+    ],
+    "n_rings": 3,
+    "expected_active_torsions": 12
+  },
+  "prep": {
+    "optimization": "MMFF94 (139 confs; melhor -5.79 kcal/mol)",
+    "protonation": null,
+    "pdbqt": {
+      "tool": "meeko",
+      "rigid_macrocycles": false,
+      "min_ring_size": 7,
+      "max_ring_size": 33,
+      "notes": "glue_atoms=2"
+    },
+    "gates": []
+  },
+  "notes": "Papel no estudo: fenda do nucleotideo -- controle de sitio distinto. ATENCAO: 12 torsoes ativas -- ABAIXO do gate padrao da plataforma (GATE_MIN_TORSIONS=15 em runner.py). Macrociclo rigido; o gate generico nao se aplica sem ajuste explicito.",
+  "ccd": "LAR",
+  "reference_pdb": "1ESV",
+  "reference_resolution_A": 2.0,
+  "provenance": {
+    "mode": "ingested",
+    "reproducible": false,
+    "generated_from": "Rho_OCRL/in_silico/drogas_citoesqueleto/ligands/ligands.json",
+    "generator": "tools/ingest_campaign.py"
+  }
+}

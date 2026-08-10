@@ -1,0 +1,60 @@
+{
+  "schema_version": "2.0",
+  "id": "SUB04",
+  "sigla": "TcAct-citoesqueleto",
+  "programa": "Rho_OCRL-actina",
+  "nome_especifico": "TcActins (Dm28c) x Citocalasina D / Jasplaquinolida / Latrunculina A / Latrunculina B -- selecao de paraloga e estado oligomerico como determinantes de ligacao",
+  "titulo_paper_atual": "TcActins (Dm28c) x Cytochalasin D / Jasplakinolide / Latrunculin A / Latrunculin B -- paralog selection and oligomeric state as binding determinants",
+  "status": "ingerido (dados de trabalho; manuscrito em preparacao no Rho_OCRL)",
+  "fase_atual": "Ingestao read-only (Fase 7.1). Execucao nativa pela plataforma = Fase 7.2, ainda nao feita.",
+  "periodico_alvo": null,
+  "criado": "2026-08-09",
+  "targets": [
+    "TcAct1",
+    "TcAct2",
+    "TcAct3",
+    "TcAct4",
+    "Hs_ACTB"
+  ],
+  "primary_targets": [
+    "TcAct1",
+    "TcAct2",
+    "TcAct3",
+    "TcAct4"
+  ],
+  "counter_targets": [],
+  "human_reference_targets": [
+    "Hs_ACTB"
+  ],
+  "ligands": [
+    "citocalasina-d",
+    "jasplaquinolida",
+    "latrunculina-a",
+    "latrunculina-b"
+  ],
+  "default_ligand": "citocalasina-d",
+  "protocols": {
+    "docking": "vina_exh32"
+  },
+  "paths": {
+    "data_root": null,
+    "_note": "null = usa o default (docking_project/SUB04 dentro da plataforma). Os dados brutos de origem continuam em C:\\Users\\luizd\\OneDrive\\Data_Science\\Projetos\\Rho_OCRL\\in_silico\\drogas_citoesqueleto -- nunca movidos."
+  },
+  "ui": {
+    "header": "Actinas de Trypanosoma cruzi x drogas do citoesqueleto",
+    "subtitle": "4 paralogas (Dm28c) vs actina beta humana -- conservacao de sitio como determinante de seletividade",
+    "recommended_targets": [
+      "TcAct1",
+      "TcAct3",
+      "Hs_ACTB"
+    ],
+    "organism_badge_field": "category"
+  },
+  "provenance": {
+    "mode": "ingested",
+    "reproducible": false,
+    "source_root": "C:\\Users\\luizd\\OneDrive\\Data_Science\\Projetos\\Rho_OCRL\\in_silico\\drogas_citoesqueleto",
+    "generator": "tools/ingest_campaign.py",
+    "note": "Ingestao read-only da Fase 7.1. A plataforma le os dados de onde estao; o projeto Rho_OCRL continua dono deles. Ver .project-memory/PROJECT_STATE.md e PLANO.md em Rho_OCRL para a narrativa cientifica completa (nao reescrita aqui)."
+  }
+}

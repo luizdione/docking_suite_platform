@@ -1,0 +1,127 @@
+{
+  "schema_version": "2.0",
+  "campaign": "SUB04",
+  "target": "Hs_ACTB",
+  "ligand": "citocalasina-d",
+  "site": "citocalasina_D",
+  "role": "human_reference",
+  "assembly_state": {
+    "required": "monomer",
+    "min_protomers": 1,
+    "site_topology": "intraprotomer",
+    "rationale": "Docking prospectivo e redocking rodados no monomero (G-actina). Ver validation.experimental_kd para o efeito de ate 3 ordens de grandeza do estado (monomero x extremidade barbada do filamento)."
+  },
+  "cofactor_requirement": {
+    "required": [],
+    "rationale": "Sem cofator obrigatorio identificado na fonte para este sistema (actina + droga do citoesqueleto). Estado nucleotidico (ATP/ADP) da actina e variavel relevante para afinidade (ver experimental_kd[].state), mas nao modelado como cofator explicito nesta ingestao."
+  },
+  "experimental_kd": [
+    {
+      "value": 4.6,
+      "unit": "uM",
+      "type": "Kd",
+      "state": "G-actina monomerica, forma induzida por Mg2+",
+      "comparable_to_monomer_prediction": true,
+      "pmid": "3782101",
+      "doi": null,
+      "citation": "Goddette & Frieden (1986) J Biol Chem 261:15970-3 — 'overall dissociation constant to the Mg2+-induced form of 4.6 microM'"
+    },
+    {
+      "value": 0.002,
+      "unit": "uM",
+      "type": "Kd (de K = 0,5 nM^-1)",
+      "state": "extremidade barbada do FILAMENTO (ADP)",
+      "comparable_to_monomer_prediction": false,
+      "pmid": "3944126",
+      "doi": null,
+      "citation": "Carlier, Criquet, Pantaloni & Korn (1986) J Biol Chem 261:2041-50 — 'interacts strongly with the barbed ends ... (K = 0.5 nM-1)'"
+    },
+    {
+      "value": 0.02,
+      "unit": "uM",
+      "type": "IC50 (meia-inibicao)",
+      "state": "inibicao de elongacao na extremidade barbada (ATP-actina)",
+      "comparable_to_monomer_prediction": false,
+      "pmid": "1899622",
+      "doi": "10.1021/bi00221a034",
+      "citation": "Sampath & Pollard (1991) Biochemistry 30:1973-80 — 'Half-maximal inhibition of elongation at the barbed end is at ... 0.02 microM CD for ATP-actin'"
+    }
+  ],
+  "_experimental_kd_note": "Kd de literatura (PubMed), state obrigatorio por peculiaridade cientifica real: a afinidade varia ate 3 ordens de grandeza com o estado da actina.",
+  "state_controls": [
+    {
+      "state": "Gform_monomero",
+      "reference_pdb": "3EKS",
+      "kd_experimental_uM": 4.6,
+      "rmsd_superposicao_A": 0.92,
+      "recuperacao_sitio_pct": 88.9
+    },
+    {
+      "state": "Fform_barbada",
+      "reference_pdb": "9L2N",
+      "kd_experimental_uM": 0.002,
+      "rmsd_superposicao_A": 1.0,
+      "recuperacao_sitio_pct": 88.2
+    }
+  ],
+  "engines": {
+    "primary_pose": "vina",
+    "secondary_pose": "boltz2",
+    "affinity_estimator_reliable": false,
+    "affinity_estimator_note": "calibracao_afinidade.json: a cabeca de afinidade do Boltz-2 inverte a ordem experimental em pelo menos 1 caso medido (fator de erro ate 6x p/ latrunculina A). Score/afinidade do Boltz-2 NAO confiavel para ranking absoluto neste sistema."
+  },
+  "validation": {
+    "redock_gate": [
+      {
+        "reference_pdb": "3EKS",
+        "rmsd_best_A": 0.49,
+        "rmsd_top1_A": 0.49,
+        "passed": true,
+        "rmsd_function": "menor RMSD entre 20 poses vs cristal (equivalente a CalcRMS -- nunca GetBestRMS, que alinha antes de medir e mascara pose errada)"
+      },
+      {
+        "reference_pdb": "9L2N",
+        "rmsd_best_A": 0.68,
+        "rmsd_top1_A": 0.68,
+        "passed": true,
+        "rmsd_function": "menor RMSD entre 20 poses vs cristal (equivalente a CalcRMS -- nunca GetBestRMS, que alinha antes de medir e mascara pose errada)"
+      }
+    ],
+    "boltz2_geometry": {
+      "verdict": "sitio_e_pose",
+      "ptm": 0.96,
+      "iptm": 0.94,
+      "complex_plddt": 0.909
+    }
+  },
+  "docking_prospective": {
+    "citocalasina": {
+      "is_native_site": true,
+      "dG_top1_kcal_mol": -6.229
+    },
+    "latrunculina": {
+      "is_native_site": false,
+      "dG_top1_kcal_mol": -5.535
+    }
+  },
+  "protocols": {
+    "docking": "vina_exh32"
+  },
+  "status": {
+    "docking": "done",
+    "structure_prediction": "done",
+    "note": "Ingerido de Rho_OCRL/in_silico/drogas_citoesqueleto. Execucao nativa pela plataforma = Fase 7.2, pendente."
+  },
+  "provenance": {
+    "mode": "ingested",
+    "reproducible": false,
+    "generated_from": "Rho_OCRL/in_silico/drogas_citoesqueleto/analysis/*.json",
+    "generator": "tools/ingest_campaign.py",
+    "original_scripts": [
+      "prep_docking_receptors.py",
+      "redock_gate.py",
+      "run_boltz.py",
+      "build_factin_complexes.py"
+    ]
+  }
+}

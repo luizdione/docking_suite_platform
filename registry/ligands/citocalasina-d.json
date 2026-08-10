@@ -1,0 +1,50 @@
+{
+  "schema_version": "2.0",
+  "id": "citocalasina-d",
+  "name": "citocalasina_D",
+  "display_name": "(3S,3aR,4S,6S,6aR,7E,10S,12R,13E,15R,15aR)-3-benzyl-6,12-dihydroxy-4,10,12-trimethyl-5-methylidene-1,11-dioxo-2,3,3a,4,5,6,6a,9,10,11,12,15-dodecahydro-1H-cycloundeca[d]isoindol-15-yl acetate",
+  "smiles": "C[C@H]1C/C=C/[C@H]2[C@H](O)C(=C)[C@@H](C)[C@H]3[C@H](Cc4ccccc4)NC(=O)[C@@]23[C@H](OC(C)=O)/C=C/[C@@](C)(O)C1=O",
+  "formula": "C30H37NO6",
+  "mw_g_mol": 507.618,
+  "heavy_atoms": null,
+  "charge": 0,
+  "class": "macrociclo natural (droga do citoesqueleto)",
+  "chemotype_tags": [
+    "cytoskeleton_drug",
+    "macrocycle"
+  ],
+  "topology": {
+    "is_macrocycle": true,
+    "largest_ring_size": 11,
+    "ring_sizes": [
+      11,
+      6,
+      6,
+      5
+    ],
+    "n_rings": 4,
+    "expected_active_torsions": 13
+  },
+  "prep": {
+    "optimization": "MMFF94 (56 confs; melhor 81.08 kcal/mol)",
+    "protonation": null,
+    "pdbqt": {
+      "tool": "meeko",
+      "rigid_macrocycles": false,
+      "min_ring_size": 7,
+      "max_ring_size": 33,
+      "notes": "glue_atoms=2"
+    },
+    "gates": []
+  },
+  "notes": "Papel no estudo: fenda SD1/SD3 (barbed end) -- ligante principal, sitio conservado em TcAct1. ATENCAO: 13 torsoes ativas -- ABAIXO do gate padrao da plataforma (GATE_MIN_TORSIONS=15 em runner.py). Macrociclo rigido; o gate generico nao se aplica sem ajuste explicito.",
+  "ccd": "CY9",
+  "reference_pdb": "3EKS",
+  "reference_resolution_A": 1.8,
+  "provenance": {
+    "mode": "ingested",
+    "reproducible": false,
+    "generated_from": "Rho_OCRL/in_silico/drogas_citoesqueleto/ligands/ligands.json",
+    "generator": "tools/ingest_campaign.py"
+  }
+}

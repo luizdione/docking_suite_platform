@@ -1,0 +1,72 @@
+{
+  "schema_version": "2.0",
+  "campaign": "SUB04",
+  "target": "TcAct3",
+  "ligand": "jasplaquinolida",
+  "site": "jasplaquinolida",
+  "role": "primary_target",
+  "assembly_state": {
+    "required": "filament",
+    "min_protomers": 3,
+    "site_topology": "interprotomer (juncao de 3 protomeros)",
+    "rationale": "Jasplaquinolida liga na juncao de multiplos protomeros da F-actina; nao existe pose monomerica com sentido biologico (PLANO.md da fonte).",
+    "built_by": "transferencia estrutural / threading (build_factin_complexes.py, Rho_OCRL) -- NAO e predicao de novo.",
+    "n_protomeros_no_modelo": 5,
+    "rmsd_colocacao_medio_A": 2.52,
+    "choques_interprotomero_lt_2A": 334
+  },
+  "cofactor_requirement": {
+    "required": [],
+    "rationale": "Sem cofator obrigatorio identificado na fonte para este sistema (actina + droga do citoesqueleto). Estado nucleotidico (ATP/ADP) da actina e variavel relevante para afinidade (ver experimental_kd[].state), mas nao modelado como cofator explicito nesta ingestao."
+  },
+  "experimental_kd": [
+    {
+      "value": 0.015,
+      "unit": "uM",
+      "type": "Kd",
+      "state": "F-ACTINA (competitiva com faloidina)",
+      "comparable_to_monomer_prediction": false,
+      "pmid": "8195116",
+      "doi": null,
+      "citation": "Bubb, Senderowicz, Sausville, Duncan & Korn (1994) J Biol Chem 269:14869-71 — 'binds to F-actin competitively with phalloidin with a dissociation constant of approximately 15 nM'"
+    }
+  ],
+  "_experimental_kd_note": "Kd de literatura (PubMed), state obrigatorio por peculiaridade cientifica real: a afinidade varia ate 3 ordens de grandeza com o estado da actina.",
+  "state_controls": [],
+  "engines": {
+    "primary_pose": "structural_transfer_threading",
+    "secondary_pose": "boltz2",
+    "affinity_estimator_reliable": false,
+    "affinity_estimator_note": "calibracao_afinidade.json: a cabeca de afinidade do Boltz-2 inverte a ordem experimental em pelo menos 1 caso medido (fator de erro ate 6x p/ latrunculina A). Score/afinidade do Boltz-2 NAO confiavel para ranking absoluto neste sistema."
+  },
+  "validation": {
+    "redock_gate": [
+      {
+        "reference_pdb": "7PM3",
+        "rmsd_best_A": 6.41,
+        "rmsd_top1_A": 10.52,
+        "passed": false,
+        "rmsd_function": "menor RMSD entre 20 poses vs cristal (equivalente a CalcRMS -- nunca GetBestRMS, que alinha antes de medir e mascara pose errada)"
+      }
+    ]
+  },
+  "docking_prospective": {},
+  "protocols": {},
+  "status": {
+    "docking": "n/a (filamento, sem docking monomerico)",
+    "structure_prediction": "done",
+    "note": "Ingerido de Rho_OCRL/in_silico/drogas_citoesqueleto. Execucao nativa pela plataforma = Fase 7.2, pendente. Teste cego formal de vazamento de treino do Boltz-2 existe para {'pdb': '8TRN', 'entidade_actina': '1', 'descricao_entidade': 'Actin', 'liberado': '2024-03-06', 'depositado': '2023-08-09', 'resolucao': 3.0, 'organismo': 'Toxoplasma gondii', 'titulo': 'Actin 1 from T. gondii in filaments bound to MgADP and jasplakinolide', 'no_treino_boltz2': False}/8TRN (T. gondii, NAO este alvo) -- alcance_da_aplicacao varia 40-74% conforme o TcAct (corte_treino_boltz2=2023-06-01). Ver blind_test_8trn.json na fonte para o detalhe por alvo; nao ha held_out determinado diretamente para este par."
+  },
+  "provenance": {
+    "mode": "ingested",
+    "reproducible": false,
+    "generated_from": "Rho_OCRL/in_silico/drogas_citoesqueleto/analysis/*.json",
+    "generator": "tools/ingest_campaign.py",
+    "original_scripts": [
+      "prep_docking_receptors.py",
+      "redock_gate.py",
+      "run_boltz.py",
+      "build_factin_complexes.py"
+    ]
+  }
+}

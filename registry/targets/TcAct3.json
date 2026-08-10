@@ -1,0 +1,436 @@
+{
+  "schema_version": "2.0",
+  "id": "TcAct3",
+  "aliases": [
+    "Q4D1Q8"
+  ],
+  "name": "Actina 3 de Trypanosoma cruzi (cepa Dm28c)",
+  "organism": "Trypanosoma cruzi",
+  "category": "parasite",
+  "ortholog_of": null,
+  "structure": {
+    "source": "alphafold",
+    "pdb_id": null,
+    "assembly": null,
+    "n_protomers_required": 1,
+    "local_file": "C:\\Users\\luizd\\OneDrive\\Data_Science\\Projetos\\Rho_OCRL\\in_silico\\drogas_citoesqueleto\\structures\\TcAct3_AF_Q4D1Q8.cif",
+    "confidence": {
+      "global": 90.6,
+      "site": {
+        "citocalasina_D": 82.5,
+        "citocalasina_D_Fform": 84.1,
+        "jasplaquinolida": 94.1,
+        "faloidina": 94.4
+      }
+    },
+    "resolution_A": null,
+    "cofactor_copies": {}
+  },
+  "chemistry": {
+    "keep_cofactors": [],
+    "essential_cofactors": [],
+    "cofactor_source": "none",
+    "nonstandard_residues": [],
+    "protonation_pH": 7.4
+  },
+  "sites": {
+    "citocalasina_D": {
+      "definition": "derived_from_reference_complex",
+      "reference_pdb": "3EKS",
+      "reference_ligand_resname": "HET CY9 copia na cadeia A (94 % enterrada, 1 protomeros ['A']); copias no arquivo: 1",
+      "box_size_A": [
+        25.0,
+        25.0,
+        25.0
+      ],
+      "box_policy": "xtal_bbox_plus_padding",
+      "cutoff_A": 4.5,
+      "n_contacts": 18,
+      "n_positions_mapped": 18,
+      "n_positions_total": 18,
+      "plddt_medio": 82.5,
+      "plddt_min": 27.4,
+      "divergent_residues_vs_consensus": [
+        {
+          "chain": "A",
+          "resnum": 133,
+          "ref": "Y",
+          "ref_resname": "TYR",
+          "target_residue": "A"
+        },
+        {
+          "chain": "A",
+          "resnum": 135,
+          "ref": "A",
+          "ref_resname": "ALA",
+          "target_residue": "I"
+        },
+        {
+          "chain": "A",
+          "resnum": 136,
+          "ref": "I",
+          "ref_resname": "ILE",
+          "target_residue": "P"
+        },
+        {
+          "chain": "A",
+          "resnum": 139,
+          "ref": "V",
+          "ref_resname": "VAL",
+          "target_residue": "M"
+        },
+        {
+          "chain": "A",
+          "resnum": 140,
+          "ref": "L",
+          "ref_resname": "LEU",
+          "target_residue": "C"
+        },
+        {
+          "chain": "A",
+          "resnum": 168,
+          "ref": "G",
+          "ref_resname": "GLY",
+          "target_residue": "S"
+        },
+        {
+          "chain": "A",
+          "resnum": 170,
+          "ref": "A",
+          "ref_resname": "ALA",
+          "target_residue": "I"
+        },
+        {
+          "chain": "A",
+          "resnum": 171,
+          "ref": "L",
+          "ref_resname": "LEU",
+          "target_residue": "I"
+        },
+        {
+          "chain": "A",
+          "resnum": 172,
+          "ref": "P",
+          "ref_resname": "PRO",
+          "target_residue": "R"
+        },
+        {
+          "chain": "A",
+          "resnum": 355,
+          "ref": "M",
+          "ref_resname": "MET",
+          "target_residue": "H"
+        },
+        {
+          "chain": "A",
+          "resnum": 373,
+          "ref": "K",
+          "ref_resname": "LYS",
+          "target_residue": "E"
+        },
+        {
+          "chain": "A",
+          "resnum": 375,
+          "ref": "F",
+          "ref_resname": "PHE",
+          "target_residue": "S"
+        }
+      ],
+      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 3EKS. 12 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2)."
+    },
+    "citocalasina_D_Fform": {
+      "definition": "derived_from_reference_complex",
+      "reference_pdb": "9L2N",
+      "reference_ligand_resname": "HET CY9 copia na cadeia A (91 % enterrada, 2 protomeros ['A', 'B']); copias no arquivo: 1",
+      "box_size_A": [
+        25.0,
+        25.0,
+        25.0
+      ],
+      "box_policy": "xtal_bbox_plus_padding",
+      "cutoff_A": 4.5,
+      "n_contacts": 20,
+      "n_positions_mapped": 20,
+      "n_positions_total": 20,
+      "plddt_medio": 84.1,
+      "plddt_min": 27.4,
+      "divergent_residues_vs_consensus": [
+        {
+          "chain": "A",
+          "resnum": 133,
+          "ref": "Y",
+          "ref_resname": "TYR",
+          "target_residue": "A"
+        },
+        {
+          "chain": "A",
+          "resnum": 134,
+          "ref": "V",
+          "ref_resname": "VAL",
+          "target_residue": "L"
+        },
+        {
+          "chain": "A",
+          "resnum": 135,
+          "ref": "A",
+          "ref_resname": "ALA",
+          "target_residue": "I"
+        },
+        {
+          "chain": "A",
+          "resnum": 136,
+          "ref": "I",
+          "ref_resname": "ILE",
+          "target_residue": "P"
+        },
+        {
+          "chain": "A",
+          "resnum": 139,
+          "ref": "V",
+          "ref_resname": "VAL",
+          "target_residue": "M"
+        },
+        {
+          "chain": "A",
+          "resnum": 140,
+          "ref": "L",
+          "ref_resname": "LEU",
+          "target_residue": "C"
+        },
+        {
+          "chain": "A",
+          "resnum": 168,
+          "ref": "G",
+          "ref_resname": "GLY",
+          "target_residue": "S"
+        },
+        {
+          "chain": "A",
+          "resnum": 170,
+          "ref": "A",
+          "ref_resname": "ALA",
+          "target_residue": "I"
+        },
+        {
+          "chain": "A",
+          "resnum": 172,
+          "ref": "P",
+          "ref_resname": "PRO",
+          "target_residue": "R"
+        },
+        {
+          "chain": "A",
+          "resnum": 355,
+          "ref": "M",
+          "ref_resname": "MET",
+          "target_residue": "H"
+        },
+        {
+          "chain": "A",
+          "resnum": 373,
+          "ref": "K",
+          "ref_resname": "LYS",
+          "target_residue": "E"
+        },
+        {
+          "chain": "A",
+          "resnum": 375,
+          "ref": "F",
+          "ref_resname": "PHE",
+          "target_residue": "S"
+        },
+        {
+          "chain": "B",
+          "resnum": 109,
+          "ref": "Y",
+          "ref_resname": "TYR",
+          "target_residue": "I"
+        },
+        {
+          "chain": "B",
+          "resnum": 116,
+          "ref": "D",
+          "ref_resname": "ASP",
+          "target_residue": "E"
+        }
+      ],
+      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 9L2N. 14 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2)."
+    },
+    "jasplaquinolida": {
+      "definition": "derived_from_reference_complex",
+      "reference_pdb": "7PM3",
+      "reference_ligand_resname": "HET 9UE copia na cadeia D (87 % enterrada, 3 protomeros ['B', 'C', 'D']); copias no arquivo: 3",
+      "box_size_A": [
+        25.0,
+        25.0,
+        25.0
+      ],
+      "box_policy": "xtal_bbox_plus_padding",
+      "cutoff_A": 4.5,
+      "n_contacts": 20,
+      "n_positions_mapped": 21,
+      "n_positions_total": 21,
+      "plddt_medio": 94.1,
+      "plddt_min": 82.8,
+      "divergent_residues_vs_consensus": [
+        {
+          "chain": "D",
+          "resnum": 194,
+          "ref": "T",
+          "ref_resname": "THR",
+          "target_residue": "F"
+        },
+        {
+          "chain": "D",
+          "resnum": 198,
+          "ref": "Y",
+          "ref_resname": "TYR",
+          "target_residue": "L"
+        },
+        {
+          "chain": "D",
+          "resnum": 199,
+          "ref": "S",
+          "ref_resname": "SER",
+          "target_residue": "N"
+        },
+        {
+          "chain": "D",
+          "resnum": 205,
+          "ref": "E",
+          "ref_resname": "GLU",
+          "target_residue": "D"
+        },
+        {
+          "chain": "D",
+          "resnum": 247,
+          "ref": "V",
+          "ref_resname": "VAL",
+          "target_residue": "E"
+        },
+        {
+          "chain": "C",
+          "resnum": 110,
+          "ref": "L",
+          "ref_resname": "LEU",
+          "target_residue": "F"
+        },
+        {
+          "chain": "C",
+          "resnum": 114,
+          "ref": "A",
+          "ref_resname": "ALA",
+          "target_residue": "Q"
+        },
+        {
+          "chain": "C",
+          "resnum": 179,
+          "ref": "D",
+          "ref_resname": "ASP",
+          "target_residue": "N"
+        }
+      ],
+      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 7PM3. 8 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2)."
+    },
+    "faloidina": {
+      "definition": "derived_from_reference_complex",
+      "reference_pdb": "7BTI",
+      "reference_ligand_resname": "cadeia polimerica X (7 res: HYP-ALA-TRP-G5G-ALA-ALO-CYS); copias no arquivo: ['X', 'Y', 'Z']",
+      "box_size_A": [
+        25.0,
+        25.0,
+        25.0
+      ],
+      "box_policy": "xtal_bbox_plus_padding",
+      "cutoff_A": 4.5,
+      "n_contacts": 18,
+      "n_positions_mapped": 18,
+      "n_positions_total": 18,
+      "plddt_medio": 94.4,
+      "plddt_min": 82.8,
+      "divergent_residues_vs_consensus": [
+        {
+          "chain": "D",
+          "resnum": 72,
+          "ref": "E",
+          "ref_resname": "GLU",
+          "target_residue": "R"
+        },
+        {
+          "chain": "D",
+          "resnum": 77,
+          "ref": "T",
+          "ref_resname": "THR",
+          "target_residue": "K"
+        },
+        {
+          "chain": "D",
+          "resnum": 110,
+          "ref": "L",
+          "ref_resname": "LEU",
+          "target_residue": "F"
+        },
+        {
+          "chain": "D",
+          "resnum": 179,
+          "ref": "D",
+          "ref_resname": "ASP",
+          "target_residue": "N"
+        },
+        {
+          "chain": "C",
+          "resnum": 194,
+          "ref": "T",
+          "ref_resname": "THR",
+          "target_residue": "F"
+        },
+        {
+          "chain": "C",
+          "resnum": 198,
+          "ref": "Y",
+          "ref_resname": "TYR",
+          "target_residue": "L"
+        },
+        {
+          "chain": "C",
+          "resnum": 199,
+          "ref": "S",
+          "ref_resname": "SER",
+          "target_residue": "N"
+        },
+        {
+          "chain": "C",
+          "resnum": 205,
+          "ref": "E",
+          "ref_resname": "GLU",
+          "target_residue": "D"
+        }
+      ],
+      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 7BTI. 8 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2)."
+    },
+    "latrunculina": {
+      "definition": "derived_from_reference_complex",
+      "reference_pdb": "2Q0U",
+      "reference_ligand_resname": "LAB",
+      "box_size_A": [
+        25.0,
+        25.0,
+        25.0
+      ],
+      "box_policy": "xtal_bbox_plus_padding",
+      "notes": "Fenda do nucleotideo. A fonte NAO computou tabela de conservacao por residuo nem pLDDT por sitio para este bolso (diferente dos outros 3 sitios, todos com binding_sites.json/receptors_qc.json dedicados). Referencia = 2Q0U (latrunculina B, melhor resolucao); 1ESV (latrunculina A, 2.0 A) e co-cristal alternativo -- ver pairs/*__latrunculina-a.json e *__latrunculina-b.json. box_size_A e PLACEHOLDER, nao medido na fonte."
+    }
+  },
+  "default_site": "citocalasina_D",
+  "notes": "Modelo AlphaFold, identidade Dm28c x CL Brener = 99.2%. 3 substituicao(oes) do modelo (baseado em CL Brener) vs a cepa real Dm28c: Q115R, M303L, G389R -- caveat de fidelidade da cepa, nao de conservacao de sitio.",
+  "literature": "",
+  "provenance": {
+    "mode": "ingested",
+    "reproducible": false,
+    "generated_from": "Rho_OCRL/in_silico/drogas_citoesqueleto/analysis/receptors_qc.json + sites/binding_sites.json",
+    "generator": "tools/ingest_campaign.py",
+    "original_script": "prep_docking_receptors.py (Rho_OCRL, nao versionado aqui)"
+  },
+  "n_residues": 390,
+  "uniprot": "Q4D1Q8"
+}

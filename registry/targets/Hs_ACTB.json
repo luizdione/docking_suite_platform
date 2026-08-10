@@ -1,0 +1,169 @@
+{
+  "schema_version": "2.0",
+  "id": "Hs_ACTB",
+  "aliases": [
+    "P60709"
+  ],
+  "name": "Actina beta humana (referencia)",
+  "organism": "Homo sapiens",
+  "category": "human",
+  "ortholog_of": null,
+  "structure": {
+    "source": "alphafold",
+    "pdb_id": null,
+    "assembly": null,
+    "n_protomers_required": 1,
+    "local_file": "C:\\Users\\luizd\\OneDrive\\Data_Science\\Projetos\\Rho_OCRL\\in_silico\\drogas_citoesqueleto\\structures\\Hs_ACTB_AF_P60709.cif",
+    "confidence": {
+      "global": 95.2,
+      "site": {
+        "citocalasina_D": 93.8,
+        "citocalasina_D_Fform": 94.5,
+        "jasplaquinolida": 94.8,
+        "faloidina": 94.8
+      }
+    },
+    "resolution_A": null,
+    "cofactor_copies": {}
+  },
+  "chemistry": {
+    "keep_cofactors": [],
+    "essential_cofactors": [],
+    "cofactor_source": "none",
+    "nonstandard_residues": [],
+    "protonation_pH": 7.4
+  },
+  "sites": {
+    "citocalasina_D": {
+      "definition": "derived_from_reference_complex",
+      "reference_pdb": "3EKS",
+      "reference_ligand_resname": "HET CY9 copia na cadeia A (94 % enterrada, 1 protomeros ['A']); copias no arquivo: 1",
+      "box_size_A": [
+        25.0,
+        25.0,
+        25.0
+      ],
+      "box_policy": "xtal_bbox_plus_padding",
+      "cutoff_A": 4.5,
+      "n_contacts": 18,
+      "n_positions_mapped": 18,
+      "n_positions_total": 18,
+      "plddt_medio": 93.8,
+      "plddt_min": 82.3,
+      "divergent_residues_vs_consensus": [],
+      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 3EKS. 0 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2)."
+    },
+    "citocalasina_D_Fform": {
+      "definition": "derived_from_reference_complex",
+      "reference_pdb": "9L2N",
+      "reference_ligand_resname": "HET CY9 copia na cadeia A (91 % enterrada, 2 protomeros ['A', 'B']); copias no arquivo: 1",
+      "box_size_A": [
+        25.0,
+        25.0,
+        25.0
+      ],
+      "box_policy": "xtal_bbox_plus_padding",
+      "cutoff_A": 4.5,
+      "n_contacts": 20,
+      "n_positions_mapped": 20,
+      "n_positions_total": 20,
+      "plddt_medio": 94.5,
+      "plddt_min": 82.3,
+      "divergent_residues_vs_consensus": [
+        {
+          "chain": "B",
+          "resnum": 109,
+          "ref": "Y",
+          "ref_resname": "TYR",
+          "target_residue": "E"
+        },
+        {
+          "chain": "B",
+          "resnum": 112,
+          "ref": "V",
+          "ref_resname": "VAL",
+          "target_residue": "Y"
+        }
+      ],
+      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 9L2N. 2 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2)."
+    },
+    "jasplaquinolida": {
+      "definition": "derived_from_reference_complex",
+      "reference_pdb": "7PM3",
+      "reference_ligand_resname": "HET 9UE copia na cadeia D (87 % enterrada, 3 protomeros ['B', 'C', 'D']); copias no arquivo: 3",
+      "box_size_A": [
+        25.0,
+        25.0,
+        25.0
+      ],
+      "box_policy": "xtal_bbox_plus_padding",
+      "cutoff_A": 4.5,
+      "n_contacts": 20,
+      "n_positions_mapped": 21,
+      "n_positions_total": 21,
+      "plddt_medio": 94.8,
+      "plddt_min": 86.4,
+      "divergent_residues_vs_consensus": [
+        {
+          "chain": "B",
+          "resnum": 287,
+          "ref": "I",
+          "ref_resname": "ILE",
+          "target_residue": "V"
+        }
+      ],
+      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 7PM3. 1 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2)."
+    },
+    "faloidina": {
+      "definition": "derived_from_reference_complex",
+      "reference_pdb": "7BTI",
+      "reference_ligand_resname": "cadeia polimerica X (7 res: HYP-ALA-TRP-G5G-ALA-ALO-CYS); copias no arquivo: ['X', 'Y', 'Z']",
+      "box_size_A": [
+        25.0,
+        25.0,
+        25.0
+      ],
+      "box_policy": "xtal_bbox_plus_padding",
+      "cutoff_A": 4.5,
+      "n_contacts": 18,
+      "n_positions_mapped": 18,
+      "n_positions_total": 18,
+      "plddt_medio": 94.8,
+      "plddt_min": 86.4,
+      "divergent_residues_vs_consensus": [
+        {
+          "chain": "E",
+          "resnum": 287,
+          "ref": "I",
+          "ref_resname": "ILE",
+          "target_residue": "V"
+        }
+      ],
+      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 7BTI. 1 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2)."
+    },
+    "latrunculina": {
+      "definition": "derived_from_reference_complex",
+      "reference_pdb": "2Q0U",
+      "reference_ligand_resname": "LAB",
+      "box_size_A": [
+        25.0,
+        25.0,
+        25.0
+      ],
+      "box_policy": "xtal_bbox_plus_padding",
+      "notes": "Fenda do nucleotideo. A fonte NAO computou tabela de conservacao por residuo nem pLDDT por sitio para este bolso (diferente dos outros 3 sitios, todos com binding_sites.json/receptors_qc.json dedicados). Referencia = 2Q0U (latrunculina B, melhor resolucao); 1ESV (latrunculina A, 2.0 A) e co-cristal alternativo -- ver pairs/*__latrunculina-a.json e *__latrunculina-b.json. box_size_A e PLACEHOLDER, nao medido na fonte."
+    }
+  },
+  "default_site": "citocalasina_D",
+  "notes": "Modelo AlphaFold, identidade Dm28c x CL Brener = None%. Sem divergencias conhecidas entre a cepa Dm28c e o genoma-base CL Brener.",
+  "literature": "",
+  "provenance": {
+    "mode": "ingested",
+    "reproducible": false,
+    "generated_from": "Rho_OCRL/in_silico/drogas_citoesqueleto/analysis/receptors_qc.json + sites/binding_sites.json",
+    "generator": "tools/ingest_campaign.py",
+    "original_script": "prep_docking_receptors.py (Rho_OCRL, nao versionado aqui)"
+  },
+  "n_residues": 375,
+  "uniprot": "P60709"
+}

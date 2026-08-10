@@ -1,0 +1,50 @@
+{
+  "schema_version": "2.0",
+  "id": "jasplaquinolida",
+  "name": "jasplaquinolida",
+  "display_name": "Jasplakinolide",
+  "smiles": "C[C@H]1C[C@@H](C)\\C=C(/C)C[C@H](C)C(=O)N[C@@H](C)C(=O)N(C)[C@H](Cc2c(Br)[nH]c3ccccc23)C(=O)N[C@H](CC(=O)O1)c4ccc(O)cc4",
+  "formula": "C36H45BrN4O6",
+  "mw_g_mol": 709.67,
+  "heavy_atoms": null,
+  "charge": 0,
+  "class": "macrociclo natural (droga do citoesqueleto)",
+  "chemotype_tags": [
+    "cytoskeleton_drug",
+    "macrocycle"
+  ],
+  "topology": {
+    "is_macrocycle": true,
+    "largest_ring_size": 19,
+    "ring_sizes": [
+      19,
+      6,
+      6,
+      5
+    ],
+    "n_rings": 4,
+    "expected_active_torsions": 19
+  },
+  "prep": {
+    "optimization": "MMFF94 (200 confs; melhor 39.89 kcal/mol)",
+    "protonation": null,
+    "pdbqt": {
+      "tool": "meeko",
+      "rigid_macrocycles": false,
+      "min_ring_size": 7,
+      "max_ring_size": 33,
+      "notes": "glue_atoms=2"
+    },
+    "gates": []
+  },
+  "notes": "Papel no estudo: juncao de 3 protomeros da F-actina -- ligante principal, sitio divergente.",
+  "ccd": "9UE",
+  "reference_pdb": "7PM3",
+  "reference_resolution_A": 3.1,
+  "provenance": {
+    "mode": "ingested",
+    "reproducible": false,
+    "generated_from": "Rho_OCRL/in_silico/drogas_citoesqueleto/ligands/ligands.json",
+    "generator": "tools/ingest_campaign.py"
+  }
+}
