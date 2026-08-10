@@ -426,6 +426,15 @@ def validate_all():
             errors.append(f"{ctx}: structure.source='pdb' exige structure.pdb_id")
         if source in ("alphafold", "local") and not struct.get("local_file"):
             errors.append(f"{ctx}: structure.source={source!r} exige structure.local_file")
+        elif source in ("alphafold", "local") and struct.get("local_file"):
+            # local_file aponta pra fora do repo (dado ingerido) -- se o projeto-fonte
+            # for reorganizado, isto quebra em silencio sem esta checagem (ja aconteceu
+            # uma vez: Rho_OCRL/.../structures/ -> colaboracoes/tcactina/.../models/).
+            if not Path(struct["local_file"]).exists():
+                errors.append(
+                    f"{ctx}: structure.local_file nao existe em disco: "
+                    f"{struct['local_file']!r}"
+                )
         if source == "alphafold" and not (struct.get("confidence") or {}).get("global"):
             errors.append(
                 f"{ctx}: modelo AlphaFold sem confidence.global -- pLDDT e obrigatorio "

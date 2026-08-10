@@ -13,7 +13,7 @@
     "pdb_id": null,
     "assembly": null,
     "n_protomers_required": 1,
-    "local_file": "C:\\Users\\luizd\\OneDrive\\Data_Science\\Projetos\\Rho_OCRL\\in_silico\\drogas_citoesqueleto\\structures\\TcAct1_AF_Q4CYQ8.cif",
+    "local_file": "C:\\Users\\luizd\\OneDrive\\Data_Science\\Projetos\\colaboracoes\\tcactina\\in_silico\\drogas_citoesqueleto\\models\\TcAct1_AF_Q4CYQ8.cif",
     "confidence": {
       "global": 94.9,
       "site": {
@@ -255,16 +255,24 @@
       "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 7BTI. 7 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2)."
     },
     "latrunculina": {
-      "definition": "derived_from_reference_complex",
-      "reference_pdb": "2Q0U",
-      "reference_ligand_resname": "LAB",
+      "definition": "explicit_center",
+      "reference_pdb": "1ESV",
+      "reference_ligand_resname": "LAR",
+      "box_center_A": [
+        17.046,
+        11.068,
+        78.554
+      ],
       "box_size_A": [
-        25.0,
-        25.0,
-        25.0
+        26.1,
+        22.0,
+        23.7
       ],
       "box_policy": "xtal_bbox_plus_padding",
-      "notes": "Fenda do nucleotideo. A fonte NAO computou tabela de conservacao por residuo nem pLDDT por sitio para este bolso (diferente dos outros 3 sitios, todos com binding_sites.json/receptors_qc.json dedicados). Referencia = 2Q0U (latrunculina B, melhor resolucao); 1ESV (latrunculina A, 2.0 A) e co-cristal alternativo -- ver pairs/*__latrunculina-a.json e *__latrunculina-b.json. box_size_A e PLACEHOLDER, nao medido na fonte."
+      "superposition_rmsd_A": 0.96,
+      "n_ca_matched": 72,
+      "prepared_receptor_local_file": "C:\\Users\\luizd\\OneDrive\\Data_Science\\Projetos\\colaboracoes\\tcactina\\in_silico\\drogas_citoesqueleto\\docking\\receptors\\latrunculina\\TcAct1_latrunculina.pdbqt",
+      "notes": "Fenda do nucleotideo. Centro/caixa/receptor VERIFICADOS (nao placeholder, nao recomputado nesta sessao): vem de docking/receptors/receptors.json do projeto-fonte (chave 'latrunculina/TcAct1'), gerado por scripts/prep_docking_receptors.py via superposicao estrutural LOCAL do modelo AlphaFold do TcAct1 contra o co-cristal 1ESV (latrunculina A), RMSD=0.96 A / 72 CAs pareados. box_center_A so faz sentido fisico JUNTO com prepared_receptor_local_file -- o receptor ja esta no referencial do cristal apos a superposicao; aplicar este centro ao .cif bruto do AlphaFold (sem transformar) daria resultado errado. A fonte NAO computou tabela de conservacao por residuo nem pLDDT por sitio para este bolso (diferente dos outros 3 sitios). T-0021 (2026-08-10): validado contra o par TcAct1 x latrunculina-A via runner.execute(dry_run=False). Os outros 4 alvos (TcAct2-4, Hs_ACTB) tem entradas equivalentes em receptors.json, ainda nao migradas p/ o registry -- mesmo padrao, quando forem os proximos pares validados."
     }
   },
   "default_site": "citocalasina_D",

@@ -13,7 +13,7 @@
     "pdb_id": null,
     "assembly": null,
     "n_protomers_required": 1,
-    "local_file": "C:\\Users\\luizd\\OneDrive\\Data_Science\\Projetos\\Rho_OCRL\\in_silico\\drogas_citoesqueleto\\structures\\Hs_ACTB_AF_P60709.cif",
+    "local_file": "C:\\Users\\luizd\\OneDrive\\Data_Science\\Projetos\\colaboracoes\\tcactina\\in_silico\\drogas_citoesqueleto\\models\\Hs_ACTB_AF_P60709.cif",
     "confidence": {
       "global": 95.2,
       "site": {

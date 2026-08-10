@@ -373,6 +373,35 @@ def analyze_pdb(pdb_path, target_info):
     return report
 
 
+def ensure_pdb_format(structure_path, output_dir, name_hint="structure"):
+    """Garante um arquivo .pdb a partir de qualquer formato de estrutura aceito
+    pelo registry (hoje: .pdb passa direto; .cif/.mmcif e convertido).
+
+    clean_protein() usa Bio.PDB.PDBParser (formato PDB, colunas fixas de
+    texto) -- parsear um .cif com ele NAO levanta excecao, mas produz uma
+    Structure com ZERO atomos: falha silenciosa, confirmado por teste manual
+    antes desta funcao existir (T-0021, Fase 0.3). Alvos com fonte AlphaFold/
+    local (ex.: SUB04) sao .cif; alvos com PDB ID historico (SUB01) ja sao
+    .pdb e retornam sem tocar em nada.
+    """
+    structure_path = Path(structure_path)
+    suffix = structure_path.suffix.lower()
+    if suffix == ".pdb":
+        return structure_path
+    if suffix in (".cif", ".mmcif"):
+        from Bio.PDB import MMCIFParser, PDBIO
+        parser = MMCIFParser(QUIET=True)
+        structure = parser.get_structure(name_hint, str(structure_path))
+        out_dir = Path(output_dir)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path = out_dir / f"{name_hint}_from_cif.pdb"
+        io = PDBIO()
+        io.set_structure(structure)
+        io.save(str(out_path))
+        return out_path
+    raise ValueError(f"formato de estrutura desconhecido: {suffix!r} ({structure_path})")
+
+
 def clean_protein(pdb_path, target_info, output_dir):
     """
     Clean protein keeping essential cofactors and metals.
@@ -426,14 +455,20 @@ def clean_protein(pdb_path, target_info, output_dir):
     # Calculate grid center BEFORE cleaning (need ligand coordinates)
     grid_center = _calculate_grid_center(structure, target_info)
 
+    # Nome do arquivo de saida: PDB ID quando existe; alvos alphafold/local
+    # (structure.pdb_id=None, ex.: os 5 do SUB04) usam o id do alvo -- sem
+    # isso, processar 2+ alvos AlphaFold no mesmo output_dir colide em
+    # "None_clean.pdb"/"None_receptor.pdbqt", sobrescrevendo em silencio.
+    name_key = target_info.get("pdb") or target_info.get("id") or "unknown"
+
     # Save clean PDB
-    clean_path = Path(output_dir) / f"{target_info['pdb']}_clean.pdb"
+    clean_path = Path(output_dir) / f"{name_key}_clean.pdb"
     io = PDBIO()
     io.set_structure(structure)
     io.save(str(clean_path), SmartSelect())
 
     # Convert to PDBQT
-    pdbqt_path = Path(output_dir) / f"{target_info['pdb']}_receptor.pdbqt"
+    pdbqt_path = Path(output_dir) / f"{name_key}_receptor.pdbqt"
     pdbqt_ok, pdbqt_msg = _convert_to_pdbqt(clean_path, pdbqt_path)
 
     return clean_path, pdbqt_path, grid_center, pdbqt_ok, pdbqt_msg
@@ -445,6 +480,24 @@ def _calculate_grid_center(structure, target_info):
     import numpy as np
 
     strategy = target_info.get("grid_strategy", "ligand_center")
+
+    # Strategy 0: centro EXPLICITO, ja resolvido em outro lugar (nao computado
+    # aqui). Usado quando o alvo nao tem ligante co-cristalizado proprio (ex.:
+    # modelos AlphaFold puros, caso do SUB04) -- o centro veio de uma
+    # superposicao estrutural contra um complexo de referencia, feita fora
+    # desta funcao (ver T-0021 Fase D) e gravada no registry como dado, nao
+    # recomputada aqui. ERRO CLARO se a estrategia pede isto mas o numero nao
+    # veio -- NUNCA cai no ultimo recurso (centro de massa da proteina
+    # inteira), que seria um valor plausivel e silenciosamente errado.
+    if strategy == "explicit_center":
+        center = target_info.get("box_center_A")
+        if not center:
+            raise ValueError(
+                "grid_strategy='explicit_center' mas target_info sem "
+                "'box_center_A' -- o site precisa declarar o centro (nunca "
+                "cair no centro de massa da proteina por engano)"
+            )
+        return tuple(round(float(c), 2) for c in center)
 
     # Strategy 1: Center on co-crystallized ligand
     if strategy == "ligand_center":
@@ -891,6 +944,96 @@ def open_in_pymol(files, pymol_path=None):
 # FULL PIPELINE
 # =====================================================================
 
+def prepare_ligand_pdbqt(smiles, compound_name, ligand_root_dir, log=None):
+    """Prepara o PDBQT de um ligante a partir do SMILES, com cache e cascata
+    de rotas (OpenBabel -> RDKit+Meeko). Extraida de run_full_pipeline() (a
+    Fase 4 previa isto -- 'run_full_pipeline ganha campaign_id/ligand_id' --
+    mas o corpo continuava com SMILES/nome do SUB01 hardcoded ate agora), para
+    ser reusavel por qualquer campanha/ligante via VinaEngine.prepare().
+
+    Busca em 2 localizacoes (padrao do projeto) antes de gerar:
+      1) <ligand_root_dir>/<compound_name>/<compound_name>.pdbqt (subpasta -- padrao compound_db)
+      2) <ligand_root_dir>/<compound_name>.pdbqt                  (flat -- legado)
+
+    Retorna o Path do PDBQT em sucesso, None em falha (log ja registra o motivo
+    -- nunca levanta, para o chamador decidir como abortar).
+    """
+    log = log or logging.getLogger("pipeline")
+    ligand_root_dir = Path(ligand_root_dir)
+
+    candidate_paths = [
+        ligand_root_dir / compound_name / f"{compound_name}.pdbqt",
+        ligand_root_dir / f"{compound_name}.pdbqt",
+    ]
+    for cand in candidate_paths:
+        if cand.exists() and cand.stat().st_size > 100:
+            log.info(f"  [OK] Ligand exists: {cand}")
+            return cand
+
+    # Nao encontrou -- gerar. Usa subpasta (padrao do projeto)
+    ligand_dir = ligand_root_dir / compound_name
+    ligand_dir.mkdir(parents=True, exist_ok=True)
+    ligand_pdbqt = ligand_dir / f"{compound_name}.pdbqt"
+
+    # Rota A: OpenBabel (preferido, gera PDBQT diretamente com cargas Gasteiger)
+    try:
+        from openbabel import pybel
+        mol = pybel.readstring("smi", smiles)
+        mol.addh()
+        mol.make3D(forcefield="mmff94", steps=500)
+        ff = pybel._forcefields["mmff94"]
+        if ff.Setup(mol.OBMol):
+            ff.ConjugateGradients(1000, 1.0e-6)
+            ff.GetCoordinates(mol.OBMol)
+        mol.write("pdbqt", str(ligand_pdbqt), overwrite=True)
+        mol.write("mol2", str(ligand_dir / f"{compound_name}.mol2"), overwrite=True)
+        log.info(f"  [OK] Ligand prepared via OpenBabel: {ligand_pdbqt}")
+        return ligand_pdbqt
+    except Exception as e_ob:
+        # Rota B: RDKit + Meeko -- tentada em QUALQUER falha da Rota A, nao so
+        # ImportError (pacote ausente). Achado real (T-0021 Fase E): OpenBabel
+        # pode estar INSTALADO mas mal configurado no ambiente (aqui:
+        # "smi is not a recognised Open Babel format", tipico de
+        # BABEL_DATADIR/BABEL_LIBDIR ausente) -- isso levantava uma excecao
+        # generica que a versao anterior desta funcao NAO tratava como "tentar
+        # a Rota B", so registrava o erro e desistia.
+        log.info(f"  [INFO] Rota A (OpenBabel) falhou ({e_ob!r}) — tentando Rota B (RDKit + Meeko)")
+        try:
+            from rdkit import Chem
+            from rdkit.Chem import AllChem
+            from meeko import MoleculePreparation, PDBQTWriterLegacy
+
+            rdmol = Chem.MolFromSmiles(smiles)
+            if rdmol is None:
+                raise ValueError("SMILES invalido")
+            rdmol = Chem.AddHs(rdmol)
+            ret = AllChem.EmbedMolecule(rdmol, AllChem.ETKDGv3())
+            if ret == -1:
+                ret = AllChem.EmbedMolecule(rdmol)
+            if ret == -1:
+                raise ValueError("EmbedMolecule falhou")
+            AllChem.MMFFOptimizeMolecule(rdmol)
+
+            prep = MoleculePreparation()
+            prep.prepare(rdmol)
+            pdbqt_text = PDBQTWriterLegacy.write_string(prep.setup)[0]
+            ligand_pdbqt.write_text(pdbqt_text, encoding="utf-8")
+
+            # Tambem salvar mol2 via RDKit
+            mol2_path = ligand_dir / f"{compound_name}.mol2"
+            Chem.MolToMolFile(rdmol, str(mol2_path.with_suffix(".mol")))
+            log.info(f"  [OK] Ligand prepared via RDKit+Meeko: {ligand_pdbqt}")
+            return ligand_pdbqt
+        except Exception as e_rdk:
+            log.error(f"  [ERRO] Rota B (RDKit+Meeko) falhou: {e_rdk}")
+            log.error(f"  [ERRO] Para gerar o ligante, instale uma dessas opcoes:")
+            log.error(f"         conda install -c conda-forge openbabel  (Rota A)")
+            log.error(f"         pip install meeko                       (Rota B - precisa rdkit)")
+            log.error(f"         OU mantenha o env 'datascience' ativo (ja tem tudo):")
+            log.error(f"         conda activate datascience")
+            return None
+
+
 def run_full_pipeline(selected_targets, base_dir="docking_project",
                      exhaustiveness=32, open_pymol=False):
     """Run complete pipeline with QC"""
@@ -923,78 +1066,9 @@ def run_full_pipeline(selected_targets, base_dir="docking_project",
     smiles = "O=C1C=C(SC#N)C(=O)c2ccccc21"
     compound_safe = "2-SCN-NQ"  # Nome do composto base do estudo
 
-    # Buscar ligante PDBQT em multiplas localizacoes (padrao do projeto):
-    #  1) docking_project/ligand/2-SCN-NQ/2-SCN-NQ.pdbqt   (subpasta - padrao compound_db)
-    #  2) docking_project/ligand/2-SCN-NQ.pdbqt             (flat - legado)
-    candidate_paths = [
-        dirs["ligand"] / compound_safe / f"{compound_safe}.pdbqt",
-        dirs["ligand"] / f"{compound_safe}.pdbqt",
-    ]
-    ligand_pdbqt = None
-    for cand in candidate_paths:
-        if cand.exists() and cand.stat().st_size > 100:
-            ligand_pdbqt = cand
-            log.info(f"  [OK] Ligand exists: {ligand_pdbqt}")
-            break
-
+    ligand_pdbqt = prepare_ligand_pdbqt(smiles, compound_safe, dirs["ligand"], log=log)
     if ligand_pdbqt is None:
-        # Nao encontrou — tentar gerar. Usa subpasta (padrao do projeto)
-        ligand_dir = dirs["ligand"] / compound_safe
-        ligand_dir.mkdir(parents=True, exist_ok=True)
-        ligand_pdbqt = ligand_dir / f"{compound_safe}.pdbqt"
-
-        # Rota A: OpenBabel (preferido, gera PDBQT diretamente com cargas Gasteiger)
-        try:
-            from openbabel import pybel
-            mol = pybel.readstring("smi", smiles)
-            mol.addh()
-            mol.make3D(forcefield="mmff94", steps=500)
-            ff = pybel._forcefields["mmff94"]
-            if ff.Setup(mol.OBMol):
-                ff.ConjugateGradients(1000, 1.0e-6)
-                ff.GetCoordinates(mol.OBMol)
-            mol.write("pdbqt", str(ligand_pdbqt), overwrite=True)
-            mol.write("mol2", str(ligand_dir / f"{compound_safe}.mol2"), overwrite=True)
-            log.info(f"  [OK] Ligand prepared via OpenBabel: {ligand_pdbqt}")
-        except ImportError:
-            # Rota B: RDKit + Meeko (fallback sem openbabel)
-            log.info("  [INFO] OpenBabel ausente — tentando Rota B (RDKit + Meeko)")
-            try:
-                from rdkit import Chem
-                from rdkit.Chem import AllChem
-                from meeko import MoleculePreparation, PDBQTWriterLegacy
-
-                rdmol = Chem.MolFromSmiles(smiles)
-                if rdmol is None:
-                    raise ValueError("SMILES invalido")
-                rdmol = Chem.AddHs(rdmol)
-                ret = AllChem.EmbedMolecule(rdmol, AllChem.ETKDGv3())
-                if ret == -1:
-                    ret = AllChem.EmbedMolecule(rdmol)
-                if ret == -1:
-                    raise ValueError("EmbedMolecule falhou")
-                AllChem.MMFFOptimizeMolecule(rdmol)
-
-                prep = MoleculePreparation()
-                prep.prepare(rdmol)
-                pdbqt_text = PDBQTWriterLegacy.write_string(prep.setup)[0]
-                ligand_pdbqt.write_text(pdbqt_text, encoding="utf-8")
-
-                # Tambem salvar mol2 via RDKit
-                mol2_path = ligand_dir / f"{compound_safe}.mol2"
-                Chem.MolToMolFile(rdmol, str(mol2_path.with_suffix(".mol")))
-                log.info(f"  [OK] Ligand prepared via RDKit+Meeko: {ligand_pdbqt}")
-            except Exception as e_rdk:
-                log.error(f"  [ERRO] Rota B (RDKit+Meeko) falhou: {e_rdk}")
-                log.error(f"  [ERRO] Para gerar o ligante, instale uma dessas opcoes:")
-                log.error(f"         conda install -c conda-forge openbabel  (Rota A)")
-                log.error(f"         pip install meeko                       (Rota B - precisa rdkit)")
-                log.error(f"         OU mantenha o env 'datascience' ativo (ja tem tudo):")
-                log.error(f"         conda activate datascience")
-                return False
-        except Exception as e:
-            log.error(f"  [ERRO] OpenBabel falhou: {e}")
-            return False
+        return False
 
     # --- PROTEIN PREP + QC ---
     log.info("\n--- STEP 2: Protein Preparation + Quality Control ---")

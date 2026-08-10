@@ -332,19 +332,34 @@ def _engine_request(task, dry_run):
 def _engine_executor(task, dry_run=False):
     """Executor default: resolve o engine por nome (pacote engines/) e roda.
 
-    Converte EngineResult -> dict {cmdline, outputs, metrics, error?}, a MESMA
-    forma que _run_task ja consumia do antigo vina_executor -- por isso os testes
-    de proveniencia, que injetam um executor fake, continuam validos sem mudanca.
+    Chama o contrato completo -- prepare() ANTES de run() (engines/base.py
+    documenta esse ciclo desde a Fase 4, mas nada aqui o respeitava: ia direto
+    para run(), que so consome entradas ja resolvidas e nunca as prepara). Sem
+    isso, nenhuma campanha conseguia rodar docking real (dry_run=False): Vina
+    recebia sempre inputs={} / grid_center=None e falhava alto (por design,
+    nunca em silencio) em "receptor_pdbqt ausente".
+
+    Converte EngineResult -> dict {cmdline, outputs, inputs, metrics, error?},
+    superset da forma que _run_task ja consumia do antigo vina_executor -- por
+    isso os testes de proveniencia, que injetam um executor fake, continuam
+    validos sem mudanca (so ganham a chave 'inputs' extra, que ignoram).
     """
     try:
         from engines import get_engine
         engine = get_engine(task.engine)
     except Exception as exc:  # engine desconhecido/quebrado nao derruba o run
         return {"error": f"engine '{task.engine}' indisponivel: {exc!r}"}
-    result = engine.run(_engine_request(task, dry_run))
+    req = _engine_request(task, dry_run)
+    try:
+        req = engine.prepare(req) or req  # resolve entradas/saidas; nunca executa
+    except Exception as exc:  # arquivo ausente, sitio invalido etc. -- erro claro
+        return {"error": f"engine {task.engine} prepare() levantou: {exc!r}"}
+    result = engine.run(req)
     out = {"cmdline": result.cmdline,
            "metrics": dict(result.metrics or {}),
-           "outputs": dict(result.outputs or {})}
+           "outputs": dict(result.outputs or {}),
+           "inputs": dict(req.inputs or {}),
+           "params": dict(req.params or {})}
     if result.log:
         out["log_tail"] = result.log
     if result.status == "error" or result.error:
@@ -446,8 +461,22 @@ def _run_task(task, executor, dry_run):
     task.wall_s = round(time.perf_counter() - t0, 3)
     task.cmdline = result.get("cmdline")
     task.metrics = result.get("metrics", {}) or {}
+    # params tambem e atualizado (nao so inputs/outputs): prepare() resolve
+    # grid_center a partir de None -- sem isto, run.json fica com o valor de
+    # planejamento (None), nao o que foi de fato usado no comando do Vina.
+    for key, val in (result.get("params") or {}).items():
+        task.params[key] = val
+    for role, pth in (result.get("inputs") or {}).items():
+        task.inputs[role] = str(pth)
     for role, pth in (result.get("outputs") or {}).items():
         task.outputs[role] = str(pth)
+    # Recalcula input_hashes (nao so no topo desta funcao, onde task.inputs
+    # normalmente ainda estava vazio): o executor pode ter preenchido entradas
+    # via engine.prepare() nesse meio tempo -- sem isto, o run.json alegava
+    # proveniencia sobre hash de arquivo que nunca foi de fato hasheado.
+    task.input_hashes = {role: _sha256_file(pth)
+                         for role, pth in task.inputs.items()
+                         if pth and Path(pth).exists()}
     task.output_hashes = {role: _sha256_file(pth)
                           for role, pth in task.outputs.items()
                           if pth and Path(pth).exists()}

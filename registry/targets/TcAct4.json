@@ -13,7 +13,7 @@
     "pdb_id": null,
     "assembly": null,
     "n_protomers_required": 1,
-    "local_file": "C:\\Users\\luizd\\OneDrive\\Data_Science\\Projetos\\Rho_OCRL\\in_silico\\drogas_citoesqueleto\\structures\\TcAct4_AF_Q4D083.cif",
+    "local_file": "C:\\Users\\luizd\\OneDrive\\Data_Science\\Projetos\\colaboracoes\\tcactina\\in_silico\\drogas_citoesqueleto\\models\\TcAct4_AF_Q4D083.cif",
     "confidence": {
       "global": 85.0,
       "site": {

@@ -42,6 +42,12 @@ icone.png
 docking_project/figures/md_clean/*.pdb
 docking_project/figures/md_clean/minimized_*.pdb
 docking_project/figures/smoke_test_*/
+
+# --- Saidas de runner.execute() real (dry_run=False) -- recriado a cada
+# rodada de test_engines.py::test_real_docking_reproduces_golden_grid_center
+# (T-0021 Fase A) e de validacoes ad-hoc por campanha; nunca dado do projeto.
+docking_project/runs/
+docking_project/*/runs/
 docking_project/proteins/*_receptor.pdbqt
 docking_project/validation/
 docking_project/_obsoletos_pdb_errados/
