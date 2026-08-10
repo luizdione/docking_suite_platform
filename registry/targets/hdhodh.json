@@ -1,0 +1,58 @@
+{
+  "schema_version": "2.0",
+  "id": "hDHODH",
+  "aliases": [
+    "1D3H"
+  ],
+  "name": "DHODH",
+  "organism": "Homo sapiens",
+  "category": "human",
+  "ortholog_of": null,
+  "structure": {
+    "source": "pdb",
+    "pdb_id": "1D3H",
+    "assembly": null,
+    "n_protomers_required": 1,
+    "local_file": null,
+    "confidence": null,
+    "resolution_A": "1.60 A"
+  },
+  "chemistry": {
+    "keep_cofactors": [
+      "FMN"
+    ],
+    "essential_cofactors": [
+      "FMN"
+    ],
+    "cofactor_source": "crystal",
+    "nonstandard_residues": [],
+    "protonation_pH": 7.4
+  },
+  "sites": {
+    "orthosteric": {
+      "definition": "ligand_center",
+      "box_size_A": [
+        25,
+        25,
+        25
+      ],
+      "box_policy": "fixed",
+      "ligand_resnames": [
+        "BRE"
+      ],
+      "residue_numbering_reference": "1D3H"
+    }
+  },
+  "default_site": "orthosteric",
+  "notes": "FMN essential.",
+  "literature": "Liu 2000.",
+  "provenance": {
+    "generated_from": "docking_v2.TARGET_DB",
+    "generator": "tools/export_target_db_to_registry.py"
+  },
+  "notes_pt": "Contraparte humana da DHODH de Leishmania. Diferencas no sitio de ligacao da ubiquinona permitem seletividade.",
+  "references": [
+    "Liu et al., 2000, Structure"
+  ],
+  "name_en": "Dihydroorotate Dehydrogenase"
+}

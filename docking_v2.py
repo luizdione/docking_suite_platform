@@ -73,7 +73,17 @@ REMOVE_RESIDUES = {
 # =====================================================================
 # TARGET DATABASE v2 - Literature-informed
 # =====================================================================
-TARGET_DB = {
+# FONTE DE VERDADE: registry/targets/*.json (ver registry.py e docs/REGISTRY.md).
+#
+# O dicionario abaixo deixou de ser a fonte e passou a ser REDE DE SEGURANCA:
+# so entra em uso se o registry estiver ausente ou corrompido, e nesse caso a
+# plataforma avisa alto em vez de seguir em silencio. Manter as duas fontes em
+# divergencia foi exatamente o que produziu tres PDBs errados no fallback de
+# alvos do dashboard; o teste tests/test_registry_parity.py existe para impedir
+# que isso se repita.
+#
+# Removido na Fase 9, quando o registry tiver rodagem suficiente.
+_TARGET_DB_FALLBACK = {
     # --- T. cruzi ---
     "TcTR": {
         "pdb": "1BZL",
@@ -229,6 +239,37 @@ TARGET_DB = {
 }
 
 
+def load_target_db(campaign_id=None):
+    """Carrega os alvos do registry, caindo no fallback embutido se preciso.
+
+    A campanha default vem de registry/program.json, nao de um literal aqui --
+    e o que permite a mesma funcao servir naftoquinona em tripanotiona redutase
+    e droga do citoesqueleto em actina sem tocar no codigo.
+    """
+    try:
+        import registry
+
+        campaign = campaign_id or registry.load_program().get("default_campaign", "SUB01")
+        db = registry.as_legacy_target_db(campaign)
+        if not db:
+            raise registry.RegistryError(f"campanha '{campaign}' nao declara nenhum alvo")
+        return db
+    except Exception as exc:  # noqa: BLE001 - queremos degradar, mas ruidosamente
+        import warnings
+
+        warnings.warn(
+            f"[docking_v2] registry indisponivel ({exc.__class__.__name__}: {exc}); "
+            "usando o fallback embutido de alvos. Os resultados continuam validos para o "
+            "SUB01, mas nenhuma campanha nova sera visivel ate o registry voltar.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return dict(_TARGET_DB_FALLBACK)
+
+
+TARGET_DB = load_target_db()
+
+
 # =====================================================================
 # QC + PROTEIN PREPARATION
 # =====================================================================
@@ -339,7 +380,11 @@ def clean_protein(pdb_path, target_info, output_dir):
     """
     from Bio.PDB import PDBParser, PDBIO, Select
 
-    target_id = [k for k, v in TARGET_DB.items() if v["pdb"] == target_info["pdb"]][0]
+    # Havia aqui um lookup reverso por PDB para descobrir o id do alvo. Era
+    # codigo morto (o resultado nunca era usado) e uma bomba-relogio: estoura
+    # IndexError com alvo sem PDB -- modelo AlphaFold, que e a regra fora do
+    # painel original -- e devolve o alvo errado se dois alvos compartilharem
+    # PDB (mesmo cristal, dois sitios). O id agora vem do proprio target_info.
     keep_cofactors = set(target_info.get("keep_cofactors", []))
     keep_metals = ESSENTIAL_METALS
 
@@ -1111,7 +1156,10 @@ def run_full_pipeline(selected_targets, base_dir="docking_project",
             log.info(f"  {tid:<12} {data['organism']:<35} "
                      f"{data['best_dG']:<10.1f} {data['ki_uM']:<10.3f}")
 
-        # Save results JSON
+        # Save results JSON.
+        # Grava os DOIS nomes durante a transicao: 'results.json' e a convencao
+        # canonica nova, 'docking_results.json' e o que leitores antigos esperam.
+        # A escrita dupla cai na Fase 9, quando nao houver mais leitor antigo.
         import json
         results_json = dirs["results"] / "docking_results.json"
         try:
@@ -1119,6 +1167,13 @@ def run_full_pipeline(selected_targets, base_dir="docking_project",
             log.info(f"\n  [OK] Results saved: {results_json}")
         except Exception as e:
             log.warning(f"  [AVISO] Could not save JSON: {e}")
+
+        canonical = dirs["results"] / "results.json"
+        try:
+            canonical.write_text(json.dumps(all_results, indent=2), encoding="utf-8")
+            log.info(f"  [OK] Results saved (canonico): {canonical}")
+        except Exception as e:
+            log.warning(f"  [AVISO] Could not save canonical JSON: {e}")
 
     if n_failed > 0:
         log.warning(f"\n  {n_failed} target(s) failed - see log above for details.")

@@ -22,6 +22,8 @@ from __future__ import annotations
 import argparse, logging, math, os, sys, time
 from pathlib import Path
 
+import registry  # fonte de verdade dos alvos (substitui o antigo TARGET_MAP fixo)
+
 try:
     from openmm import (app, unit, LangevinMiddleIntegrator, VerletIntegrator, AndersenThermostat, MonteCarloBarostat, Platform)
     from openmm import CustomExternalForce
@@ -41,12 +43,88 @@ logging.basicConfig(
 log = logging.getLogger("md_clean")
 
 
-# Mapeamento de alvos validados (PDB + n_chains)
-TARGET_MAP = {
-    "TcTR": {"pdb": "1BZL_clean.pdb", "n_fads": 2, "organism": "T. cruzi"},
-    "LiTR": {"pdb": "2JK6_clean.pdb", "n_fads": 2, "organism": "L. infantum"},
-    "hGR":  {"pdb": "3DJJ_clean.pdb", "n_fads": 1, "organism": "H. sapiens"},  # 3GRS ausente; 3DJJ tem FAD + ditiol Cys58/Cys63
-}
+def _md_ready_targets():
+    """Alvos que declaram cofator de MD (structure.cofactor_copies) no registry."""
+    ready = []
+    for t in registry.list_targets():
+        struct = t.get("structure") or {}
+        if (struct.get("cofactor_copies") or {}).get("FAD") is not None:
+            ready.append(t.get("id"))
+    return ready
+
+
+def _target_md_info(target_id):
+    """Info de MD de um alvo, resolvida do registry (substitui o antigo TARGET_MAP).
+
+    Devolve {id, pdb_id, pdb, n_fads, organism}. `n_fads` vem de
+    structure.cofactor_copies -- um VALOR curado (migrado do TARGET_MAP), NUNCA
+    derivado de n_protomers: o hGR e dimero mas o 3DJJ_clean.pdb usado na MD tem 1
+    copia do cofator, enquanto TcTR/LiTR (1BZL/2JK6) tem 2. Levanta RegistryError
+    se o alvo nao existe no registry.
+    """
+    t = registry.get_target(target_id)
+    struct = t.get("structure") or {}
+    pdb_id = struct.get("pdb_id")
+    return {
+        "id": t.get("id", target_id),
+        "pdb_id": pdb_id,
+        "pdb": f"{pdb_id}_clean.pdb" if pdb_id else None,
+        "n_fads": (struct.get("cofactor_copies") or {}).get("FAD"),
+        "organism": t.get("organism"),
+    }
+
+
+def resolve_target_paths(args, base):
+    """Resolve os caminhos de entrada da MD a partir do alvo, falhando ALTO.
+
+    Antes, dois degradados silenciosos moravam neste ponto e produziam uma
+    trajetoria plausivel e cientificamente errada:
+      (1) alvo desconhecido caia para o alvo default (rodava OUTRO sistema);
+      (2) XML de FAD/ligante ausente reusava o do alvo default com um mero
+          log.info -- passando despercebido.
+    Agora ambos abortam. O alvo e seus metadados vem do REGISTRY (nao mais de um
+    TARGET_MAP fixo); so tem MD preparada quem declara structure.cofactor_copies.
+    O reuso do XML de outro alvo e legitimo (o FAD e a mesma molecula entre
+    especies), mas tem de ser DECLARADO via --fad-xml/--lig-xml, nunca assumido em
+    silencio. Muta args.complex/fad_xml/lig_xml quando None; devolve
+    (target_info, sub, tagged).
+    """
+    try:
+        target_info = _target_md_info(args.target)
+    except registry.RegistryError:
+        log.error("=" * 70)
+        log.error(f"Alvo '{args.target}' nao existe no registry.")
+        log.error(f"  Alvos com MD preparada: {sorted(_md_ready_targets())}.")
+        log.error("=" * 70)
+        sys.exit(2)
+    if target_info["n_fads"] is None or target_info["pdb"] is None:
+        log.error("=" * 70)
+        log.error(f"Alvo '{args.target}' existe mas NAO tem MD preparada "
+                  "(structure.cofactor_copies['FAD'] / pdb_id ausente no registry).")
+        log.error("  Cair para o alvo default aqui produziria a trajetoria de OUTRO")
+        log.error("  sistema -- plausivel e cientificamente errada. Abortando.")
+        log.error(f"  Alvos com MD preparada: {sorted(_md_ready_targets())}.")
+        log.error("=" * 70)
+        sys.exit(2)
+    sub = base / ("smoke_test_fad" if args.target == "TcTR"
+                  else f"smoke_test_{args.target.lower()}")
+    tagged = args.target
+    if args.complex is None:
+        args.complex = sub / f"complex_{tagged}_initial.pdb"
+    if args.fad_xml is None:
+        args.fad_xml = sub / f"cofactor_FAD_{tagged}.xml"
+        if not args.fad_xml.exists():
+            log.error(f"XML de FAD do alvo {args.target} ausente: {args.fad_xml}")
+            log.error("  O reuso do XML de FF de outro alvo nao e mais silencioso.")
+            log.error("  Se for intencional (mesmo cofator), declare --fad-xml <caminho>.")
+            sys.exit(3)
+    if args.lig_xml is None:
+        args.lig_xml = sub / f"lig_{tagged}_smirnoff.xml"
+        if not args.lig_xml.exists():
+            log.error(f"XML do ligante do alvo {args.target} ausente: {args.lig_xml}")
+            log.error("  Para reusar o XML de outro alvo, declare --lig-xml <caminho>.")
+            sys.exit(3)
+    return target_info, sub, tagged
 
 
 def build_canonical_fad_topology(canonical_template_pdb: Path,
@@ -986,8 +1064,10 @@ def resolve_topology(args) -> Path:
 
 def main():
     p = argparse.ArgumentParser(description="md_clean.py - MD enxuto TryR/FAD/LIG")
-    p.add_argument("--target", default="TcTR", choices=list(TARGET_MAP.keys()),
-                   help="Alvo (TcTR/LiTR/hGR). Default: TcTR")
+    p.add_argument("--target", default="TcTR",
+                   help="Alvo com MD preparada (hoje TcTR/LiTR/hGR). Default TcTR. "
+                        "Alvo sem preparo falha alto (nao cai mais para o default "
+                        "em silencio -- ver resolve_target_paths).")
     p.add_argument("--ns", type=float, default=5.0, help="ns de producao")
     p.add_argument("--tag", default="TcTR", help="Sufixo dos arquivos de saida")
     p.add_argument("--platform", default="CUDA",
@@ -1069,30 +1149,11 @@ def main():
              f"allow_fallback={args.allow_fallback}, fresh={args.fresh}, fast={args.fast}")
     log.info("=" * 70)
 
-    # Resolve paths default por target (TARGET_MAP)
+    # Resolve paths default por target. resolve_target_paths() falha ALTO se o
+    # alvo nao tiver MD preparada ou faltar XML -- nada de fallback silencioso.
     base = ROOT / "docking_project/figures"
     proteins_dir = ROOT / "docking_project/proteins"
-    if args.target not in TARGET_MAP:
-        log.warning(f"Target {args.target} nao mapeado; usando default TcTR.")
-        args.target = "TcTR"
-    target_info = TARGET_MAP[args.target]
-    if args.target == "TcTR":
-        sub = base / "smoke_test_fad"
-    else:
-        sub = base / f"smoke_test_{args.target.lower()}"
-    tagged = args.target
-    if args.complex is None:
-        args.complex = sub / f"complex_{tagged}_initial.pdb"
-    if args.fad_xml is None:
-        args.fad_xml = sub / f"cofactor_FAD_{tagged}.xml"
-        if not args.fad_xml.exists():
-            args.fad_xml = base / "smoke_test_fad" / "cofactor_FAD_TcTR.xml"
-            log.info(f"  reusando FAD XML do TcTR para {args.target}")
-    if args.lig_xml is None:
-        args.lig_xml = sub / f"lig_{tagged}_smirnoff.xml"
-        if not args.lig_xml.exists():
-            args.lig_xml = base / "smoke_test_fad" / "lig_TcTR_smirnoff.xml"
-            log.info(f"  reusando ligante XML do TcTR para {args.target}")
+    target_info, sub, tagged = resolve_target_paths(args, base)
     log.info(f"Target: {args.target} ({target_info['organism']}, "
              f"{target_info['n_fads']} FAD(s) esperado(s))")
     log.info(f"  receptor: {target_info['pdb']}")
@@ -1112,7 +1173,7 @@ def main():
         args.fresh = True
 
     if args.fresh:
-        # FRESH: precisa apenas dos XMLs (PDB do receptor vem do TARGET_MAP)
+        # FRESH: precisa apenas dos XMLs (PDB do receptor vem do registry via target_info)
         for f in (args.fad_xml, args.lig_xml):
             if not f.exists():
                 log.error(f"Arquivo ausente: {f}")
@@ -1124,7 +1185,7 @@ def main():
                 sys.exit(3)
 
     if args.fresh:
-        receptor = args.receptor or (proteins_dir / TARGET_MAP[args.target]["pdb"])
+        receptor = args.receptor or (proteins_dir / target_info["pdb"])
         # NOTA (fix 2026-05-13): por default agora usamos os xtal heavy PDBs
         # (53 atomos canonicos) + template TcTR.pdb (86 atomos canonicos), que
         # batem com cofactor_FAD_TcTR.xml. Os antigos

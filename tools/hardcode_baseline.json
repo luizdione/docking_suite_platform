@@ -1,0 +1,61 @@
+{
+  "total": 538,
+  "per_file": {
+    "dashboard_v2.py": {
+      "composto_sub01": 51,
+      "alvos_do_painel": 67,
+      "classe_quimica": 10,
+      "organismo": 33,
+      "cofator_flavina": 30
+    },
+    "docking_v2.py": {
+      "composto_sub01": 3,
+      "alvos_do_painel": 17,
+      "classe_quimica": 1,
+      "organismo": 8,
+      "cofator_flavina": 17
+    },
+    "md_simulation.py": {
+      "composto_sub01": 3,
+      "alvos_do_painel": 18,
+      "classe_quimica": 1,
+      "organismo": 1,
+      "cofator_flavina": 54
+    },
+    "target_selector.py": {
+      "composto_sub01": 5,
+      "alvos_do_painel": 30,
+      "classe_quimica": 4,
+      "organismo": 35,
+      "cofator_flavina": 8
+    },
+    "compound_db.py": {
+      "composto_sub01": 10,
+      "alvos_do_painel": 1,
+      "classe_quimica": 13,
+      "organismo": 4,
+      "cofator_flavina": 0
+    },
+    "populate_ligand_db.py": {
+      "composto_sub01": 3,
+      "alvos_do_painel": 1,
+      "classe_quimica": 27,
+      "organismo": 11,
+      "cofator_flavina": 0
+    },
+    "export_web.py": {
+      "composto_sub01": 7,
+      "alvos_do_painel": 18,
+      "classe_quimica": 3,
+      "organismo": 7,
+      "cofator_flavina": 8
+    },
+    "analysis.py": {
+      "composto_sub01": 3,
+      "alvos_do_painel": 5,
+      "classe_quimica": 7,
+      "organismo": 14,
+      "cofator_flavina": 0
+    }
+  }
+}

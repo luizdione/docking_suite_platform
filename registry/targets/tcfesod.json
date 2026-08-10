@@ -1,0 +1,63 @@
+{
+  "schema_version": "2.0",
+  "id": "TcFeSOD",
+  "aliases": [
+    "4DVH"
+  ],
+  "name": "Fe-Superoxide Dismutase",
+  "organism": "Trypanosoma cruzi",
+  "category": "parasite",
+  "ortholog_of": "hMnSOD",
+  "structure": {
+    "source": "pdb",
+    "pdb_id": "4DVH",
+    "assembly": null,
+    "n_protomers_required": 1,
+    "local_file": null,
+    "confidence": null,
+    "resolution_A": "1.50 A"
+  },
+  "chemistry": {
+    "keep_cofactors": [
+      "FE",
+      "FE2"
+    ],
+    "essential_cofactors": [
+      "FE",
+      "FE2"
+    ],
+    "cofactor_source": "crystal",
+    "nonstandard_residues": [],
+    "protonation_pH": 7.4
+  },
+  "sites": {
+    "metal_active_site": {
+      "definition": "metal_center",
+      "box_size_A": [
+        22,
+        22,
+        22
+      ],
+      "box_policy": "fixed",
+      "fallback_residues": [
+        "HIS26",
+        "HIS73",
+        "ASP156",
+        "HIS160"
+      ],
+      "residue_numbering_reference": "4DVH"
+    }
+  },
+  "default_site": "metal_active_site",
+  "notes": "Fe is ESSENTIAL. Apo structure - grid on Fe active site.",
+  "literature": "Mateo 2008.",
+  "provenance": {
+    "generated_from": "docking_v2.TARGET_DB",
+    "generator": "tools/export_target_db_to_registry.py"
+  },
+  "notes_pt": "Diretamente relacionada ao estresse oxidativo. Fe-SOD e a principal defesa contra O2.- no parasito. Ausente em humanos (que usam Cu/Zn-SOD e Mn-SOD). Inibicao potencializa dano oxidativo da naftoquinona - sinergia com dados de ROS.",
+  "references": [
+    "Mateo et al., 2008, Mol Biochem Parasitol"
+  ],
+  "name_en": "Iron Superoxide Dismutase (Fe-SOD)"
+}

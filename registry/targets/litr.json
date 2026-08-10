@@ -1,0 +1,66 @@
+{
+  "schema_version": "2.0",
+  "id": "LiTR",
+  "aliases": [
+    "2JK6"
+  ],
+  "name": "Trypanothione Reductase",
+  "organism": "Leishmania infantum (proxy for L. amazonensis, 95% identity)",
+  "category": "parasite",
+  "ortholog_of": "hGR",
+  "structure": {
+    "source": "pdb",
+    "pdb_id": "2JK6",
+    "assembly": null,
+    "n_protomers_required": 1,
+    "local_file": null,
+    "confidence": null,
+    "resolution_A": "2.95 A",
+    "cofactor_copies": {"FAD": 2}
+  },
+  "chemistry": {
+    "keep_cofactors": [
+      "FAD"
+    ],
+    "essential_cofactors": [
+      "FAD"
+    ],
+    "cofactor_source": "crystal",
+    "nonstandard_residues": [],
+    "protonation_pH": 7.4
+  },
+  "sites": {
+    "orthosteric": {
+      "definition": "ligand_center",
+      "box_size_A": [
+        25,
+        25,
+        25
+      ],
+      "box_policy": "fixed",
+      "ligand_resnames": [
+        "TS2",
+        "TS4",
+        "FAD"
+      ],
+      "fallback_residues": [
+        "CYS52",
+        "CYS57",
+        "HIS461"
+      ],
+      "residue_numbering_reference": "2JK6"
+    }
+  },
+  "default_site": "orthosteric",
+  "notes": "NO crystal structure exists for L. amazonensis TR. 2JK6 (L. infantum) is the standard proxy (95% identity). Camargo et al. (Sci Rep, 2023) used this approach for L. amazonensis. FAD is ESSENTIAL - grid centered on flavin ring near active site.",
+  "literature": "Baiocco 2009; Camargo/Sci Rep 2023 for L. amazonensis.",
+  "provenance": {
+    "generated_from": "docking_v2.TARGET_DB",
+    "generator": "tools/export_target_db_to_registry.py"
+  },
+  "notes_pt": "Ortologo da TcTR em Leishmania. Mesmo mecanismo - essencial para manutencao do sistema tiol-dependente. Permite comparacao direta T. cruzi vs Leishmania no manuscrito.",
+  "references": [
+    "Baiocco et al., 2009, Structure"
+  ],
+  "name_en": "Trypanothione Reductase"
+}

@@ -1,0 +1,35 @@
+{
+  "schema_version": "2.0",
+  "id": "2-br-nq",
+  "name": "2-Br-NQ",
+  "display_name": "2-Bromo-1,4-naftoquinona",
+  "smiles": "O=C1C=C(Br)C(=O)c2ccccc21",
+  "formula": "C10H5BrO2",
+  "mw_g_mol": 237.052,
+  "heavy_atoms": 13,
+  "charge": 0,
+  "class": "naphthoquinone",
+  "chemotype_tags": [
+    "naphthoquinone"
+  ],
+  "topology": {
+    "is_macrocycle": false,
+    "largest_ring_size": null,
+    "expected_active_torsions": 0
+  },
+  "prep": {
+    "optimization": "MMFF94 (1000 steps conjugate gradients)",
+    "protonation": null,
+    "pdbqt": {
+      "tool": "openbabel"
+    },
+    "gates": []
+  },
+  "notes": "Eletrofílico; IC50 ~0,8–2 µM vs T. cruzi (De Castro et al.).",
+  "provenance": {
+    "generated_from": "compound_db + docking_project/ligand/*/metadata.json",
+    "generator": "tools/export_compound_db_to_registry.py",
+    "date_added": "2026-07-04",
+    "has_prepared_pdbqt": false
+  }
+}

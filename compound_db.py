@@ -67,9 +67,28 @@ DEFAULT_COMPOUND = {
 # CORE FUNCTIONS
 # =============================================================================
 
-def get_ligand_dir(compound_name: str) -> Path:
+def _ligand_root(base_dir=None, campaign_id=None) -> Path:
+    """Raiz da biblioteca de ligantes.
+
+    BASE_DIR/LIGAND_DIR sao resolvidos no import, o que basta enquanto ha uma
+    campanha so. Com duas campanhas servidas pelo mesmo processo (raizes de
+    dados diferentes), um valor de modulo devolveria a arvore errada -- dai o
+    parametro. Sem argumento, o comportamento e exatamente o de antes.
+    """
+    if base_dir:
+        return Path(base_dir) / "ligand"
+    if campaign_id:
+        try:
+            import paths
+            return paths.data_root(campaign_id) / "ligand"
+        except Exception:
+            pass
+    return LIGAND_DIR
+
+
+def get_ligand_dir(compound_name: str, base_dir=None, campaign_id=None) -> Path:
     """Return the directory for a given compound."""
-    return LIGAND_DIR / _safe_name(compound_name)
+    return _ligand_root(base_dir, campaign_id) / _safe_name(compound_name)
 
 
 def _safe_name(name) -> str:
@@ -94,15 +113,16 @@ def _safe_name(name) -> str:
     return safe
 
 
-def list_compounds() -> list[dict]:
+def list_compounds(base_dir=None, campaign_id=None) -> list[dict]:
     """
     Scan docking_project/ligand/ and return all compounds with their metadata.
     Returns list of metadata dicts, sorted by date_added then name.
     """
     compounds = []
-    if not LIGAND_DIR.exists():
+    ligand_root = _ligand_root(base_dir, campaign_id)
+    if not ligand_root.exists():
         return compounds
-    for subdir in sorted(LIGAND_DIR.iterdir()):
+    for subdir in sorted(ligand_root.iterdir()):
         if not subdir.is_dir():
             continue
         meta_path = subdir / "metadata.json"
@@ -130,13 +150,13 @@ def list_compounds() -> list[dict]:
     return compounds
 
 
-def load_compound(name: str) -> dict | None:
+def load_compound(name: str, base_dir=None, campaign_id=None) -> dict | None:
     """Load metadata for a specific compound. Returns None if not found."""
-    cdir = get_ligand_dir(name)
+    cdir = get_ligand_dir(name, base_dir, campaign_id)
     meta_path = cdir / "metadata.json"
     if not meta_path.exists():
         # Try scanning all compounds by name field
-        for c in list_compounds():
+        for c in list_compounds(base_dir, campaign_id):
             if c.get("name", "").lower() == name.lower():
                 return c
         return None
@@ -148,9 +168,9 @@ def load_compound(name: str) -> dict | None:
     return meta
 
 
-def get_pdbqt_path(compound_name: str) -> Path | None:
+def get_pdbqt_path(compound_name: str, base_dir=None, campaign_id=None) -> Path | None:
     """Return path to the .pdbqt file for a compound, or None if missing."""
-    cdir = get_ligand_dir(compound_name)
+    cdir = get_ligand_dir(compound_name, base_dir, campaign_id)
     pdbqt_files = list(cdir.glob("*.pdbqt"))
     if pdbqt_files:
         return pdbqt_files[0]
@@ -454,7 +474,9 @@ def get_latest_results(base_dir: str | Path, compound_name: str) -> dict | None:
     safe_c = _safe_name(compound_name)
     rf     = base / "results" / safe_c / "results.json"
     if rf.exists():
-        with open(rf) as f:
+        # encoding explicito: sem ele o Windows abre em cp1252 e um resultado
+        # com acento em qualquer campo de texto estoura UnicodeDecodeError
+        with open(rf, encoding="utf-8") as f:
             return json.load(f)
     return None
 

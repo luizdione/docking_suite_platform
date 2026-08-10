@@ -1,0 +1,65 @@
+{
+  "schema_version": "2.0",
+  "id": "TcTR",
+  "aliases": [
+    "1BZL"
+  ],
+  "name": "Trypanothione Reductase",
+  "organism": "Trypanosoma cruzi",
+  "category": "parasite",
+  "ortholog_of": "hGR",
+  "structure": {
+    "source": "pdb",
+    "pdb_id": "1BZL",
+    "assembly": null,
+    "n_protomers_required": 1,
+    "local_file": null,
+    "confidence": null,
+    "resolution_A": "2.40 A",
+    "cofactor_copies": {"FAD": 2}
+  },
+  "chemistry": {
+    "keep_cofactors": [
+      "FAD"
+    ],
+    "essential_cofactors": [
+      "FAD"
+    ],
+    "cofactor_source": "crystal",
+    "nonstandard_residues": [],
+    "protonation_pH": 7.4
+  },
+  "sites": {
+    "orthosteric": {
+      "definition": "ligand_center",
+      "box_size_A": [
+        25,
+        25,
+        25
+      ],
+      "box_policy": "fixed",
+      "ligand_resnames": [
+        "TS2",
+        "TS4"
+      ],
+      "fallback_residues": [
+        "CYS52",
+        "CYS57",
+        "HIS461"
+      ],
+      "residue_numbering_reference": "1BZL"
+    }
+  },
+  "default_site": "orthosteric",
+  "notes": "FAD is ESSENTIAL. Grid centered on trypanothione binding site.",
+  "literature": "Krauth-Siegel 2003; PDB has FAD + TS2 co-crystal.",
+  "provenance": {
+    "generated_from": "docking_v2.TARGET_DB",
+    "generator": "tools/export_target_db_to_registry.py"
+  },
+  "notes_pt": "Alvo classico e validado. Ausente em mamiferos (humanos usam glutationa redutase). Diretamente coerente com dados de estresse oxidativo - inibicao da TcTR compromete defesa antioxidante tiol-dependente do parasito, explicando aumento de ROS.",
+  "references": [
+    "Krauth-Siegel et al., 2003, Antioxid Redox Signal"
+  ],
+  "name_en": "Trypanothione Reductase"
+}

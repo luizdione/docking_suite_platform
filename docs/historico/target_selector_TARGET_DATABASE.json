@@ -1,0 +1,301 @@
+{
+  "_meta": {
+    "source": "target_selector.py TARGET_DATABASE",
+    "archived_by": "tools/migrate_target_selector.py",
+    "warning": "Arquivo de memoria. Os grid_center aqui sao FIXOS e nao confiaveis: foram substituidos pelo calculo dinamico de _calculate_grid_center() sobre o co-cristal. Nao reintroduzir.",
+    "targets_never_in_panel": [
+      "TcNDH2",
+      "LmTR"
+    ]
+  },
+  "targets": {
+    "1": {
+      "id": "TcTR",
+      "pdb": "1BZL",
+      "resolution": "2.40 A",
+      "organism": "T. cruzi",
+      "target_name": "Tripanotiona Redutase (TcTR)",
+      "target_name_en": "Trypanothione Reductase",
+      "category": "parasite",
+      "justification": "Alvo classico e validado. Ausente em mamiferos (humanos usam glutationa redutase). Diretamente coerente com dados de estresse oxidativo - inibicao da TcTR compromete defesa antioxidante tiol-dependente do parasito, explicando aumento de ROS.",
+      "cofactor": "FAD, NADPH",
+      "ligand_in_pdb": "Tripanotiona (TS2)",
+      "grid_center": [
+        15.0,
+        -2.0,
+        -18.0
+      ],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "human_ortholog": "hGR",
+      "references": "Krauth-Siegel et al., 2003, Antioxid Redox Signal"
+    },
+    "2": {
+      "id": "TcCruzain",
+      "pdb": "3KKU",
+      "resolution": "1.28 A",
+      "organism": "T. cruzi",
+      "target_name": "Cruzaina (cisteino-protease)",
+      "target_name_en": "Cruzain (cysteine protease)",
+      "category": "parasite",
+      "justification": "Principal cisteino-protease de T. cruzi. Essencial para sobrevivencia, nutricao e evasao imune do parasito. Co-cristal com inibidor covalente disponivel (excelente para validacao).",
+      "cofactor": "Nenhum",
+      "ligand_in_pdb": "Inibidor vinilsulfona (K11)",
+      "grid_center": [
+        5.0,
+        10.0,
+        15.0
+      ],
+      "grid_size": [
+        22,
+        22,
+        22
+      ],
+      "human_ortholog": "hCatL",
+      "references": "McKerrow et al., 2009, Bioorg Med Chem"
+    },
+    "3": {
+      "id": "TcFeSOD",
+      "pdb": "4DVH",
+      "resolution": "1.50 A",
+      "organism": "T. cruzi",
+      "target_name": "Ferro-Superoxido Dismutase (Fe-SOD)",
+      "target_name_en": "Iron Superoxide Dismutase (Fe-SOD)",
+      "category": "parasite",
+      "justification": "Diretamente relacionada ao estresse oxidativo. Fe-SOD e a principal defesa contra O2.- no parasito. Ausente em humanos (que usam Cu/Zn-SOD e Mn-SOD). Inibicao potencializa dano oxidativo da naftoquinona - sinergia com dados de ROS.",
+      "cofactor": "Fe2+/Fe3+",
+      "ligand_in_pdb": "Nenhum (apo)",
+      "grid_center": [
+        30.0,
+        45.0,
+        25.0
+      ],
+      "grid_size": [
+        22,
+        22,
+        22
+      ],
+      "human_ortholog": "hMnSOD",
+      "references": "Mateo et al., 2008, Mol Biochem Parasitol"
+    },
+    "4": {
+      "id": "TcNDH2",
+      "pdb": "5JWA",
+      "resolution": "2.60 A",
+      "organism": "T. cruzi",
+      "target_name": "NADH desidrogenase tipo II (NDH2)",
+      "target_name_en": "Type II NADH Dehydrogenase (NDH2)",
+      "category": "parasite",
+      "justification": "NADH-fumarato redutase mitocondrial / NADH desidrogenase tipo II. Ausente em mamiferos. Componente da cadeia respiratoria alternativa de tripanossomatideos. Coerente com dados de estresse oxidativo - naftoquinonas podem desviar eletrons gerando ROS mitocondrial. NOTA: PDB 5JWA e de Caldalkalibacillus (melhor estrutura disponivel); usar como modelo por homologia se necessario.",
+      "cofactor": "FAD, UQ (ubiquinona)",
+      "ligand_in_pdb": "UQ1",
+      "grid_center": [
+        25.0,
+        20.0,
+        15.0
+      ],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "human_ortholog": null,
+      "references": "Verner et al., 2011, Int J Parasitol"
+    },
+    "5": {
+      "id": "LiTR",
+      "pdb": "2JK6",
+      "resolution": "2.95 A",
+      "organism": "Leishmania infantum",
+      "target_name": "Tripanotiona Redutase (LiTR)",
+      "target_name_en": "Trypanothione Reductase",
+      "category": "parasite",
+      "justification": "Ortologo da TcTR em Leishmania. Mesmo mecanismo - essencial para manutencao do sistema tiol-dependente. Permite comparacao direta T. cruzi vs Leishmania no manuscrito.",
+      "cofactor": "FAD, NADPH",
+      "ligand_in_pdb": "Tripanotiona",
+      "grid_center": [
+        10.5,
+        3.0,
+        -14.0
+      ],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "human_ortholog": "hGR",
+      "references": "Baiocco et al., 2009, Structure"
+    },
+    "6": {
+      "id": "LmTR",
+      "pdb": "2W0H",
+      "resolution": "2.60 A",
+      "organism": "Leishmania major",
+      "target_name": "Tripanotiona Redutase (LmTR)",
+      "target_name_en": "Trypanothione Reductase (L. major)",
+      "category": "parasite",
+      "justification": "Alternativa ao LiTR com especie diferente (L. major). Util se quiser mostrar conservacao do binding entre especies.",
+      "cofactor": "FAD, NADPH",
+      "ligand_in_pdb": "Inibidor",
+      "grid_center": [
+        12.0,
+        5.0,
+        -12.0
+      ],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "human_ortholog": "hGR",
+      "references": "Khan, 2007, J Mol Graph Model"
+    },
+    "7": {
+      "id": "LmPTR1",
+      "pdb": "1E7W",
+      "resolution": "2.20 A",
+      "organism": "Leishmania major",
+      "target_name": "Pteridina Redutase 1 (PTR1)",
+      "target_name_en": "Pteridine Reductase 1 (PTR1)",
+      "category": "parasite",
+      "justification": "Alvo validado com excelentes estruturas cristalograficas. Essencial para metabolismo de pteridinas/folatos. Bypass da via DHFR - resistencia a antifolatos. Varias co-estruturas com inibidores disponiveis para validacao do protocolo.",
+      "cofactor": "NADPH",
+      "ligand_in_pdb": "Methotrexato (MTX)",
+      "grid_center": [
+        25.0,
+        30.0,
+        15.0
+      ],
+      "grid_size": [
+        22,
+        22,
+        22
+      ],
+      "human_ortholog": null,
+      "references": "Gourley et al., 2001, Nat Struct Biol"
+    },
+    "8": {
+      "id": "LmDHODH",
+      "pdb": "3C61",
+      "resolution": "2.13 A",
+      "organism": "Leishmania donovani",
+      "target_name": "Diidroorotato Desidrogenase (DHODH)",
+      "target_name_en": "Dihydroorotate Dehydrogenase (DHODH)",
+      "category": "parasite",
+      "justification": "Enzima da via de biossintese de pirimidinas. Alvo emergente para tripanossomatideos. Usa ubiquinona como aceptor de eletrons - naftoquinonas podem competir como analogos. Estruturalmente distinta da DHODH humana.",
+      "cofactor": "FMN, Ubiquinona",
+      "ligand_in_pdb": "Orotato (ORO)",
+      "grid_center": [
+        -34.34,
+        21.12,
+        -2.42
+      ],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "human_ortholog": "hDHODH",
+      "references": "Pinheiro et al., 2013, Biochemistry"
+    },
+    "9": {
+      "id": "hGR",
+      "pdb": "3DJJ",
+      "resolution": "1.05 A",
+      "organism": "H. sapiens",
+      "target_name": "Glutationa Redutase (hGR)",
+      "target_name_en": "Glutathione Reductase",
+      "category": "human",
+      "justification": "Contraparte humana da tripanotiona redutase. Usa glutationa em vez de tripanotiona. Diferenca estrutural no sitio ativo (mais estreito) e a base molecular da seletividade.",
+      "cofactor": "FAD, NADPH",
+      "ligand_in_pdb": "FAD/NADPH (sem GSSG; grid no par catalitico Cys58/Cys63)",
+      "grid_center": [
+        20.48,
+        14.94,
+        25.71
+      ],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "human_ortholog": null,
+      "references": "Karplus & Schulz, 1987, J Mol Biol"
+    },
+    "10": {
+      "id": "hCatL",
+      "pdb": "2XU3",
+      "resolution": "1.40 A",
+      "organism": "H. sapiens",
+      "target_name": "Catepsina L humana",
+      "target_name_en": "Cathepsin L",
+      "category": "human",
+      "justification": "Contraparte humana da cruzaina. Comparacao direta de seletividade entre cisteino-proteases parasitaria vs hospedeiro.",
+      "cofactor": "Nenhum",
+      "ligand_in_pdb": "Inibidor",
+      "grid_center": [
+        10.0,
+        15.0,
+        20.0
+      ],
+      "grid_size": [
+        22,
+        22,
+        22
+      ],
+      "human_ortholog": null,
+      "references": "Turk et al., 2012, Biochim Biophys Acta"
+    },
+    "11": {
+      "id": "hDHODH",
+      "pdb": "1D3H",
+      "resolution": "1.60 A",
+      "organism": "H. sapiens",
+      "target_name": "DHODH humana",
+      "target_name_en": "Dihydroorotate Dehydrogenase",
+      "category": "human",
+      "justification": "Contraparte humana da DHODH de Leishmania. Diferencas no sitio de ligacao da ubiquinona permitem seletividade.",
+      "cofactor": "FMN, Ubiquinona",
+      "ligand_in_pdb": "Brequinar",
+      "grid_center": [
+        25.0,
+        20.0,
+        15.0
+      ],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "human_ortholog": null,
+      "references": "Liu et al., 2000, Structure"
+    },
+    "12": {
+      "id": "hMnSOD",
+      "pdb": "1LUV",
+      "resolution": "1.85 A",
+      "organism": "H. sapiens",
+      "target_name": "Mn-Superoxido Dismutase (MnSOD)",
+      "target_name_en": "Manganese Superoxide Dismutase",
+      "category": "human",
+      "justification": "Contraparte humana da Fe-SOD de T. cruzi. Usa Mn em vez de Fe como cofator - diferenca no sitio ativo permite seletividade. Comparacao Fe-SOD vs MnSOD e classica.",
+      "cofactor": "Mn3+/Mn2+",
+      "ligand_in_pdb": "Nenhum (apo)",
+      "grid_center": [
+        28.0,
+        32.0,
+        20.0
+      ],
+      "grid_size": [
+        22,
+        22,
+        22
+      ],
+      "human_ortholog": null,
+      "references": "Borgstahl et al., 1992, Cell"
+    }
+  }
+}

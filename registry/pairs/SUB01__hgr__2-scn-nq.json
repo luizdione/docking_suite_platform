@@ -1,0 +1,51 @@
+{
+  "schema_version": "2.0",
+  "campaign": "SUB01",
+  "target": "hGR",
+  "ligand": "2-scn-nq",
+  "site": "orthosteric",
+  "role": "counter_target",
+
+  "assembly_state": {
+    "required": "dimer",
+    "min_protomers": 2,
+    "site_topology": "intraprotomer",
+    "rationale": "Homodimero, ortologo humano da TR."
+  },
+
+  "cofactor_requirement": {
+    "required": ["FAD"],
+    "rationale": "A comparacao de seletividade so e valida se o contra-alvo for preparado com o mesmo cofator do alvo."
+  },
+
+  "selectivity": {
+    "compared_against": ["TcTR", "LiTR"],
+    "expectation": "menor afinidade que nos alvos parasitarios",
+    "rationale": "hGR e o ortologo humano; e o contra-alvo que sustenta a alegacao de seletividade do manuscrito."
+  },
+
+  "experimental_kd": [],
+  "_experimental_kd_todo": "Ver SUB01__tctr__2-scn-nq.json.",
+
+  "engines": {
+    "primary_pose": "vina",
+    "secondary_pose": null,
+    "affinity_estimator_reliable": true
+  },
+
+  "validation": {
+    "redock_reference_pdb": "3DJJ",
+    "rmsd_function": "CalcRMS",
+    "rmsd_function_forbidden": ["GetBestRMS"],
+    "rmsd_pass_A": 2.0,
+    "training_leakage": null,
+    "reporting": { "scale": "continuous" }
+  },
+
+  "protocols": {
+    "docking": "vina_exh32",
+    "md": "md_ff14sb_hmr_300k"
+  },
+
+  "status": { "docking": "done", "md": "done" }
+}

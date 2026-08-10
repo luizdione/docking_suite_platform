@@ -1,0 +1,7 @@
+{
+  "_note": "Overrides declarativos de executaveis externos, lidos por engines/toolchain.py (find_tool: cascata PATH -> ESTE arquivo -> heuristica conda). Registrar aqui um binario que NAO esta no PATH torna a resolucao independente do CWD. Cada valor pode ser uma string (caminho) ou {\"path\": \"...\"}. Caminho inexistente e ignorado (cai no proximo passo da cascata), entao um override especifico desta maquina e seguro num arquivo versionado.",
+  "vina": {
+    "path": "C:/Users/luizd/OneDrive/Data_Science/Projetos/docking/vina.exe",
+    "_note": "AutoDock Vina fora do PATH e do repo; vivia so no CWD do OneDrive. Registrado para o runner achar de qualquer CWD (execucao real via /api/run sem dry-run)."
+  }
+}

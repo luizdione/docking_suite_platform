@@ -1,0 +1,35 @@
+{
+  "schema_version": "2.0",
+  "id": "nq-acr",
+  "name": "NQ-ACR",
+  "display_name": "NQ-Acridina (mepacrina-mimétic)",
+  "smiles": "O=C1C=C(NCCCNc3c4ccccc4nc4ccccc34)C(=O)c2ccccc21",
+  "formula": "C26H21N3O2",
+  "mw_g_mol": 407.473,
+  "heavy_atoms": 31,
+  "charge": 0,
+  "class": "naphthoquinone",
+  "chemotype_tags": [
+    "naphthoquinone"
+  ],
+  "topology": {
+    "is_macrocycle": false,
+    "largest_ring_size": null,
+    "expected_active_torsions": 6
+  },
+  "prep": {
+    "optimization": "MMFF94 (1000 steps conjugate gradients)",
+    "protonation": null,
+    "pdbqt": {
+      "tool": "openbabel"
+    },
+    "gates": []
+  },
+  "notes": "Dual design: NQ + acridina; substrato subversivo + inibidor TR sítio Z.",
+  "provenance": {
+    "generated_from": "compound_db + docking_project/ligand/*/metadata.json",
+    "generator": "tools/export_compound_db_to_registry.py",
+    "date_added": "2026-07-04",
+    "has_prepared_pdbqt": false
+  }
+}

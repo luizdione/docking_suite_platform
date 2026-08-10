@@ -1,0 +1,35 @@
+{
+  "schema_version": "2.0",
+  "id": "2-oh-nq",
+  "name": "2-OH-NQ",
+  "display_name": "Lawsona (2-OH-1,4-NQ)",
+  "smiles": "O=C1C=C(O)C(=O)c2ccccc21",
+  "formula": "C10H6O3",
+  "mw_g_mol": 174.155,
+  "heavy_atoms": 13,
+  "charge": 0,
+  "class": "naphthoquinone",
+  "chemotype_tags": [
+    "naphthoquinone"
+  ],
+  "topology": {
+    "is_macrocycle": false,
+    "largest_ring_size": null,
+    "expected_active_torsions": 0
+  },
+  "prep": {
+    "optimization": "MMFF94 (1000 steps conjugate gradients)",
+    "protonation": null,
+    "pdbqt": {
+      "tool": "openbabel"
+    },
+    "gates": []
+  },
+  "notes": "Produto natural; atividade antiparasitária documentada.",
+  "provenance": {
+    "generated_from": "compound_db + docking_project/ligand/*/metadata.json",
+    "generator": "tools/export_compound_db_to_registry.py",
+    "date_added": "2026-07-04",
+    "has_prepared_pdbqt": false
+  }
+}

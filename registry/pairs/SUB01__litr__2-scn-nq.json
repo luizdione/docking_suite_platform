@@ -1,0 +1,54 @@
+{
+  "schema_version": "2.0",
+  "campaign": "SUB01",
+  "target": "LiTR",
+  "ligand": "2-scn-nq",
+  "site": "orthosteric",
+  "role": "primary_target",
+
+  "assembly_state": {
+    "required": "dimer",
+    "min_protomers": 2,
+    "site_topology": "intraprotomer",
+    "rationale": "Homodimero, como a TcTR."
+  },
+
+  "cofactor_requirement": {
+    "required": ["FAD"],
+    "rationale": "Mesma hipotese de ligacao na si-face do flavina."
+  },
+
+  "species_proxy": {
+    "is_proxy": true,
+    "structure_species": "Leishmania infantum",
+    "intended_species": "Leishmania amazonensis",
+    "identity_pct": 95,
+    "rationale": "Nao existe estrutura cristalografica de TR de L. amazonensis. 2JK6 (L. infantum) e o proxy padrao do campo.",
+    "literature": "Baiocco 2009; Camargo et al., Sci Rep 2023, usou a mesma abordagem para L. amazonensis."
+  },
+
+  "experimental_kd": [],
+  "_experimental_kd_todo": "Ver SUB01__tctr__2-scn-nq.json.",
+
+  "engines": {
+    "primary_pose": "vina",
+    "secondary_pose": null,
+    "affinity_estimator_reliable": true
+  },
+
+  "validation": {
+    "redock_reference_pdb": "2JK6",
+    "rmsd_function": "CalcRMS",
+    "rmsd_function_forbidden": ["GetBestRMS"],
+    "rmsd_pass_A": 2.0,
+    "training_leakage": null,
+    "reporting": { "scale": "continuous" }
+  },
+
+  "protocols": {
+    "docking": "vina_exh32",
+    "md": "md_ff14sb_hmr_300k"
+  },
+
+  "status": { "docking": "done", "md": "done" }
+}

@@ -287,3 +287,9 @@ no `.gitignore`.
 - Ao editar `dashboard_v2.py` (arquivo grande, com HTML/JS embutido), **suba o app e teste a
   rota afetada** antes de commitar (Flask `test_client` cobre rotas sem GPU/rede).
 - Toda figura/saída de compostos vai para `figures/<composto>/` (ver `compound_db.py`).
+## Instruções de Compactação
+Ao compactar (`/compact`) esta sessão, **preserve**:
+- o objetivo/tarefa atual e as decisões já tomadas;
+- os arquivos criados/modificados e os próximos passos pendentes.
+O estado detalhado da sessão fica em `docs/historico/CONTEXTO_SESSAO.md` —
+releia esse arquivo ao retomar após `/compact`, `/clear` ou `/branch`.

@@ -1,0 +1,70 @@
+{
+  "schema_version": "2.0",
+  "id": "LmPTR1",
+  "aliases": [
+    "2QHX"
+  ],
+  "name": "Pteridine Reductase 1 (PTR1)",
+  "organism": "Leishmania major",
+  "category": "parasite",
+  "ortholog_of": null,
+  "structure": {
+    "source": "pdb",
+    "pdb_id": "2QHX",
+    "assembly": null,
+    "n_protomers_required": 1,
+    "local_file": null,
+    "confidence": null,
+    "resolution_A": "2.20 A"
+  },
+  "chemistry": {
+    "keep_cofactors": [
+      "NAP",
+      "NDP",
+      "FAD"
+    ],
+    "essential_cofactors": [
+      "NAP",
+      "NDP",
+      "FAD"
+    ],
+    "cofactor_source": "crystal",
+    "nonstandard_residues": [],
+    "protonation_pH": 7.4
+  },
+  "sites": {
+    "orthosteric": {
+      "definition": "ligand_center",
+      "box_size_A": [
+        22,
+        22,
+        22
+      ],
+      "box_policy": "fixed",
+      "ligand_resnames": [
+        "6QA",
+        "MTX",
+        "TAQ",
+        "DHB"
+      ],
+      "fallback_residues": [
+        "PHE113",
+        "TYR194",
+        "SER111"
+      ],
+      "residue_numbering_reference": "2QHX"
+    }
+  },
+  "default_site": "orthosteric",
+  "notes": "NADPH is ESSENTIAL - it forms part of the active site. 2QHX has co-crystal with pteridine inhibitor (best for grid). Alternative: 1E7W (methotrexate complex).",
+  "literature": "Gourley 2001; Dawson 2006; Hardy 2005.",
+  "provenance": {
+    "generated_from": "docking_v2.TARGET_DB",
+    "generator": "tools/export_target_db_to_registry.py"
+  },
+  "notes_pt": "Alvo validado com excelentes estruturas cristalograficas. Essencial para metabolismo de pteridinas/folatos. Bypass da via DHFR - resistencia a antifolatos. Varias co-estruturas com inibidores disponiveis para validacao do protocolo.",
+  "references": [
+    "Gourley et al., 2001, Nat Struct Biol"
+  ],
+  "name_en": "Pteridine Reductase 1 (PTR1)"
+}

@@ -1,0 +1,35 @@
+{
+  "schema_version": "2.0",
+  "id": "2-triazol-nq",
+  "name": "2-triazol-NQ",
+  "display_name": "2-(1,2,4-Triazol-1-il)-NQ",
+  "smiles": "O=C1C=C(n2cnnn2)C(=O)c2ccccc21",
+  "formula": "C11H6N4O2",
+  "mw_g_mol": 226.195,
+  "heavy_atoms": 17,
+  "charge": 0,
+  "class": "naphthoquinone",
+  "chemotype_tags": [
+    "naphthoquinone"
+  ],
+  "topology": {
+    "is_macrocycle": false,
+    "largest_ring_size": null,
+    "expected_active_torsions": 1
+  },
+  "prep": {
+    "optimization": "MMFF94 (1000 steps conjugate gradients)",
+    "protonation": null,
+    "pdbqt": {
+      "tool": "openbabel"
+    },
+    "gates": []
+  },
+  "notes": "Bahia et al. 2016 MedChemComm; IC50 0,8–3,1 µM T. cruzi.",
+  "provenance": {
+    "generated_from": "compound_db + docking_project/ligand/*/metadata.json",
+    "generator": "tools/export_compound_db_to_registry.py",
+    "date_added": "2026-07-04",
+    "has_prepared_pdbqt": false
+  }
+}

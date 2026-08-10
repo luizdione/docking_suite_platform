@@ -1,0 +1,29 @@
+{
+  "schema_version": "2.0",
+  "id": "boltz2_5samples",
+  "engine": "boltz2",
+  "name": "Boltz-2, 5 amostras de difusao, MSA com contencao de VRAM",
+  "capabilities": ["pose", "affinity"],
+  "params": {
+    "diffusion_samples": 5,
+    "max_parallel_samples": 1,
+    "output_format": "mmcif",
+    "write_full_pae": true,
+    "use_msa_server": true,
+    "msa_ladder": [
+      { "step": "completo", "max_msa_seqs": null },
+      { "step": "msa_1024", "max_msa_seqs": 1024, "subsample_msa": true },
+      { "step": "msa_256", "max_msa_seqs": 256, "num_subsampled_msa": 256, "subsample_msa": true }
+    ],
+    "no_kernels": true
+  },
+  "verdict_rule": {
+    "method": "vote_over_diffusion_samples",
+    "n_samples": 5,
+    "threshold": "k/5 >= 0.5 de recuperacao do sitio",
+    "forbidden": "model_0_only"
+  },
+  "training_cutoff": "2023-06-01",
+  "notes": "model_0 e estatistica de ordem, nao 'a resposta': ler so o model_0 foi sistematicamente enganoso. A escada de MSA sobe um degrau apenas quando o stderr acusa OOM, e o degrau usado fica registrado para a secao de Metodos. A confiabilidade da cabeca de afinidade e decidida POR PAR (pair.engines.affinity_estimator_reliable), nao aqui.",
+  "literature": "Passaro et al. 2025 (Boltz-2)."
+}

@@ -1,0 +1,50 @@
+{
+  "schema_version": "2.0",
+  "campaign": "SUB01",
+  "target": "TcTR",
+  "ligand": "2-scn-nq",
+  "site": "orthosteric",
+  "role": "primary_target",
+
+  "assembly_state": {
+    "required": "dimer",
+    "min_protomers": 2,
+    "site_topology": "intraprotomer",
+    "rationale": "A tripanotiona redutase e um homodimero funcional; o sitio ativo se forma com contribuicao das duas cadeias. Docar no monomero perde parte da parede do sitio."
+  },
+
+  "cofactor_requirement": {
+    "required": ["FAD"],
+    "rationale": "O FAD nao e acessorio: a hipotese do estudo e ligacao na si-face do flavina. Remover o FAD apaga o sitio de interesse."
+  },
+
+  "experimental_kd": [],
+  "_experimental_kd_todo": "Os valores de IC50/toxicidade do 2-SCN-NQ estao hoje embutidos na string HTML do dashboard (abas de toxicidade). Migram para ca na Fase 5.3, com 'state' obrigatorio e PMID. Nao preencher a mao antes de conferir contra o manuscrito submetido.",
+
+  "engines": {
+    "primary_pose": "vina",
+    "secondary_pose": null,
+    "affinity_estimator_reliable": true,
+    "affinity_estimator_note": "Score do Vina usado como ranking relativo dentro do painel, nao como Kd absoluto."
+  },
+
+  "validation": {
+    "redock_reference_pdb": "1BZL",
+    "rmsd_function": "CalcRMS",
+    "rmsd_function_forbidden": ["GetBestRMS"],
+    "rmsd_pass_A": 2.0,
+    "training_leakage": null,
+    "reporting": { "scale": "continuous", "note": "Docking classico; sem o piso de ruido que inviabiliza ranking em co-dobramento." }
+  },
+
+  "protocols": {
+    "docking": "vina_exh32",
+    "md": "md_ff14sb_hmr_300k"
+  },
+
+  "status": {
+    "docking": "done",
+    "md": "done",
+    "note": "MD n=3, 50 ns por replica. Base do manuscrito submetido."
+  }
+}

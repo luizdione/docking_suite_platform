@@ -1,0 +1,35 @@
+{
+  "schema_version": "2.0",
+  "id": "2-no2-nq",
+  "name": "2-NO2-NQ",
+  "display_name": "2-Nitro-1,4-naftoquinona",
+  "smiles": "O=C1C=C([N+](=O)[O-])C(=O)c2ccccc21",
+  "formula": "C10H5NO4",
+  "mw_g_mol": 203.153,
+  "heavy_atoms": 15,
+  "charge": 0,
+  "class": "naphthoquinone",
+  "chemotype_tags": [
+    "naphthoquinone"
+  ],
+  "topology": {
+    "is_macrocycle": false,
+    "largest_ring_size": null,
+    "expected_active_torsions": 1
+  },
+  "prep": {
+    "optimization": "MMFF94 (1000 steps conjugate gradients)",
+    "protonation": null,
+    "pdbqt": {
+      "tool": "openbabel"
+    },
+    "gates": []
+  },
+  "notes": "Grupo saída para conversão a amino.",
+  "provenance": {
+    "generated_from": "compound_db + docking_project/ligand/*/metadata.json",
+    "generator": "tools/export_compound_db_to_registry.py",
+    "date_added": "2026-07-04",
+    "has_prepared_pdbqt": false
+  }
+}

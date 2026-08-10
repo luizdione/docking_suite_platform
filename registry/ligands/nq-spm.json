@@ -1,0 +1,35 @@
+{
+  "schema_version": "2.0",
+  "id": "nq-spm",
+  "name": "NQ-SPM",
+  "display_name": "NQ-Espermidina (design dual)",
+  "smiles": "O=C1C=C(SCCCNCCCCNCCCN)C(=O)c2ccccc21",
+  "formula": "C20H29N3O2S",
+  "mw_g_mol": 375.538,
+  "heavy_atoms": 26,
+  "charge": 0,
+  "class": "naphthoquinone",
+  "chemotype_tags": [
+    "naphthoquinone"
+  ],
+  "topology": {
+    "is_macrocycle": false,
+    "largest_ring_size": null,
+    "expected_active_torsions": 13
+  },
+  "prep": {
+    "optimization": "MMFF94 (1000 steps conjugate gradients)",
+    "protonation": null,
+    "pdbqt": {
+      "tool": "openbabel"
+    },
+    "gates": []
+  },
+  "notes": "Dual design: NQ + cauda espermidina; substrato subversivo + inibidor TR.",
+  "provenance": {
+    "generated_from": "compound_db + docking_project/ligand/*/metadata.json",
+    "generator": "tools/export_compound_db_to_registry.py",
+    "date_added": "2026-07-04",
+    "has_prepared_pdbqt": false
+  }
+}

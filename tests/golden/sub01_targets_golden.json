@@ -1,0 +1,406 @@
+{
+  "_meta": {
+    "n_targets": 10,
+    "note": "snapshot pre-refatoracao; nao editar a mao",
+    "source": "docking_v2.TARGET_DB"
+  },
+  "targets": {
+    "LiTR": {
+      "_types": {
+        "category": "str",
+        "grid_fallback_residues": "list",
+        "grid_size": "tuple",
+        "grid_strategy": "str",
+        "human_ortholog": "str",
+        "keep_cofactors": "list",
+        "ligand_resnames": "list",
+        "literature": "str",
+        "notes": "str",
+        "organism": "str",
+        "pdb": "str",
+        "target": "str"
+      },
+      "category": "parasite",
+      "grid_fallback_residues": [
+        "CYS52",
+        "CYS57",
+        "HIS461"
+      ],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "grid_strategy": "ligand_center",
+      "human_ortholog": "hGR",
+      "keep_cofactors": [
+        "FAD"
+      ],
+      "ligand_resnames": [
+        "TS2",
+        "TS4",
+        "FAD"
+      ],
+      "literature": "Baiocco 2009; Camargo/Sci Rep 2023 for L. amazonensis.",
+      "notes": "NO crystal structure exists for L. amazonensis TR. 2JK6 (L. infantum) is the standard proxy (95% identity). Camargo et al. (Sci Rep, 2023) used this approach for L. amazonensis. FAD is ESSENTIAL - grid centered on flavin ring near active site.",
+      "organism": "Leishmania infantum (proxy for L. amazonensis, 95% identity)",
+      "pdb": "2JK6",
+      "target": "Trypanothione Reductase"
+    },
+    "LmDHODH": {
+      "_types": {
+        "category": "str",
+        "grid_fallback_residues": "list",
+        "grid_size": "tuple",
+        "grid_strategy": "str",
+        "human_ortholog": "str",
+        "keep_cofactors": "list",
+        "ligand_resnames": "list",
+        "literature": "str",
+        "notes": "str",
+        "organism": "str",
+        "pdb": "str",
+        "target": "str"
+      },
+      "category": "parasite",
+      "grid_fallback_residues": [],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "grid_strategy": "ligand_center",
+      "human_ortholog": "hDHODH",
+      "keep_cofactors": [
+        "FMN",
+        "FAD"
+      ],
+      "ligand_resnames": [
+        "ORO",
+        "OA"
+      ],
+      "literature": "Pinheiro 2013.",
+      "notes": "FMN essential. Naphthoquinones may compete as ubiquinone analogs.",
+      "organism": "Leishmania donovani",
+      "pdb": "3C61",
+      "target": "Dihydroorotate Dehydrogenase"
+    },
+    "LmPTR1": {
+      "_types": {
+        "category": "str",
+        "grid_fallback_residues": "list",
+        "grid_size": "tuple",
+        "grid_strategy": "str",
+        "human_ortholog": "NoneType",
+        "keep_cofactors": "list",
+        "ligand_resnames": "list",
+        "literature": "str",
+        "notes": "str",
+        "organism": "str",
+        "pdb": "str",
+        "target": "str"
+      },
+      "category": "parasite",
+      "grid_fallback_residues": [
+        "PHE113",
+        "TYR194",
+        "SER111"
+      ],
+      "grid_size": [
+        22,
+        22,
+        22
+      ],
+      "grid_strategy": "ligand_center",
+      "human_ortholog": null,
+      "keep_cofactors": [
+        "NAP",
+        "NDP",
+        "FAD"
+      ],
+      "ligand_resnames": [
+        "6QA",
+        "MTX",
+        "TAQ",
+        "DHB"
+      ],
+      "literature": "Gourley 2001; Dawson 2006; Hardy 2005.",
+      "notes": "NADPH is ESSENTIAL - it forms part of the active site. 2QHX has co-crystal with pteridine inhibitor (best for grid). Alternative: 1E7W (methotrexate complex).",
+      "organism": "Leishmania major",
+      "pdb": "2QHX",
+      "target": "Pteridine Reductase 1 (PTR1)"
+    },
+    "TcCruzain": {
+      "_types": {
+        "category": "str",
+        "grid_fallback_residues": "list",
+        "grid_size": "tuple",
+        "grid_strategy": "str",
+        "human_ortholog": "str",
+        "keep_cofactors": "list",
+        "ligand_resnames": "list",
+        "literature": "str",
+        "notes": "str",
+        "organism": "str",
+        "pdb": "str",
+        "target": "str"
+      },
+      "category": "parasite",
+      "grid_fallback_residues": [
+        "CYS25",
+        "HIS159",
+        "ASN175"
+      ],
+      "grid_size": [
+        22,
+        22,
+        22
+      ],
+      "grid_strategy": "ligand_center",
+      "human_ortholog": "hCatL",
+      "keep_cofactors": [],
+      "ligand_resnames": [
+        "K11",
+        "VNS"
+      ],
+      "literature": "McKerrow 2009; co-crystal with K11.",
+      "notes": "No cofactors needed. Grid on catalytic triad.",
+      "organism": "Trypanosoma cruzi",
+      "pdb": "3KKU",
+      "target": "Cruzain"
+    },
+    "TcFeSOD": {
+      "_types": {
+        "category": "str",
+        "grid_fallback_residues": "list",
+        "grid_size": "tuple",
+        "grid_strategy": "str",
+        "human_ortholog": "str",
+        "keep_cofactors": "list",
+        "ligand_resnames": "list",
+        "literature": "str",
+        "notes": "str",
+        "organism": "str",
+        "pdb": "str",
+        "target": "str"
+      },
+      "category": "parasite",
+      "grid_fallback_residues": [
+        "HIS26",
+        "HIS73",
+        "ASP156",
+        "HIS160"
+      ],
+      "grid_size": [
+        22,
+        22,
+        22
+      ],
+      "grid_strategy": "metal_center",
+      "human_ortholog": "hMnSOD",
+      "keep_cofactors": [
+        "FE",
+        "FE2"
+      ],
+      "ligand_resnames": [],
+      "literature": "Mateo 2008.",
+      "notes": "Fe is ESSENTIAL. Apo structure - grid on Fe active site.",
+      "organism": "Trypanosoma cruzi",
+      "pdb": "4DVH",
+      "target": "Fe-Superoxide Dismutase"
+    },
+    "TcTR": {
+      "_types": {
+        "category": "str",
+        "grid_fallback_residues": "list",
+        "grid_size": "tuple",
+        "grid_strategy": "str",
+        "human_ortholog": "str",
+        "keep_cofactors": "list",
+        "ligand_resnames": "list",
+        "literature": "str",
+        "notes": "str",
+        "organism": "str",
+        "pdb": "str",
+        "target": "str"
+      },
+      "category": "parasite",
+      "grid_fallback_residues": [
+        "CYS52",
+        "CYS57",
+        "HIS461"
+      ],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "grid_strategy": "ligand_center",
+      "human_ortholog": "hGR",
+      "keep_cofactors": [
+        "FAD"
+      ],
+      "ligand_resnames": [
+        "TS2",
+        "TS4"
+      ],
+      "literature": "Krauth-Siegel 2003; PDB has FAD + TS2 co-crystal.",
+      "notes": "FAD is ESSENTIAL. Grid centered on trypanothione binding site.",
+      "organism": "Trypanosoma cruzi",
+      "pdb": "1BZL",
+      "target": "Trypanothione Reductase"
+    },
+    "hCatL": {
+      "_types": {
+        "category": "str",
+        "grid_fallback_residues": "list",
+        "grid_size": "tuple",
+        "grid_strategy": "str",
+        "human_ortholog": "NoneType",
+        "keep_cofactors": "list",
+        "ligand_resnames": "list",
+        "literature": "str",
+        "notes": "str",
+        "organism": "str",
+        "pdb": "str",
+        "target": "str"
+      },
+      "category": "human",
+      "grid_fallback_residues": [
+        "CYS25",
+        "HIS163",
+        "ASN187"
+      ],
+      "grid_size": [
+        22,
+        22,
+        22
+      ],
+      "grid_strategy": "residue_center",
+      "human_ortholog": null,
+      "keep_cofactors": [],
+      "ligand_resnames": [],
+      "literature": "Turk 2012.",
+      "notes": "Counterpart of cruzain.",
+      "organism": "Homo sapiens",
+      "pdb": "2XU3",
+      "target": "Cathepsin L"
+    },
+    "hDHODH": {
+      "_types": {
+        "category": "str",
+        "grid_fallback_residues": "list",
+        "grid_size": "tuple",
+        "grid_strategy": "str",
+        "human_ortholog": "NoneType",
+        "keep_cofactors": "list",
+        "ligand_resnames": "list",
+        "literature": "str",
+        "notes": "str",
+        "organism": "str",
+        "pdb": "str",
+        "target": "str"
+      },
+      "category": "human",
+      "grid_fallback_residues": [],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "grid_strategy": "ligand_center",
+      "human_ortholog": null,
+      "keep_cofactors": [
+        "FMN"
+      ],
+      "ligand_resnames": [
+        "BRE"
+      ],
+      "literature": "Liu 2000.",
+      "notes": "FMN essential.",
+      "organism": "Homo sapiens",
+      "pdb": "1D3H",
+      "target": "DHODH"
+    },
+    "hGR": {
+      "_types": {
+        "category": "str",
+        "grid_fallback_residues": "list",
+        "grid_size": "tuple",
+        "grid_strategy": "str",
+        "human_ortholog": "NoneType",
+        "keep_cofactors": "list",
+        "ligand_resnames": "list",
+        "literature": "str",
+        "notes": "str",
+        "organism": "str",
+        "pdb": "str",
+        "target": "str"
+      },
+      "category": "human",
+      "grid_fallback_residues": [
+        "CYS58",
+        "CYS63"
+      ],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "grid_strategy": "ligand_center",
+      "human_ortholog": null,
+      "keep_cofactors": [
+        "FAD"
+      ],
+      "ligand_resnames": [
+        "GSH",
+        "GTX",
+        "GDS"
+      ],
+      "literature": "Karplus & Schulz 1987.",
+      "notes": "FAD essential. Counterpart of TR.",
+      "organism": "Homo sapiens",
+      "pdb": "3DJJ",
+      "target": "Glutathione Reductase"
+    },
+    "hMnSOD": {
+      "_types": {
+        "category": "str",
+        "grid_fallback_residues": "list",
+        "grid_size": "tuple",
+        "grid_strategy": "str",
+        "human_ortholog": "NoneType",
+        "keep_cofactors": "list",
+        "ligand_resnames": "list",
+        "literature": "str",
+        "notes": "str",
+        "organism": "str",
+        "pdb": "str",
+        "target": "str"
+      },
+      "category": "human",
+      "grid_fallback_residues": [
+        "HIS26",
+        "HIS74",
+        "ASP159",
+        "HIS163"
+      ],
+      "grid_size": [
+        22,
+        22,
+        22
+      ],
+      "grid_strategy": "metal_center",
+      "human_ortholog": null,
+      "keep_cofactors": [
+        "MN"
+      ],
+      "ligand_resnames": [],
+      "literature": "Borgstahl 1992.",
+      "notes": "Mn essential. Counterpart of Fe-SOD.",
+      "organism": "Homo sapiens",
+      "pdb": "1LUV",
+      "target": "Mn-Superoxide Dismutase"
+    }
+  }
+}

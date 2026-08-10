@@ -1,0 +1,25 @@
+{
+  "schema_version": "2.0",
+  "id": "haddock3_default",
+  "engine": "haddock3",
+  "name": "HADDOCK3, docking guiado por restricoes ambiguas",
+  "capabilities": ["pose"],
+  "params": {
+    "modules": ["topoaa", "rigidbody", "caprieval", "flexref", "emref"],
+    "sampling_rigidbody": 1000,
+    "select_rigidbody": 200,
+    "select_flexref": 50
+  },
+  "restraints": {
+    "source": "target_site",
+    "_note": "O ambig.tbl passa a ser GERADO a partir de sites.*.fallback_residues / contatos derivados do complexo de referencia, em vez de escrito a mao por alvo.",
+    "passive_from_active": true
+  },
+  "score": {
+    "unit": "HADDOCK score (a.u.)",
+    "direction": "lower_is_better",
+    "_note": "Nao e kcal/mol e nao e comparavel com o score do Vina. Nunca ranquear os dois na mesma tabela."
+  },
+  "notes": "Protocolo existente em haddock3/ (HADDOCK3_PROTOCOLO.md, run-TcTR-2SCN-NQ.cfg, ambig.tbl), ate agora fora da plataforma. Util onde a restricao de interface importa: sitio na juncao interprotomero de filamento, e o proprio SUB01.",
+  "literature": "Honorato et al. 2024 (HADDOCK3)."
+}

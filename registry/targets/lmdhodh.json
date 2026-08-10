@@ -1,0 +1,61 @@
+{
+  "schema_version": "2.0",
+  "id": "LmDHODH",
+  "aliases": [
+    "3C61"
+  ],
+  "name": "Dihydroorotate Dehydrogenase",
+  "organism": "Leishmania donovani",
+  "category": "parasite",
+  "ortholog_of": "hDHODH",
+  "structure": {
+    "source": "pdb",
+    "pdb_id": "3C61",
+    "assembly": null,
+    "n_protomers_required": 1,
+    "local_file": null,
+    "confidence": null,
+    "resolution_A": "2.13 A"
+  },
+  "chemistry": {
+    "keep_cofactors": [
+      "FMN",
+      "FAD"
+    ],
+    "essential_cofactors": [
+      "FMN",
+      "FAD"
+    ],
+    "cofactor_source": "crystal",
+    "nonstandard_residues": [],
+    "protonation_pH": 7.4
+  },
+  "sites": {
+    "orthosteric": {
+      "definition": "ligand_center",
+      "box_size_A": [
+        25,
+        25,
+        25
+      ],
+      "box_policy": "fixed",
+      "ligand_resnames": [
+        "ORO",
+        "OA"
+      ],
+      "residue_numbering_reference": "3C61"
+    }
+  },
+  "default_site": "orthosteric",
+  "notes": "FMN essential. Naphthoquinones may compete as ubiquinone analogs.",
+  "literature": "Pinheiro 2013.",
+  "provenance": {
+    "generated_from": "docking_v2.TARGET_DB",
+    "generator": "tools/export_target_db_to_registry.py"
+  },
+  "notes_pt": "Enzima da via de biossintese de pirimidinas. Alvo emergente para tripanossomatideos. Usa ubiquinona como aceptor de eletrons - naftoquinonas podem competir como analogos. Estruturalmente distinta da DHODH humana.",
+  "references": [
+    "Pinheiro et al., 2013, Biochemistry"
+  ],
+  "name_en": "Dihydroorotate Dehydrogenase (DHODH)"
+}

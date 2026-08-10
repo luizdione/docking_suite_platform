@@ -1,0 +1,26 @@
+{
+  "schema_version": "2.0",
+  "id": "docking-suite",
+  "name": "Docking Suite",
+  "description": "Plataforma guarda-chuva de docking e dinamica molecular em alvos proteicos diversos, preservando as caracteristicas de cada par proteina-ligante.",
+  "platform_app": "dashboard_v2.py (Flask, :5001)",
+  "sibling_platform": "epigenoma (R/Shiny, app_v3.R)",
+  "convention": "SUBNN = campanha; cada campanha tem seus proprios alvos, ligantes, pares e protocolos.",
+  "responsible": "Luiz Dione Barbosa De-Melo",
+  "orcid": "0000-0003-2445-9943",
+  "institution": "Instituto Federal de Educacao, Ciencia e Tecnologia do Rio de Janeiro (IFRJ)",
+  "email": "luiz.melo@ifrj.edu.br",
+
+  "chemistry_defaults": {
+    "_note": "Herdeiros de ESSENTIAL_COFACTORS / ESSENTIAL_METALS / REMOVE_RESIDUES de docking_v2.py. Sao defaults do programa, sobrepostos por target.chemistry.*. A lista original era enviesada para flavoenzimas (FAD/FMN/NADPH) porque a plataforma so via tripanotiona redutase; manter como default e correto, assumir como universal nao e.",
+    "essential_cofactors": ["FAD", "FDA", "FMN", "NAD", "NAI", "NAP", "NDP"],
+    "essential_metals": ["CA", "CO", "CU", "FE", "FE2", "MG", "MN", "ZN"],
+    "remove_residues": [
+      "ACT", "BME", "CIT", "CL", "DMF", "DMS", "DOD", "EDO", "GOL", "HOH",
+      "IOD", "MPD", "PEG", "PHO", "PO4", "SO4", "SUL", "TRS", "WAT"
+    ],
+    "protonation_pH": 7.4
+  },
+
+  "default_campaign": "SUB01"
+}

@@ -1,0 +1,56 @@
+{
+  "schema_version": "2.0",
+  "id": "hCatL",
+  "aliases": [
+    "2XU3"
+  ],
+  "name": "Cathepsin L",
+  "organism": "Homo sapiens",
+  "category": "human",
+  "ortholog_of": null,
+  "structure": {
+    "source": "pdb",
+    "pdb_id": "2XU3",
+    "assembly": null,
+    "n_protomers_required": 1,
+    "local_file": null,
+    "confidence": null,
+    "resolution_A": "1.40 A"
+  },
+  "chemistry": {
+    "keep_cofactors": [],
+    "essential_cofactors": [],
+    "cofactor_source": "none",
+    "nonstandard_residues": [],
+    "protonation_pH": 7.4
+  },
+  "sites": {
+    "catalytic_site": {
+      "definition": "residue_center",
+      "box_size_A": [
+        22,
+        22,
+        22
+      ],
+      "box_policy": "fixed",
+      "fallback_residues": [
+        "CYS25",
+        "HIS163",
+        "ASN187"
+      ],
+      "residue_numbering_reference": "2XU3"
+    }
+  },
+  "default_site": "catalytic_site",
+  "notes": "Counterpart of cruzain.",
+  "literature": "Turk 2012.",
+  "provenance": {
+    "generated_from": "docking_v2.TARGET_DB",
+    "generator": "tools/export_target_db_to_registry.py"
+  },
+  "notes_pt": "Contraparte humana da cruzaina. Comparacao direta de seletividade entre cisteino-proteases parasitaria vs hospedeiro.",
+  "references": [
+    "Turk et al., 2012, Biochim Biophys Acta"
+  ],
+  "name_en": "Cathepsin L"
+}

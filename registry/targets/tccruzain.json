@@ -1,0 +1,60 @@
+{
+  "schema_version": "2.0",
+  "id": "TcCruzain",
+  "aliases": [
+    "3KKU"
+  ],
+  "name": "Cruzain",
+  "organism": "Trypanosoma cruzi",
+  "category": "parasite",
+  "ortholog_of": "hCatL",
+  "structure": {
+    "source": "pdb",
+    "pdb_id": "3KKU",
+    "assembly": null,
+    "n_protomers_required": 1,
+    "local_file": null,
+    "confidence": null,
+    "resolution_A": "1.28 A"
+  },
+  "chemistry": {
+    "keep_cofactors": [],
+    "essential_cofactors": [],
+    "cofactor_source": "none",
+    "nonstandard_residues": [],
+    "protonation_pH": 7.4
+  },
+  "sites": {
+    "orthosteric": {
+      "definition": "ligand_center",
+      "box_size_A": [
+        22,
+        22,
+        22
+      ],
+      "box_policy": "fixed",
+      "ligand_resnames": [
+        "K11",
+        "VNS"
+      ],
+      "fallback_residues": [
+        "CYS25",
+        "HIS159",
+        "ASN175"
+      ],
+      "residue_numbering_reference": "3KKU"
+    }
+  },
+  "default_site": "orthosteric",
+  "notes": "No cofactors needed. Grid on catalytic triad.",
+  "literature": "McKerrow 2009; co-crystal with K11.",
+  "provenance": {
+    "generated_from": "docking_v2.TARGET_DB",
+    "generator": "tools/export_target_db_to_registry.py"
+  },
+  "notes_pt": "Principal cisteino-protease de T. cruzi. Essencial para sobrevivencia, nutricao e evasao imune do parasito. Co-cristal com inibidor covalente disponivel (excelente para validacao).",
+  "references": [
+    "McKerrow et al., 2009, Bioorg Med Chem"
+  ],
+  "name_en": "Cruzain (cysteine protease)"
+}

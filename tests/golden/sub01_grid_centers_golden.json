@@ -1,0 +1,161 @@
+{
+  "_meta": {
+    "missing_pdb_locally": [],
+    "n_covered": 10,
+    "note": "GATE BLOQUEANTE. Se um destes centros mudar, o docking do SUB01 deixa de ser reproduzivel e o paper submetido fica orfao.",
+    "protein_dir": "docking_project/proteins",
+    "source": "docking_v2._calculate_grid_center"
+  },
+  "centers": {
+    "LiTR": {
+      "grid_center": [
+        15.61,
+        36.11,
+        0.05
+      ],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "grid_strategy": "ligand_center",
+      "pdb": "2JK6",
+      "pdb_sha256": "72666786e8036b5e3c911366f289ac39389b3d28884d8b8f1050b9660545b158"
+    },
+    "LmDHODH": {
+      "grid_center": [
+        -34.34,
+        21.12,
+        -2.42
+      ],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "grid_strategy": "ligand_center",
+      "pdb": "3C61",
+      "pdb_sha256": "78c120b42714a78bfe5e7649fa1662c9ac81cc8981a08b459e2ac73085f87837"
+    },
+    "LmPTR1": {
+      "grid_center": [
+        11.84,
+        46.23,
+        69.29
+      ],
+      "grid_size": [
+        22,
+        22,
+        22
+      ],
+      "grid_strategy": "ligand_center",
+      "pdb": "2QHX",
+      "pdb_sha256": "95967598ca832c22468c9893fe79d0e1f1c3ca5fe97f2591805d875fb1b3dfd2"
+    },
+    "TcCruzain": {
+      "grid_center": [
+        -4.8,
+        -31.42,
+        -1.92
+      ],
+      "grid_size": [
+        22,
+        22,
+        22
+      ],
+      "grid_strategy": "ligand_center",
+      "pdb": "3KKU",
+      "pdb_sha256": "a2d4758fe3a0a529aba567691fe8816a88f1db763816095ff02a2af1fe4bcbc4"
+    },
+    "TcFeSOD": {
+      "grid_center": [
+        13.81,
+        -4.58,
+        19.55
+      ],
+      "grid_size": [
+        22,
+        22,
+        22
+      ],
+      "grid_strategy": "metal_center",
+      "pdb": "4DVH",
+      "pdb_sha256": "b69630291cf0a5a0bb625b5709dda06b9a35f083c8c7064a8a7e146efb4c129a"
+    },
+    "TcTR": {
+      "grid_center": [
+        43.57,
+        7.66,
+        0.09
+      ],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "grid_strategy": "ligand_center",
+      "pdb": "1BZL",
+      "pdb_sha256": "4d041254fa8f8af92ddf8934df5caf6a2e941fa52693c2954c158ee20b6f62fc"
+    },
+    "hCatL": {
+      "grid_center": [
+        12.66,
+        4.95,
+        4.01
+      ],
+      "grid_size": [
+        22,
+        22,
+        22
+      ],
+      "grid_strategy": "residue_center",
+      "pdb": "2XU3",
+      "pdb_sha256": "dda8a9cc441fca7bd74b0e3cc6a5831d06e2d2658329a9d5c93abd63d0681627"
+    },
+    "hDHODH": {
+      "grid_center": [
+        42.2,
+        41.43,
+        10.68
+      ],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "grid_strategy": "ligand_center",
+      "pdb": "1D3H",
+      "pdb_sha256": "674edc1627932009be648a4878c522e69182a2e1ea74a1374bbfe572a4bc71d3"
+    },
+    "hGR": {
+      "grid_center": [
+        20.54,
+        13.84,
+        25.09
+      ],
+      "grid_size": [
+        25,
+        25,
+        25
+      ],
+      "grid_strategy": "ligand_center",
+      "pdb": "3DJJ",
+      "pdb_sha256": "58fcc984563e21cf063a67a390583193f6b0f86ed4741688723ea87bacad2ce4"
+    },
+    "hMnSOD": {
+      "grid_center": [
+        49.68,
+        25.03,
+        94.02
+      ],
+      "grid_size": [
+        22,
+        22,
+        22
+      ],
+      "grid_strategy": "metal_center",
+      "pdb": "1LUV",
+      "pdb_sha256": "8f40e0340297b8e1cef2e3f6b3155ed941f0feb08db3c126c452b638c572c572"
+    }
+  }
+}

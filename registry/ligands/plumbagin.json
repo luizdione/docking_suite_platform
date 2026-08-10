@@ -1,0 +1,35 @@
+{
+  "schema_version": "2.0",
+  "id": "plumbagin",
+  "name": "plumbagin",
+  "display_name": "Plumbagina",
+  "smiles": "O=C1c2c(O)cccc2C(=O)C=C1C",
+  "formula": "C11H8O3",
+  "mw_g_mol": 188.182,
+  "heavy_atoms": 14,
+  "charge": 0,
+  "class": "naphthoquinone",
+  "chemotype_tags": [
+    "naphthoquinone"
+  ],
+  "topology": {
+    "is_macrocycle": false,
+    "largest_ring_size": null,
+    "expected_active_torsions": 0
+  },
+  "prep": {
+    "optimization": "MMFF94 (1000 steps conjugate gradients)",
+    "protonation": null,
+    "pdbqt": {
+      "tool": "openbabel"
+    },
+    "gates": []
+  },
+  "notes": "5-Hidroxi-2-metil-NQ; atividade antiparasitária e antitumoral.",
+  "provenance": {
+    "generated_from": "compound_db + docking_project/ligand/*/metadata.json",
+    "generator": "tools/export_compound_db_to_registry.py",
+    "date_added": "2026-07-04",
+    "has_prepared_pdbqt": false
+  }
+}

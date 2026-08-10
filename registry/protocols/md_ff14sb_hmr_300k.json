@@ -1,0 +1,35 @@
+{
+  "schema_version": "2.0",
+  "id": "md_ff14sb_hmr_300k",
+  "engine": "openmm",
+  "name": "OpenMM/CUDA, ff14SB + TIP3P, HMR 4 fs, 300 K",
+  "capabilities": ["dynamics"],
+  "forcefield": {
+    "protein": "amber14-all.xml",
+    "water": "amber14/tip3p.xml",
+    "ligand": "openff/smirnoff",
+    "cofactor": "gaff"
+  },
+  "integration": {
+    "integrator": "LangevinMiddle",
+    "timestep_fs": 4,
+    "hmr": true,
+    "hmr_factor_amu": 4.0,
+    "friction_ps": 1.0
+  },
+  "thermostat": { "T_K": 300 },
+  "barostat": { "type": "MonteCarlo", "P_bar": 1.0 },
+  "solvent": {
+    "model": "tip3p",
+    "padding_A": 10,
+    "electrostatics": "PME",
+    "ions_mM": 150
+  },
+  "reporting": { "dcd_interval_steps": 2500, "ps_per_frame": 10 },
+  "schedule": [
+    { "stage": "minimize" },
+    { "stage": "production", "ns": 50, "replicas": 3 }
+  ],
+  "notes": "Protocolo do SUB01, ja executado e publicado (MD n=3, 50 ns por replica). NAO alterar: e a base do manuscrito submetido. Para campanhas com cofator nucleotidico (ATP/ADP/Mg) use md_charmm36m_2fs_310k -- ff14SB nao tem templates nativos desses residuos.",
+  "literature": "Eastman et al. 2017 (OpenMM 7); Maier et al. 2015 (ff14SB)."
+}

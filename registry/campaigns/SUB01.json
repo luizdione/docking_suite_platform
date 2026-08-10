@@ -1,0 +1,73 @@
+{
+  "schema_version": "2.0",
+  "id": "SUB01",
+  "sigla": "NQ-TR-subversivo",
+  "programa": "NQ-Antiparasitarios",
+  "nome_especifico": "2-Tiocianato-1,4-naftoquinona como substrato subversivo da tripanotiona redutase: ligacao seletiva na si-face do FAD em Trypanosoma cruzi e Leishmania versus glutationa redutase humana",
+  "titulo_paper_atual": "2-Thiocyanate-1,4-naphthoquinone as a subversive substrate of trypanothione reductase: selective FAD si-face binding in Trypanosoma cruzi and Leishmania versus human glutathione reductase",
+  "status": "submetido",
+  "fase_atual": "MD n=3 consolidada (50 ns x 3 replicas por alvo); manuscrito submetido a ACS Infectious Diseases",
+  "periodico_alvo": "ACS Infectious Diseases (Q1)",
+  "criado": "2026-03-11",
+
+  "targets": [
+    "TcTR", "LiTR", "hGR",
+    "TcCruzain", "TcFeSOD", "LmPTR1", "LmDHODH",
+    "hCatL", "hDHODH", "hMnSOD"
+  ],
+  "primary_targets": ["TcTR", "LiTR"],
+  "counter_targets": ["hGR"],
+  "selectivity_panel": {
+    "parasite": ["TcTR", "LiTR", "TcCruzain", "TcFeSOD", "LmPTR1", "LmDHODH"],
+    "human": ["hGR", "hCatL", "hDHODH", "hMnSOD"],
+    "pairs": [
+      { "parasite": "TcTR", "human": "hGR", "rationale": "ortologos; base da seletividade do estudo" },
+      { "parasite": "LiTR", "human": "hGR", "rationale": "ortologos" },
+      { "parasite": "TcCruzain", "human": "hCatL", "rationale": "ortologos (cisteino-proteases)" },
+      { "parasite": "TcFeSOD", "human": "hMnSOD", "rationale": "ortologos (superoxido dismutases)" },
+      { "parasite": "LmDHODH", "human": "hDHODH", "rationale": "ortologos" }
+    ]
+  },
+
+  "ligands": [
+    "2-scn-nq", "2-cl-nq", "2-br-nq", "2-nh2-nq", "2-oh-nq", "2-me-nq",
+    "2-no2-nq", "2-ome-nq", "2-triazol-nq", "2-imidazol-nq",
+    "beta-lapachone", "plumbagin", "nq-spm", "nq-acr", "bis-nq"
+  ],
+  "default_ligand": "2-scn-nq",
+
+  "protocols": {
+    "docking": "vina_exh32",
+    "md": "md_ff14sb_hmr_300k"
+  },
+
+  "paths": {
+    "data_root": null,
+    "_note": "null = usa o default do programa (NQ_DATA_DIR, hoje E:/data/docking). paths.py resolve em cascata; o layout antigo continua sendo lido."
+  },
+
+  "ui": {
+    "header": "Naftoquinonas antiparasitarias — T. cruzi + L. amazonensis",
+    "subtitle": "Substrato subversivo da tripanotiona redutase",
+    "recommended_targets": ["TcTR", "LiTR", "hGR"],
+    "organism_badge_field": "category"
+  },
+
+  "scripts": {
+    "docking": { "arquivo": "docking_v2.py", "engine": "AutoDock Vina 1.2.7" },
+    "md": { "arquivo": "md_simulation.py", "engine": "OpenMM 8.2 (CUDA)", "wrapper": "run_md_safe.ps1" },
+    "md_replicas": { "arquivo": "replica_driver.py", "saida": "replica_summary.json" },
+    "agregacao_n3": { "arquivo": "aggregate_md_n3.py", "saida": "n3_resultados.json" },
+    "binding_mode": { "arquivo": "analyze_dcd_numpy.py", "metrica": "lig-FAD / lig-ditiol (A)" },
+    "admet": { "arquivo": "admet_module.py" },
+    "toxicidade": { "arquivo": "toxicity_module.py" },
+    "ciclodextrina": { "arquivo": "cyclodex_module.py" },
+    "drug_design_dual": { "arquivo": "dual_design_pipeline.py" },
+    "analise_figuras": { "arquivo": "analysis.py" }
+  },
+
+  "provenance": {
+    "converted_from": "subprojeto/subprojeto_config.json (schema_version 1.0)",
+    "note": "O registry antigo era descritivo: nenhum codigo de execucao o consultava. Este passa a ser autoritativo."
+  }
+}

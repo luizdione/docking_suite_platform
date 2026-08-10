@@ -1,0 +1,61 @@
+{
+  "schema_version": "2.0",
+  "id": "hMnSOD",
+  "aliases": [
+    "1LUV"
+  ],
+  "name": "Mn-Superoxide Dismutase",
+  "organism": "Homo sapiens",
+  "category": "human",
+  "ortholog_of": null,
+  "structure": {
+    "source": "pdb",
+    "pdb_id": "1LUV",
+    "assembly": null,
+    "n_protomers_required": 1,
+    "local_file": null,
+    "confidence": null,
+    "resolution_A": "1.85 A"
+  },
+  "chemistry": {
+    "keep_cofactors": [
+      "MN"
+    ],
+    "essential_cofactors": [
+      "MN"
+    ],
+    "cofactor_source": "crystal",
+    "nonstandard_residues": [],
+    "protonation_pH": 7.4
+  },
+  "sites": {
+    "metal_active_site": {
+      "definition": "metal_center",
+      "box_size_A": [
+        22,
+        22,
+        22
+      ],
+      "box_policy": "fixed",
+      "fallback_residues": [
+        "HIS26",
+        "HIS74",
+        "ASP159",
+        "HIS163"
+      ],
+      "residue_numbering_reference": "1LUV"
+    }
+  },
+  "default_site": "metal_active_site",
+  "notes": "Mn essential. Counterpart of Fe-SOD.",
+  "literature": "Borgstahl 1992.",
+  "provenance": {
+    "generated_from": "docking_v2.TARGET_DB",
+    "generator": "tools/export_target_db_to_registry.py"
+  },
+  "notes_pt": "Contraparte humana da Fe-SOD de T. cruzi. Usa Mn em vez de Fe como cofator - diferenca no sitio ativo permite seletividade. Comparacao Fe-SOD vs MnSOD e classica.",
+  "references": [
+    "Borgstahl et al., 1992, Cell"
+  ],
+  "name_en": "Manganese Superoxide Dismutase"
+}

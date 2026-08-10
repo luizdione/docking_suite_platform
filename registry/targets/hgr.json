@@ -1,0 +1,71 @@
+{
+  "schema_version": "2.0",
+  "id": "hGR",
+  "aliases": [
+    "3DJJ",
+    "3GRS"
+  ],
+  "name": "Glutathione Reductase",
+  "organism": "Homo sapiens",
+  "category": "human",
+  "ortholog_of": null,
+  "structure": {
+    "source": "pdb",
+    "pdb_id": "3DJJ",
+    "assembly": null,
+    "n_protomers_required": 1,
+    "local_file": null,
+    "confidence": null,
+    "resolution_A": "1.05 A",
+    "alternative_pdb_ids": [
+      "3GRS"
+    ],
+    "_alt_note": "3GRS e outra estrutura de glutationa redutase humana, citada no texto do dashboard ('3DJJ/3GRS'). O docking do SUB01 usou 3DJJ. Registrada aqui para que uma busca por 3GRS resolva para hGR -- e nao para o alvo errado, como acontecia no fallback de alvos, onde 3GRS estava atribuido a TcCruzain.",
+    "cofactor_copies": {"FAD": 1},
+    "_cofactor_copies_note": "1 FAD (nao 2): o 3DJJ_clean.pdb usado na MD e monomerico, enquanto TcTR/LiTR (1BZL/2JK6) tem 2 FADs no arquivo. Valor curado, migrado do antigo md_simulation.TARGET_MAP; NAO derivar de n_protomers (daria 2 e mudaria a MD do hGR)."
+  },
+  "chemistry": {
+    "keep_cofactors": [
+      "FAD"
+    ],
+    "essential_cofactors": [
+      "FAD"
+    ],
+    "cofactor_source": "crystal",
+    "nonstandard_residues": [],
+    "protonation_pH": 7.4
+  },
+  "sites": {
+    "orthosteric": {
+      "definition": "ligand_center",
+      "box_size_A": [
+        25,
+        25,
+        25
+      ],
+      "box_policy": "fixed",
+      "ligand_resnames": [
+        "GSH",
+        "GTX",
+        "GDS"
+      ],
+      "fallback_residues": [
+        "CYS58",
+        "CYS63"
+      ],
+      "residue_numbering_reference": "3DJJ"
+    }
+  },
+  "default_site": "orthosteric",
+  "notes": "FAD essential. Counterpart of TR.",
+  "literature": "Karplus & Schulz 1987.",
+  "provenance": {
+    "generated_from": "docking_v2.TARGET_DB",
+    "generator": "tools/export_target_db_to_registry.py"
+  },
+  "notes_pt": "Contraparte humana da tripanotiona redutase. Usa glutationa em vez de tripanotiona. Diferenca estrutural no sitio ativo (mais estreito) e a base molecular da seletividade.",
+  "references": [
+    "Karplus & Schulz, 1987, J Mol Biol"
+  ],
+  "name_en": "Glutathione Reductase"
+}
