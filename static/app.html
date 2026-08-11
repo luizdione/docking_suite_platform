@@ -1648,6 +1648,7 @@ function switchTab(id, btn) {
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
   document.getElementById('tab-'+id).classList.add('active');
   btn.classList.add('active');
+  try{ gateCampaignTab(id); }catch(e){}
   if (id==='paper') checkDataStatus();
   // Ao entrar na aba MD: redesenha graficos (canvas estava oculto, clientWidth=0)
   if (id==='md'){
@@ -1668,9 +1669,79 @@ function switchTab(id, btn) {
   if (id==='subprojects'){
     setTimeout(function(){ try{ loadSubprojects(); }catch(e){} }, 20);
   }
+  if (id==='rmsd'){ try{ guardRmsdTab(); }catch(e){} }
+  if (id==='help'){ try{ renderHelpTargets(); }catch(e){} }
 }
 
 function openCampaign(id){ location.href = '/?campaign=' + encodeURIComponent(id); }
+
+// Aba RMSD & HADDOCK: o conteudo e a validacao ESPECIFICA do SUB01 (2-SCN-NQ:
+// poses, redocking 1BZL, HADDOCK, MD, modo subversivo/inibidor). Em outra campanha,
+// esconde e avisa -- nunca mostrar os resultados do SUB01 como se fossem dela.
+function guardRmsdTab(){
+  var isDefault = (typeof BOOTSTRAP!=='undefined' && BOOTSTRAP && BOOTSTRAP.campaign_id === BOOTSTRAP.default_campaign);
+  var wrap = document.getElementById('rmsdSub01Wrap');
+  var banner = document.getElementById('rmsdCampaignBanner');
+  if(wrap) wrap.style.display = isDefault ? '' : 'none';
+  if(banner){
+    banner.style.display = isDefault ? 'none' : '';
+    var c = document.getElementById('rmsdBannerCamp');
+    if(c) c.textContent = (BOOTSTRAP && BOOTSTRAP.campaign_id) || '';
+  }
+}
+
+// Aba Ajuda: a lista de alvos vem da campanha ATUAL (TARGETS e injetado por
+// campanha), nao mais hardcoded/desatualizada.
+function renderHelpTargets(){
+  var box = document.getElementById('helpTargetsBox');
+  var cid = document.getElementById('helpCampaignId');
+  if(cid) cid.textContent = (typeof BOOTSTRAP!=='undefined' && BOOTSTRAP && BOOTSTRAP.campaign_id) || '';
+  if(!box) return;
+  if(typeof TARGETS==='undefined' || !TARGETS){ box.innerHTML='<div style="color:#8b949e">(sem alvos)</div>'; return; }
+  var para=[], hum=[];
+  for(var tid in TARGETS){
+    var t=TARGETS[tid]||{};
+    var cof=(t.keep_cofactors&&t.keep_cofactors.length)?(', '+t.keep_cofactors.join('+')):'';
+    var item=(t.target||tid)+' ('+(t.pdb||'—')+cof+')';
+    if((t.category||'')==='human') hum.push(item); else para.push(item);
+  }
+  var html='';
+  if(para.length) html+='<div><b>Parasitários / alvo:</b> '+para.join(', ')+'</div>';
+  if(hum.length)  html+='<div><b>Controles humanos:</b> '+hum.join(', ')+'</div>';
+  box.innerHTML = html || '<div style="color:#8b949e">(sem alvos nesta campanha)</div>';
+}
+
+// Abas cujo CONTEUDO e especifico do SUB01 (2-SCN-NQ / TcTR). Em outra campanha,
+// avisa -- e oculta as puramente-SUB01 (sem equivalente na campanha atual) para
+// nao exibir resultado do SUB01 como se fosse dela. hide:false = so avisa (a aba
+// e uma ferramenta que ainda opera sobre o composto atual, ex.: preditor).
+var CAMPAIGN_SPECIFIC_TABS = {
+  md:     {label:'Dinâmica Molecular (protocolo TcTR/2-SCN-NQ)', hide:true},
+  cd:     {label:'Ciclodextrina (solubilidade do 2-SCN-NQ)',     hide:true},
+  paper:  {label:'Produção de Texto (manuscrito do SUB01)',      hide:true},
+  tox:    {label:'Toxicidade — os dados experimentais são do 2-SCN-NQ', hide:false},
+  design: {label:'Drug Design — desenhado em torno do 2-SCN-NQ', hide:false}
+};
+function gateCampaignTab(id){
+  var cfg = CAMPAIGN_SPECIFIC_TABS[id]; if(!cfg) return;
+  var isDefault = (typeof BOOTSTRAP!=='undefined' && BOOTSTRAP && BOOTSTRAP.campaign_id === BOOTSTRAP.default_campaign);
+  if(isDefault) return;                         // SUB01: conteudo original intocado
+  var panel = document.getElementById('tab-'+id); if(!panel) return;
+  var banId = 'gateBanner-'+id;
+  if(document.getElementById(banId)) return;    // ja aplicado nesta pagina
+  var ban = document.createElement('div');
+  ban.id = banId; ban.className = 'card';
+  ban.style.cssText = 'border:1px solid #6b551f;background:#3a2f12;color:#e3b341;margin-bottom:14px';
+  ban.innerHTML = '<b>&#9888; '+cfg.label+' &mdash; específico da campanha SUB01 (2-SCN-NQ).</b>'
+    + (cfg.hide
+        ? '<br><span style="color:#c9d1d9">A campanha atual ('+(BOOTSTRAP.campaign_id||'')+') não tem esses resultados; conteúdo do SUB01 ocultado.</span>'
+        : '<br><span style="color:#c9d1d9">Os textos/valores abaixo referem-se ao 2-SCN-NQ (SUB01), não à campanha atual.</span>');
+  panel.insertBefore(ban, panel.firstChild);
+  if(cfg.hide){
+    Array.prototype.forEach.call(panel.children, function(ch){ if(ch.id!==banId) ch.style.display='none'; });
+  }
+}
+window.addEventListener('DOMContentLoaded', function(){ try{ renderHelpTargets(); }catch(e){} });
 
 // Aba Subprojetos (in-app; substitui o antigo link target="_blank" p/ /subprojects).
 // Campanhas REAIS vem do registry (mesmo bootstrap do seletor de campanha);
@@ -4234,7 +4305,7 @@ loadCompounds();
         <li>Abra o <b>PowerShell</b> ou <b>Prompt de Comando</b> na pasta do projeto:<br>
           <code style="background:#fff;padding:3px 8px;border-radius:4px;display:inline-block;margin-top:4px;border:1px solid #d1d5db">cd C:\Users\luizd\OneDrive\Data_Science\Projetos\docking</code>
         </li>
-        <li style="margin-top:8px">Rode o batch de docking (cobre os 9 alvos do estudo):<br>
+        <li style="margin-top:8px">Rode o batch de docking (cobre os alvos da campanha):<br>
           <code style="background:#fff;padding:3px 8px;border-radius:4px;display:inline-block;margin-top:4px;border:1px solid #d1d5db">.\run_docking_batch.bat</code>
         </li>
         <li style="margin-top:8px">Ou rode apenas os alvos faltantes:<br>
@@ -4302,7 +4373,7 @@ loadCompounds();
       aparecera com instrucoes especificas. Para resolver, use um destes:
     </p>
     <ul style="margin:6px 0;padding-left:24px;line-height:1.7">
-      <li><b>Botao na propria UI:</b> <code>&#9654; Rodar docking (alvos selecionados)</code> ou <code>&#9654; Rodar docking de TODOS os 9 alvos</code></li>
+      <li><b>Botao na propria UI:</b> <code>&#9654; Rodar docking (alvos selecionados)</code> ou <code>&#9654; Rodar docking de TODOS os alvos</code></li>
       <li><b>Shell (mais controle):</b> <code>.\run_docking_batch.bat</code></li>
       <li><b>Modo synthetic:</b> nao precisa docking, gera figuras de literatura para preview rapido</li>
     </ul>
@@ -4324,10 +4395,9 @@ python check_docking_status.py --targets TcTR
 
 # Diagnostico OpenMM/CUDA:
 python md_module.py --check-cuda</pre>
-    <h3 style="margin:14px 0 8px;color:#78350f;font-size:1em">Os 9 alvos do estudo</h3>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px;font-size:.85em">
-      <div><b>Parasitarios:</b> TcTR (1BZL, FAD), LiTR (2JK6, FAD), TcCruzain (3KKU), TcFeSOD (4DVH, Fe), LmDHODH (3MHU, FMN+FAD)</div>
-      <div><b>Controles humanos:</b> hGR (3GRS, FAD), hCatL (2XU3), hDHODH (1D3H, FMN), hMnSOD (1LUV, Mn)</div>
+    <h3 style="margin:14px 0 8px;color:#78350f;font-size:1em">Alvos da campanha atual (<span id="helpCampaignId"></span>)</h3>
+    <div id="helpTargetsBox" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px;font-size:.85em">
+      <div style="color:#8b949e">Carregando alvos&hellip;</div>
     </div>
   </div>
 
@@ -4435,6 +4505,11 @@ python md_module.py --check-cuda</pre>
 
 <!-- ====== TAB: RMSD & HADDOCK (v2.1) ====== -->
 <div id="tab-rmsd" class="tab-panel">
+  <div id="rmsdCampaignBanner" class="card" style="display:none;border:1px solid #6b551f;background:#3a2f12;color:#e3b341">
+    <b>&#9888; A validação RMSD &amp; HADDOCK detalhada é específica da campanha SUB01 (2-SCN-NQ).</b><br>
+    <span style="color:#c9d1d9">A campanha atual (<span id="rmsdBannerCamp"></span>) ainda não tem essas análises de RMSD/MD/HADDOCK &mdash; por isso o conteúdo abaixo fica oculto, para não exibir resultados do SUB01 como se fossem desta campanha.</span>
+  </div>
+  <div id="rmsdSub01Wrap">
   <div style="margin-bottom:18px">
     <h2>&#128202; Validação por RMSD &amp; Docking guiado (HADDOCK3)</h2>
     <p style="color:#8b949e">Adicionado na v2.1 &mdash; endereça as críticas de banca: análise de RMSD e método de docking ortogonal (HADDOCK), além do RMSD da dinâmica molecular.</p>
@@ -4525,6 +4600,7 @@ $Py = "$env:USERPROFILE\\miniforge3\\envs\\datascience\\python.exe"
   <p style="color:#8b949e;font-size:.85em;margin-top:6px">&#9432; <b>Controle hGR humano:</b> as duas MD acima são <i>intra</i>-TcTR (testam a estabilidade da pose, não a seletividade dinâmica).
      A seletividade parasito-vs-hospedeiro continua sustentada pelo docking + base estrutural (Ala34&rarr;Arg). Uma MD da hGR (3DJJ/3GRS) com o mesmo protocolo
      converteria esse argumento de "docking-only" para "validado por MD" &mdash; recomendada, não obrigatória.</p>
+  </div><!-- /rmsdSub01Wrap -->
 </div>
 
 <!-- ====== TAB 10: MANUTENÇÃO ====== -->
