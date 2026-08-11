@@ -36,7 +36,7 @@ netCDF4>=1.7.0
 cftime>=1.6.0
 
 # ── Parametrizacao de ligantes e cofatores ────────────────────────────────────
-openmmforcefields>=0.13.0
+openmmforcefields>=0.15.0
 openff-toolkit>=0.15.0
 
 # ── Topologias e conversao de formato ─────────────────────────────────────────

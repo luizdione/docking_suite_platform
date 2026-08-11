@@ -1,0 +1,21 @@
+# Mantem a imagem enxuta SEM excluir docking_project (o build local embute os
+# dados dali via COPY . .). Exclui apenas ruido de repositorio/ambiente.
+.git
+.gitignore
+.github
+.idea
+.vscode
+__pycache__
+**/__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.pdb_cache
+dist_web
+dist_web_*
+docking_suite_lgm
+docking_suite_lgm.zip
+*.zip
+.project-memory
+web/viewer/README_DEPLOY.md
+environment.yml
