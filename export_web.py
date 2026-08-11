@@ -184,8 +184,10 @@ def build_viewer(campaign_id="SUB01", out_dir="dist_web", include_pipeline=True)
     # Subprojeto correspondente A campanha exportada (corrige o antigo bug do
     # indice fixo [0], que assumia o primeiro subprojeto da lista).
     subs = sp.get("subprojetos") or []
-    subproject = next((s for s in subs if s.get("id") == campaign_id),
-                      (subs[0] if subs else {}))
+    # Sem subproject correspondente A campanha, NAO cai no primeiro da lista --
+    # isso puxava o pipeline/metadados do SUB01 para dentro de outra campanha
+    # (ex.: pipeline_SUB01.svg aparecendo no pacote do SUB04).
+    subproject = next((s for s in subs if s.get("id") == campaign_id), {})
     active_sid = subproject.get("id")
     if include_pipeline and active_sid:
         r = client.get(f"/api/subproject/{active_sid}/pipeline.svg")
