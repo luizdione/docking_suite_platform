@@ -660,7 +660,7 @@ label{font-size:.88em;color:var(--text-muted);display:block;margin-bottom:4px;le
           <tr><td style="color:#f85149">-5 to -3 kcal/mol</td><td>Weak binding</td></tr>
         </table>
         <p style="margin-top:10px"><strong>Selectivity Index (SI) = Ki(human)/Ki(parasite).</strong> SI &gt; 3 = selective for parasite.</p>
-        <div class="info-box" style="margin-top:8px">
+        <div class="info-box js-sub01-only" style="margin-top:8px">
           <strong>Key argument:</strong> TcTR vs hGR SI &gt; 3 AND experimental ROS increase =
           2-SCN-NQ inhibits trypanothione reductase, collapsing the parasite antioxidant defense.
         </div>
@@ -1741,7 +1741,19 @@ function gateCampaignTab(id){
     Array.prototype.forEach.call(panel.children, function(ch){ if(ch.id!==banId) ch.style.display='none'; });
   }
 }
-window.addEventListener('DOMContentLoaded', function(){ try{ renderHelpTargets(); }catch(e){} });
+
+// Caixas narrativas soltas, especificas do SUB01 (ex.: "Key argument" do Pipeline),
+// dentro de abas por sua vez genericas -- marcadas com .js-sub01-only. Ocultas fora
+// do SUB01 para nao afirmar a tese do 2-SCN-NQ numa campanha que nao e a dele.
+function hideSub01Narratives(){
+  var isDefault = (typeof BOOTSTRAP!=='undefined' && BOOTSTRAP && BOOTSTRAP.campaign_id === BOOTSTRAP.default_campaign);
+  if(isDefault) return;
+  Array.prototype.forEach.call(document.querySelectorAll('.js-sub01-only'), function(el){ el.style.display='none'; });
+}
+window.addEventListener('DOMContentLoaded', function(){
+  try{ renderHelpTargets(); }catch(e){}
+  try{ hideSub01Narratives(); }catch(e){}
+});
 
 // Aba Subprojetos (in-app; substitui o antigo link target="_blank" p/ /subprojects).
 // Campanhas REAIS vem do registry (mesmo bootstrap do seletor de campanha);
