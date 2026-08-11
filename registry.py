@@ -94,7 +94,13 @@ def _ids(kind):
     d = _dir(kind)
     if not d.exists():
         return []
-    return sorted(p.stem for p in d.glob("*.json") if not p.stem.startswith("_"))
+    # Ignora sidecars com extensao composta (ex.: SUB01.paper.json -- dados
+    # congelados do manuscrito consumidos por export_web.build_viewer, NAO uma
+    # campanha). p.stem de "SUB01.paper.json" seria "SUB01.paper".
+    return sorted(
+        p.stem for p in d.glob("*.json")
+        if not p.stem.startswith("_") and not p.name.endswith(".paper.json")
+    )
 
 
 # ---------------------------------------------------------------- programa

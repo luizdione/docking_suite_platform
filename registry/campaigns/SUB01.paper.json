@@ -1,0 +1,272 @@
+{
+  "frozen": true,
+  "source": "2scnnq_manuscript_EN.tex",
+  "campaign_id": "SUB01",
+  "compound": {
+    "name": "2-SCN-NQ",
+    "full": "2-Thiocyanato-1,4-naphthoquinone",
+    "formula": "C11H5NO2S",
+    "mw": 215.23,
+    "smiles": "O=C1C=C(SC#N)C(=O)c2ccccc21"
+  },
+  "docking": [
+    {
+      "code": "LiTR",
+      "label": "TR (LiTR)",
+      "organism": "L. infantum",
+      "pdb": "2JK6",
+      "dg": -7.55,
+      "ki_uM": 2.9,
+      "rmsd2": 22.9,
+      "category": "leishmania",
+      "cofactors": [
+        "FAD"
+      ]
+    },
+    {
+      "code": "hGR",
+      "label": "GR (hGR)",
+      "organism": "H. sapiens",
+      "pdb": "3DJJ",
+      "dg": -7.16,
+      "ki_uM": 5.64,
+      "rmsd2": 4.8,
+      "category": "human",
+      "cofactors": [
+        "FAD"
+      ]
+    },
+    {
+      "code": "TcTR",
+      "label": "TR (TcTR)",
+      "organism": "T. cruzi",
+      "pdb": "1BZL",
+      "dg": -6.86,
+      "ki_uM": 9.42,
+      "rmsd2": 2.7,
+      "category": "parasite",
+      "cofactors": [
+        "FAD"
+      ]
+    },
+    {
+      "code": "hCatL",
+      "label": "Cathepsin L",
+      "organism": "H. sapiens",
+      "pdb": "2XU3",
+      "dg": -6.68,
+      "ki_uM": 12.74,
+      "rmsd2": 14.0,
+      "category": "human",
+      "cofactors": []
+    },
+    {
+      "code": "TcFeSOD",
+      "label": "Fe-SOD (TcFeSOD)",
+      "organism": "T. cruzi",
+      "pdb": "4DVH",
+      "dg": -6.26,
+      "ki_uM": 25.89,
+      "rmsd2": 4.6,
+      "category": "parasite",
+      "cofactors": [
+        "FE"
+      ]
+    },
+    {
+      "code": "hDHODH",
+      "label": "DHODH (hDHODH)",
+      "organism": "H. sapiens",
+      "pdb": "1D3H",
+      "dg": -6.02,
+      "ki_uM": 38.89,
+      "rmsd2": null,
+      "category": "human",
+      "cofactors": [
+        "FMN"
+      ]
+    },
+    {
+      "code": "TcCruzain",
+      "label": "Cruzain",
+      "organism": "T. cruzi",
+      "pdb": "3KKU",
+      "dg": -6.0,
+      "ki_uM": 39.82,
+      "rmsd2": 13.6,
+      "category": "parasite",
+      "cofactors": []
+    },
+    {
+      "code": "LdDHODH",
+      "label": "DHODH (LdDHODH)",
+      "organism": "L. donovani",
+      "pdb": "3C61",
+      "dg": -5.29,
+      "ki_uM": 130.9,
+      "rmsd2": 4.7,
+      "category": "leishmania",
+      "cofactors": [
+        "FMN"
+      ]
+    },
+    {
+      "code": "hMnSOD",
+      "label": "Mn-SOD (hMnSOD)",
+      "organism": "H. sapiens",
+      "pdb": "1LUV",
+      "dg": -4.85,
+      "ki_uM": 280.2,
+      "rmsd2": 2.8,
+      "category": "human",
+      "cofactors": [
+        "MN"
+      ]
+    }
+  ],
+  "docking_si_note": "Indice de seletividade in silico = Ki(humano) / Ki(parasita). A seletividade NAO decorre do docking energetico (hGR pontua entre as duas TRs); e uma propriedade estrutural do canal de substrato da TR, confirmada pela MD.",
+  "md": {
+    "subversive": [
+      {
+        "target": "TcTR",
+        "fad": 2.26,
+        "sd": 0.07,
+        "dithiol_pct": 97,
+        "category": "parasite"
+      },
+      {
+        "target": "LiTR",
+        "fad": 2.43,
+        "sd": 0.23,
+        "dithiol_pct": 95,
+        "category": "leishmania"
+      },
+      {
+        "target": "hGR",
+        "fad": 9.28,
+        "sd": 1.44,
+        "dithiol_pct": 0,
+        "category": "human"
+      }
+    ],
+    "inhibitor": [
+      {
+        "target": "TcTR",
+        "fad": 13.7,
+        "dithiol": 16.7
+      },
+      {
+        "target": "LiTR",
+        "fad": 11.2
+      }
+    ],
+    "stats": "Welch ANOVA p = 0,012; hGR vs. cada TR parasitaria p = 0,038 (Welch t, Holm); as duas TRs entre si p = 0,33; Cohen d ~ 7.",
+    "criterion": "Redox-competente: media ligante-FAD < 3 A E contato com o ditiol catalitico em > 50% dos frames. So as poses subversivas das TRs parasitarias qualificam.",
+    "protocol": "AMBER ff14SB + TIP3P, 150 mM NaCl, 300 K; OpenMM 8.3 (HMR, passo 4 fs); 50 ns por corrida; subversivo em triplicata (n=3), inibidor n=1; 12 trajetorias.",
+    "contacts_tctr": [
+      [
+        "Cys52",
+        2.5
+      ],
+      [
+        "Cys57",
+        2.5
+      ],
+      [
+        "Val58",
+        null
+      ],
+      [
+        "Ser14",
+        null
+      ],
+      [
+        "Gly56",
+        null
+      ],
+      [
+        "Thr51",
+        null
+      ],
+      [
+        "Pro59",
+        null
+      ],
+      [
+        "Val55",
+        null
+      ]
+    ],
+    "fold_note": "RMSD do backbone por cadeia ~1,4 A (fold preservado); RMSD intramolecular do ligante < 0,6 A (pose estavel)."
+  },
+  "admet": {
+    "MW": 215.23,
+    "cLogP": 2.16,
+    "TPSA": 57.9,
+    "HBD": 0,
+    "HBA": 4,
+    "RB": 1,
+    "QED": 0.935,
+    "lipinski_viol": 0,
+    "veber": true,
+    "egan": true,
+    "muegge": true,
+    "ghose": false,
+    "bioavailability": 1.0,
+    "hia": 54.3,
+    "logS": -3.21,
+    "logBB": -0.89,
+    "ppb": 75.4,
+    "vd": 10.1,
+    "herg": "baixa",
+    "ames": false,
+    "cyp_risk": "alto",
+    "pains": 3,
+    "t_half": 48,
+    "caco2": "alta",
+    "bbb": true,
+    "cyp_motifs": [
+      "naftoquinona",
+      "tiocianato",
+      "tioeter"
+    ]
+  },
+  "selectivity_cellular_max": 36.6,
+  "ic50_note": "Concordancia com a potencia celular: IC50 5,64 uM (L. amazonensis) e 10,6 uM (T. cruzi).",
+  "figs": {
+    "structure": [
+      "2scnnq_structure.svg",
+      "Estrutura 2D de 2-SCN-NQ"
+    ],
+    "docking": [
+      "fig11.png",
+      "Docking: ranking de afinidade (dG/Ki), indice de seletividade e convergencia de poses"
+    ],
+    "admet": [
+      "fig12.png",
+      "Perfil ADMET in silico (filtros de drug-likeness, absorcao/distribuicao, seguranca)"
+    ],
+    "md_tctr": [
+      "fig10.png",
+      "MD do complexo TcTR-2-SCN-NQ: RMSD e metricas do modo de ligacao"
+    ],
+    "md_matrix": [
+      "fig_md_matrix.png",
+      "Seletividade dinamica parasita-vs-humano: matriz de competencia redox e distancia ligante-FAD por sistema"
+    ],
+    "interaction_2d": [
+      "fig13.png",
+      "Mapas de interacao 3D no sitio da TcTR: modo inibidor (periferico) vs. subversivo (face si do FAD)"
+    ],
+    "interaction_3d": [
+      "fig_md3d.png",
+      "Mapas de interacao 3D dos seis sistemas de MD (enzima x modo)"
+    ],
+    "graphical_abstract": [
+      "graphical_abstract.png",
+      "Graphical abstract"
+    ]
+  },
+  "config_title": "Docking Suite IFRJ · 2-SCN-NQ, substrato subversivo da tripanotiona redutase",
+  "config_source": "Resultados in silico (docking, dinâmica molecular e ADMET) do 2-SCN-NQ."
+}

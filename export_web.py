@@ -8,10 +8,15 @@ Gera um site 100% estatico (HTML/JS/JSON) publicavel na Hostinger
 
 FIDELIDADE AO PAPER (2026-07-03): os dados cientificos (docking, MD, ADMET, seletividade
 e as FIGURAS) sao os do **manuscrito ACS submetido** (`2scnnq_manuscript_EN.tex` /
-`2scnnq_acs_submission.pdf`), NAO os dados de trabalho do dashboard. Os valores abaixo
-foram extraidos e conferidos contra o .tex submetido (Tabela tab:dock e secoes
-Docking/MD/ADMET). Metadados nao-cientificos (biblioteca de compostos, subprojetos, docs
-da Ajuda) continuam vindo do dashboard via test_client.
+`2scnnq_acs_submission.pdf`), NAO os dados de trabalho do dashboard.
+
+T-0016 (Fase 8.2-8.3): esses dados deixaram de ser constantes hard-coded neste modulo
+e passaram a viver CONGELADOS em `registry/campaigns/<id>.paper.json` (frozen: true),
+separados dos resultados vivos. `export_bundle()` virou `build_viewer(campaign_id)`,
+generica: carrega o paper congelado da campanha, ou exporta SEM secao de paper quando
+a campanha ainda nao tem manuscrito (ex.: dados de trabalho). Metadados nao-cientificos
+(biblioteca de compostos, subprojetos, docs da Ajuda) continuam vindo do dashboard via
+test_client.
 """
 from __future__ import annotations
 
@@ -28,6 +33,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 VIEWER_DIR = SCRIPT_DIR / "web" / "viewer"
 
 # --- Projeto do paper (fonte de verdade cientifica) --------------------------
+# Default historico do SUB01; build_viewer() resolve por campanha (ver _paper_figs_dir).
 PAPER_DIR = Path(os.environ.get("NQ_PAPER_DIR", r"C:\Users\luizd\OneDrive\Data_Science\Projetos\2-SNC-NQ"))
 PAPER_FIGS_DIR = PAPER_DIR / "PAPER" / "figures"
 SUBMISSION_PDF_CANDIDATES = [
@@ -35,72 +41,32 @@ SUBMISSION_PDF_CANDIDATES = [
     PAPER_DIR / "PAPER" / "2scnnq_acs_submission.pdf",
 ]
 
-# =============================================================================
-# DADOS CANONICOS DO MANUSCRITO SUBMETIDO (conferidos contra 2scnnq_manuscript_EN.tex)
-# =============================================================================
-PAPER = {
-    "compound": {
-        "name": "2-SCN-NQ",
-        "full": "2-Thiocyanato-1,4-naphthoquinone",
-        "formula": "C11H5NO2S",
-        "mw": 215.23,
-        "smiles": "O=C1C=C(SC#N)C(=O)c2ccccc21",
-    },
-    # Tabela tab:dock (manuscrito submetido), ordenada por dG. Ki em uM.
-    # rmsd2 = Top-2 pose RMSD (A); None quando so 1 pose (hDHODH).
-    "docking": [
-        {"code": "LiTR", "label": "TR (LiTR)", "organism": "L. infantum", "pdb": "2JK6", "dg": -7.55, "ki_uM": 2.90, "rmsd2": 22.9, "category": "leishmania", "cofactors": ["FAD"]},
-        {"code": "hGR", "label": "GR (hGR)", "organism": "H. sapiens", "pdb": "3DJJ", "dg": -7.16, "ki_uM": 5.64, "rmsd2": 4.8, "category": "human", "cofactors": ["FAD"]},
-        {"code": "TcTR", "label": "TR (TcTR)", "organism": "T. cruzi", "pdb": "1BZL", "dg": -6.86, "ki_uM": 9.42, "rmsd2": 2.7, "category": "parasite", "cofactors": ["FAD"]},
-        {"code": "hCatL", "label": "Cathepsin L", "organism": "H. sapiens", "pdb": "2XU3", "dg": -6.68, "ki_uM": 12.74, "rmsd2": 14.0, "category": "human", "cofactors": []},
-        {"code": "TcFeSOD", "label": "Fe-SOD (TcFeSOD)", "organism": "T. cruzi", "pdb": "4DVH", "dg": -6.26, "ki_uM": 25.89, "rmsd2": 4.6, "category": "parasite", "cofactors": ["FE"]},
-        {"code": "hDHODH", "label": "DHODH (hDHODH)", "organism": "H. sapiens", "pdb": "1D3H", "dg": -6.02, "ki_uM": 38.89, "rmsd2": None, "category": "human", "cofactors": ["FMN"]},
-        {"code": "TcCruzain", "label": "Cruzain", "organism": "T. cruzi", "pdb": "3KKU", "dg": -6.00, "ki_uM": 39.82, "rmsd2": 13.6, "category": "parasite", "cofactors": []},
-        {"code": "LdDHODH", "label": "DHODH (LdDHODH)", "organism": "L. donovani", "pdb": "3C61", "dg": -5.29, "ki_uM": 130.9, "rmsd2": 4.7, "category": "leishmania", "cofactors": ["FMN"]},
-        {"code": "hMnSOD", "label": "Mn-SOD (hMnSOD)", "organism": "H. sapiens", "pdb": "1LUV", "dg": -4.85, "ki_uM": 280.2, "rmsd2": 2.8, "category": "human", "cofactors": ["MN"]},
-    ],
-    # Dinamica molecular n=3 (secoes MD do manuscrito). Distancias em A.
-    "md": {
-        "subversive": [
-            {"target": "TcTR", "fad": 2.26, "sd": 0.07, "dithiol_pct": 97, "category": "parasite"},
-            {"target": "LiTR", "fad": 2.43, "sd": 0.23, "dithiol_pct": 95, "category": "leishmania"},
-            {"target": "hGR", "fad": 9.28, "sd": 1.44, "dithiol_pct": 0, "category": "human"},
-        ],
-        "inhibitor": [
-            {"target": "TcTR", "fad": 13.7, "dithiol": 16.7},
-            {"target": "LiTR", "fad": 11.2},
-        ],
-        "stats": "Welch ANOVA p = 0,012; hGR vs. cada TR parasitaria p = 0,038 (Welch t, Holm); as duas TRs entre si p = 0,33; Cohen d ~ 7.",
-        "criterion": "Redox-competente: media ligante-FAD < 3 A E contato com o ditiol catalitico em > 50% dos frames. So as poses subversivas das TRs parasitarias qualificam.",
-        "protocol": "AMBER ff14SB + TIP3P, 150 mM NaCl, 300 K; OpenMM 8.3 (HMR, passo 4 fs); 50 ns por corrida; subversivo em triplicata (n=3), inibidor n=1; 12 trajetorias.",
-        "contacts_tctr": [["Cys52", 2.5], ["Cys57", 2.5], ["Val58", None], ["Ser14", None], ["Gly56", None], ["Thr51", None], ["Pro59", None], ["Val55", None]],
-        "fold_note": "RMSD do backbone por cadeia ~1,4 A (fold preservado); RMSD intramolecular do ligante < 0,6 A (pose estavel).",
-    },
-    # ADMET in silico (secao ADMET do manuscrito).
-    "admet": {
-        "MW": 215.23, "cLogP": 2.16, "TPSA": 57.9, "HBD": 0, "HBA": 4, "RB": 1, "QED": 0.935,
-        "lipinski_viol": 0, "veber": True, "egan": True, "muegge": True, "ghose": False,
-        "bioavailability": 1.00, "hia": 54.3, "logS": -3.21, "logBB": -0.89, "ppb": 75.4, "vd": 10.1,
-        "herg": "baixa", "ames": False, "cyp_risk": "alto", "pains": 3, "t_half": 48,
-        "caco2": "alta", "bbb": True,
-        "cyp_motifs": ["naftoquinona", "tiocianato", "tioeter"],
-    },
-    "selectivity_cellular_max": 36.6,
-    "ic50_note": "Concordancia com a potencia celular: IC50 5,64 uM (L. amazonensis) e 10,6 uM (T. cruzi).",
-}
 
-# Figuras OFICIAIS do paper (arquivo -> rotulo). Atencao: no manuscrito a numeracao
-# de arquivo nao segue a ordem impressa (fig11=docking, fig12=ADMET, fig10=MD).
-PAPER_FIGS = {
-    "structure": ("2scnnq_structure.svg", "Estrutura 2D de 2-SCN-NQ"),
-    "docking": ("fig11.png", "Docking: ranking de afinidade (dG/Ki), indice de seletividade e convergencia de poses"),
-    "admet": ("fig12.png", "Perfil ADMET in silico (filtros de drug-likeness, absorcao/distribuicao, seguranca)"),
-    "md_tctr": ("fig10.png", "MD do complexo TcTR-2-SCN-NQ: RMSD e metricas do modo de ligacao"),
-    "md_matrix": ("fig_md_matrix.png", "Seletividade dinamica parasita-vs-humano: matriz de competencia redox e distancia ligante-FAD por sistema"),
-    "interaction_2d": ("fig13.png", "Mapas de interacao 3D no sitio da TcTR: modo inibidor (periferico) vs. subversivo (face si do FAD)"),
-    "interaction_3d": ("fig_md3d.png", "Mapas de interacao 3D dos seis sistemas de MD (enzima x modo)"),
-    "graphical_abstract": ("graphical_abstract.png", "Graphical abstract"),
+# =============================================================================
+# DADOS CANONICOS DO MANUSCRITO -- agora CONGELADOS em JSON (T-0016 Fase 8.2)
+# =============================================================================
+def _load_paper(campaign_id):
+    """Carrega registry/campaigns/<id>.paper.json (frozen), ou None se nao existir."""
+    p = SCRIPT_DIR / "registry" / "campaigns" / f"{campaign_id}.paper.json"
+    if not p.exists():
+        return None
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
+# Backward-compat: `export_web.PAPER`/`PAPER_FIGS` (usados por
+# tools/verify_paper_vs_pipeline.py) agora sao servidos a partir do JSON congelado
+# do SUB01, nao mais literais hard-coded aqui.
+_SUB01_PAPER = _load_paper("SUB01") or {}
+PAPER = {
+    "compound": _SUB01_PAPER.get("compound"),
+    "docking": _SUB01_PAPER.get("docking"),
+    "md": _SUB01_PAPER.get("md"),
+    "admet": _SUB01_PAPER.get("admet"),
+    "selectivity_cellular_max": _SUB01_PAPER.get("selectivity_cellular_max"),
+    "ic50_note": _SUB01_PAPER.get("ic50_note"),
 }
+# figuras oficiais: {chave: (arquivo, legenda)}
+PAPER_FIGS = {k: tuple(v) for k, v in (_SUB01_PAPER.get("figs") or {}).items()}
 
 # -----------------------------------------------------------------------------
 DROP_KEYS = {"_dir", "_has_mol2", "_has_pdbqt", "path", "docking_dir", "figures_dir",
@@ -137,43 +103,72 @@ def _get_json(client, url):
         return None
 
 
-def _copy_paper_figures(out):
+def _paper_figs_dir(campaign_id, paper):
+    """Diretorio das figuras oficiais do paper de uma campanha.
+
+    Precedencia (preserva o comportamento historico do SUB01):
+      env NQ_PAPER_DIR  ->  campaign.paths.paper_root  ->  default do modulo.
+    """
+    env = os.environ.get("NQ_PAPER_DIR")
+    if env:
+        return Path(env) / "PAPER" / "figures"
+    try:
+        import registry as _reg
+        camp = _reg.get_campaign(campaign_id)
+        proot = (camp.get("paths") or {}).get("paper_root")
+        if proot:
+            return Path(proot) / "figures"
+    except Exception:
+        pass
+    return PAPER_FIGS_DIR
+
+
+def _copy_paper_figures(out, campaign_id, paper):
     """Copia as figuras OFICIAIS do paper para figures/ e devolve o mapa rotulo->rel/legenda."""
     figs_out = out / "figures"
     figs_out.mkdir(parents=True, exist_ok=True)
+    figs_dir = _paper_figs_dir(campaign_id, paper)
     result = {}
-    for key, (fname, caption) in PAPER_FIGS.items():
-        src = PAPER_FIGS_DIR / fname
+    for key, val in (paper.get("figs") or {}).items():
+        fname, caption = val[0], val[1]
+        src = figs_dir / fname
         if src.exists():
             shutil.copyfile(src, figs_out / fname)
             result[key] = {"rel": f"figures/{fname}", "caption": caption}
     return result
 
 
-def export_bundle(out_dir, compound="2-SCN-NQ"):
+def build_viewer(campaign_id="SUB01", out_dir="dist_web", include_pipeline=True):
+    """Empacota o viewer estatico de UMA campanha (T-0016 Fase 8.2-8.3).
+
+    Se existir `registry/campaigns/<id>.paper.json` (frozen), usa os dados
+    cientificos congelados do manuscrito. Caso contrario, exporta SEM secao de
+    paper (dados de trabalho; abas de docking/MD/ADMET ausentes).
+    """
     out = Path(out_dir)
     if not VIEWER_DIR.exists():
         raise FileNotFoundError(f"viewer nao encontrado em {VIEWER_DIR}")
     out.mkdir(parents=True, exist_ok=True)
     shutil.copytree(VIEWER_DIR, out, dirs_exist_ok=True)
 
-    summary = {"out_dir": str(out), "figures": 0, "docs": 0, "pdf": False}
+    paper = _load_paper(campaign_id)
+    summary = {"out_dir": str(out), "campaign": campaign_id,
+               "has_paper": bool(paper), "figures": 0, "docs": 0, "pdf": False}
 
-    # 1) DADOS CIENTIFICOS = manuscrito submetido -----------------------------
-    _write_json(out / "data" / "docking.json", {
-        "targets": PAPER["docking"],
-        "si_note": "Indice de seletividade in silico = Ki(humano) / Ki(parasita). "
-                   "A seletividade NAO decorre do docking energetico (hGR pontua entre as duas TRs); "
-                   "e uma propriedade estrutural do canal de substrato da TR, confirmada pela MD.",
-    })
-    _write_json(out / "data" / "md.json", PAPER["md"])
-    _write_json(out / "data" / "admet.json", {"admet": PAPER["admet"]})
+    # 1) DADOS CIENTIFICOS = manuscrito congelado (so quando ha paper) ---------
+    figs_map = {}
+    if paper:
+        _write_json(out / "data" / "docking.json", {
+            "targets": paper["docking"],
+            "si_note": paper.get("docking_si_note", ""),
+        })
+        _write_json(out / "data" / "md.json", paper["md"])
+        _write_json(out / "data" / "admet.json", {"admet": paper["admet"]})
+        # 2) figuras oficiais do paper ----------------------------------------
+        figs_map = _copy_paper_figures(out, campaign_id, paper)
+        summary["figures"] = len(figs_map)
 
-    # 2) figuras oficiais do paper --------------------------------------------
-    figs_map = _copy_paper_figures(out)
-    summary["figures"] = len(figs_map)
-
-    # 3) PDF de submissao: NAO incluir no viewer (o manuscrito nao e distribuido pela plataforma)
+    # 3) PDF de submissao: NAO incluir no viewer (manuscrito nao e distribuido)
     pdf_rel = None
 
     # 4) metadados nao-cientificos do dashboard (compostos, subprojetos, docs) --
@@ -181,17 +176,22 @@ def export_bundle(out_dir, compound="2-SCN-NQ"):
     import dashboard_v2 as D
     client = D.app.test_client()
 
-    comp = _get_json(client, "/compounds") or {}
+    comp = _get_json(client, f"/compounds?campaign={campaign_id}") or {}
     _write_json(out / "data" / "compounds.json", sanitize(comp))
 
     sp = _get_json(client, "/api/subprojects") or {}
     _write_json(out / "data" / "subprojects.json", sanitize(sp))
-    active_sid = (sp.get("subprojetos") or [{}])[0].get("id")
-    if active_sid:
+    # Subprojeto correspondente A campanha exportada (corrige o antigo bug do
+    # indice fixo [0], que assumia o primeiro subprojeto da lista).
+    subs = sp.get("subprojetos") or []
+    subproject = next((s for s in subs if s.get("id") == campaign_id),
+                      (subs[0] if subs else {}))
+    active_sid = subproject.get("id")
+    if include_pipeline and active_sid:
         r = client.get(f"/api/subproject/{active_sid}/pipeline.svg")
         if r.status_code == 200:
             (out / "assets").mkdir(parents=True, exist_ok=True)
-            (out / "assets" / "pipeline_SUB01.svg").write_bytes(r.get_data())
+            (out / "assets" / f"pipeline_{active_sid}.svg").write_bytes(r.get_data())
 
     docs_index = []
     (out / "docs").mkdir(parents=True, exist_ok=True)
@@ -214,17 +214,18 @@ def export_bundle(out_dir, compound="2-SCN-NQ"):
     vfile = SCRIPT_DIR / "VERSION"
     if vfile.exists():
         version = vfile.read_text(encoding="utf-8").strip()
-    subproject = (sp.get("subprojetos") or [{}])[0]
     config = {
-        "title": "Docking Suite IFRJ · 2-SCN-NQ, substrato subversivo da tripanotiona redutase",
+        "title": (paper.get("config_title") if paper
+                  else f"Docking Suite IFRJ · {campaign_id}"),
         "version": version,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-        "source": "Resultados in silico (docking, dinâmica molecular e ADMET) do 2-SCN-NQ.",
-        "compound": PAPER["compound"],
+        "source": (paper.get("config_source") if paper
+                   else "Resultados in silico (dados de trabalho)."),
+        "compound": (paper.get("compound") if paper else None),
         "paper_title": subproject.get("titulo_paper"),
         "periodico_alvo": subproject.get("periodico_alvo"),
-        "selectivity_cellular_max": PAPER["selectivity_cellular_max"],
-        "ic50_note": PAPER["ic50_note"],
+        "selectivity_cellular_max": (paper.get("selectivity_cellular_max") if paper else None),
+        "ic50_note": (paper.get("ic50_note") if paper else None),
         "figs": figs_map,
         "submission_pdf": pdf_rel,
         "subproject": {
@@ -239,13 +240,21 @@ def export_bundle(out_dir, compound="2-SCN-NQ"):
     return summary
 
 
+# Backward-compat: nome antigo. Prefira build_viewer(campaign_id).
+def export_bundle(out_dir, compound="2-SCN-NQ", campaign_id="SUB01"):
+    return build_viewer(campaign_id=campaign_id, out_dir=out_dir)
+
+
 def main():
-    ap = argparse.ArgumentParser(description="Empacota o NQ-Docking Viewer estatico (fiel ao paper).")
+    ap = argparse.ArgumentParser(description="Empacota o NQ-Docking Viewer estatico (fiel ao paper congelado).")
     ap.add_argument("--out", default="dist_web")
-    ap.add_argument("--compound", default="2-SCN-NQ")
+    ap.add_argument("--campaign", default="SUB01", help="id da campanha (ex.: SUB01, SUB04)")
+    ap.add_argument("--no-pipeline", action="store_true", help="nao gerar o SVG de pipeline")
     args = ap.parse_args()
-    s = export_bundle(args.out, compound=args.compound)
-    print("[OK] bundle gerado (fiel ao manuscrito submetido):")
+    s = build_viewer(campaign_id=args.campaign, out_dir=args.out,
+                     include_pipeline=not args.no_pipeline)
+    tag = "fiel ao manuscrito submetido" if s["has_paper"] else "dados de trabalho (sem paper congelado)"
+    print(f"[OK] bundle gerado ({tag}):")
     for k, v in s.items():
         print(f"     {k}: {v}")
     print(f"\nEnvie o conteudo de {s['out_dir']}/ para o Hostinger (ver README_DEPLOY.md).")
