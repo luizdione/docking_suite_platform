@@ -178,6 +178,21 @@ def get_target(target_id):
     return _read(_target_path(target_id))
 
 
+def resolve_local_file(raw):
+    """Resolve structure.local_file para um caminho utilizavel em qualquer CWD.
+
+    Aceita ABSOLUTO (usado como esta -- back-compat com maquinas que apontam p/
+    fora do repo) OU RELATIVO a raiz do repo (ex.: 'docking_project/SUB04/models/
+    X.cif'), que e portavel: resolve local e dentro do container (/app) igual.
+    Nao levanta se o arquivo nao existir -- quem consome/valida decide."""
+    if not raw:
+        return raw
+    p = Path(raw)
+    if p.is_absolute():
+        return str(p)
+    return str((ROOT / raw).resolve())
+
+
 def list_targets(campaign_id=None):
     """Alvos do registry, ou apenas os da campanha (na ordem declarada nela)."""
     if campaign_id is None:
@@ -436,10 +451,11 @@ def validate_all():
             # local_file aponta pra fora do repo (dado ingerido) -- se o projeto-fonte
             # for reorganizado, isto quebra em silencio sem esta checagem (ja aconteceu
             # uma vez: Rho_OCRL/.../structures/ -> colaboracoes/tcactina/.../models/).
-            if not Path(struct["local_file"]).exists():
+            if not Path(resolve_local_file(struct["local_file"])).exists():
                 errors.append(
                     f"{ctx}: structure.local_file nao existe em disco: "
-                    f"{struct['local_file']!r}"
+                    f"{struct['local_file']!r} (resolvido: "
+                    f"{resolve_local_file(struct['local_file'])!r})"
                 )
         if source == "alphafold" and not (struct.get("confidence") or {}).get("global"):
             errors.append(

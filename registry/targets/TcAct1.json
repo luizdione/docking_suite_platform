@@ -13,7 +13,7 @@
     "pdb_id": null,
     "assembly": null,
     "n_protomers_required": 1,
-    "local_file": "C:\\Users\\luizd\\OneDrive\\Data_Science\\Projetos\\colaboracoes\\tcactina\\in_silico\\drogas_citoesqueleto\\models\\TcAct1_AF_Q4CYQ8.cif",
+    "local_file": "docking_project/SUB04/models/TcAct1_AF_Q4CYQ8.cif",
     "confidence": {
       "global": 94.9,
       "site": {

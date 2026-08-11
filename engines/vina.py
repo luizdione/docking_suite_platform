@@ -117,11 +117,13 @@ class VinaEngine(Engine):
                         raise RuntimeError(
                             f"download do PDB {target_info.get('pdb')} falhou: {msg}")
                 elif source in ("alphafold", "local"):
-                    local_file = struct.get("local_file")
+                    # resolve relativo-ao-repo (portavel: local e container /app)
+                    local_file = registry.resolve_local_file(struct.get("local_file"))
                     if not local_file or not Path(local_file).exists():
                         raise RuntimeError(
                             f"structure.local_file ausente/inexistente p/ "
-                            f"'{req.target}': {local_file!r}")
+                            f"'{req.target}': {struct.get('local_file')!r} "
+                            f"(resolvido: {local_file!r})")
                     # Converte .cif->.pdb se preciso (Bio.PDB.PDBParser, usado
                     # por clean_protein, le .cif SEM erro mas com 0 atomos --
                     # falha silenciosa confirmada em T-0021 Fase 0.3).

@@ -33,7 +33,7 @@ def _iter_derived_sites(campaign_id):
     # registry.list_targets() devolve os OBJETOS (dicts), nao os ids.
     for target in registry.list_targets(campaign_id):
         tid = target.get("id")
-        cif = (target.get("structure") or {}).get("local_file")
+        cif = registry.resolve_local_file((target.get("structure") or {}).get("local_file"))
         for sname, site in (target.get("sites") or {}).items():
             if site.get("definition") == "derived_from_reference_complex":
                 yield tid, sname, site, cif
