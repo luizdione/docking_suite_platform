@@ -89,3 +89,4 @@ docking_hostinger*.zip
 
 # --- Config local do Claude Code (launch.json com caminhos absolutos, worktrees) ---
 .claude/
+.pdb_cache/

@@ -489,13 +489,23 @@ def _calculate_grid_center(structure, target_info):
     # recomputada aqui. ERRO CLARO se a estrategia pede isto mas o numero nao
     # veio -- NUNCA cai no ultimo recurso (centro de massa da proteina
     # inteira), que seria um valor plausivel e silenciosamente errado.
-    if strategy == "explicit_center":
+    # explicit_center: centro ja resolvido e gravado no registry.
+    # derived_from_reference_complex: MESMA regra de runtime -- o centro e
+    # derivado por superposicao estrutural contra um complexo de referencia
+    # (offline, tools/derive_sites.py + site_derivation.py) e gravado como
+    # box_center_A; aqui so LE. Se a estrategia foi pedida mas o numero nao
+    # veio, e ERRO CLARO -- NUNCA cai no ultimo recurso (centro de massa da
+    # proteina inteira), que seria plausivel e silenciosamente errado.
+    if strategy in ("explicit_center", "derived_from_reference_complex"):
         center = target_info.get("box_center_A")
         if not center:
             raise ValueError(
-                "grid_strategy='explicit_center' mas target_info sem "
-                "'box_center_A' -- o site precisa declarar o centro (nunca "
-                "cair no centro de massa da proteina por engano)"
+                f"grid_strategy='{strategy}' mas target_info sem 'box_center_A' "
+                f"-- o site precisa declarar/derivar o centro (nunca cair no "
+                f"centro de massa da proteina por engano). Para sitios "
+                f"'derived_from_reference_complex' sem centro, rode "
+                f"tools/derive_sites.py para computar box_center_A a partir do "
+                f"complexo de referencia (reference_pdb + reference_ligand_resname)."
             )
         return tuple(round(float(c), 2) for c in center)
 
