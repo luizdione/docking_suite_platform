@@ -573,7 +573,7 @@ label{font-size:.88em;color:var(--text-muted);display:block;margin-bottom:4px;le
   <button class="tab-btn" id="tb-help" onclick="switchTab('help',this)">&#10067; Ajuda</button>
   <button class="tab-btn" id="tb-maintenance" onclick="switchTab('maintenance',this)">&#128295; Manutenção</button>
   <button class="tab-btn" id="tb-lab" onclick="switchTab('lab',this)">&#9883; Estrutura 3D &amp; Runner</button>
-  <a class="tab-btn" href="/subprojects" target="_blank" rel="noopener" style="text-decoration:none">&#9730; Subprojetos</a>
+  <button class="tab-btn" id="tb-subprojects" onclick="switchTab('subprojects',this)">&#9730; Subprojetos</button>
 </div>
 
 <!-- ====== COMPOUND SELECTOR BANNER (always visible) ====== -->
@@ -1665,6 +1665,80 @@ function switchTab(id, btn) {
   if (id==='lab'){
     setTimeout(function(){ try{ if(window.labInit) labInit(); }catch(e){} }, 30);
   }
+  if (id==='subprojects'){
+    setTimeout(function(){ try{ loadSubprojects(); }catch(e){} }, 20);
+  }
+}
+
+function openCampaign(id){ location.href = '/?campaign=' + encodeURIComponent(id); }
+
+// Aba Subprojetos (in-app; substitui o antigo link target="_blank" p/ /subprojects).
+// Campanhas REAIS vem do registry (mesmo bootstrap do seletor de campanha);
+// SUB02/SUB03 sao so planejados (sem dados de docking) e aparecem como texto.
+async function loadSubprojects(){
+  var host = document.getElementById('subprojectsContent');
+  if(!host) return;
+  host.innerHTML = '<p style="color:#8b949e">Carregando subprojetos&hellip;</p>';
+
+  var camps = (typeof BOOTSTRAP!=='undefined' && BOOTSTRAP && BOOTSTRAP.campaigns) ? BOOTSTRAP.campaigns : [];
+  var current = (typeof BOOTSTRAP!=='undefined' && BOOTSTRAP) ? BOOTSTRAP.campaign_id : '';
+
+  var enriched = await Promise.all(camps.map(async function(c){
+    var counts = null;
+    try{
+      var r = await fetch('/api/config?campaign='+encodeURIComponent(c.id));
+      if(r.ok){
+        var cfg = await r.json();
+        counts = { targets:(cfg.targets||[]).length, ligands:(cfg.ligands||[]).length, pairs:(cfg.pairs||[]).length };
+      }
+    }catch(e){}
+    return {c:c, counts:counts};
+  }));
+
+  var html = '<div class="card">'
+    + '<h2>&#9730; Subprojetos da plataforma</h2>'
+    + '<p style="color:#8b949e;font-size:.9em">Campanhas reais no registry. Clique em <strong>Abrir</strong> para trocar a plataforma para aquela campanha &mdash; sem sair do app.</p>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-top:14px">';
+  if(!enriched.length){
+    html += '<p style="color:#8b949e">Nenhuma campanha registrada.</p>';
+  }
+  enriched.forEach(function(e){
+    var c=e.c, n=e.counts, isCur=(c.id===current);
+    var badge = isCur ? ' <span class="pass" style="font-size:.72em">&#9679; ativa</span>' : '';
+    var counts = n ? ('<div style="margin:8px 0;font-size:.82em;color:#8b949e">&#127919; '+n.targets+' alvos &nbsp;&bull;&nbsp; &#129514; '+n.ligands+' ligantes &nbsp;&bull;&nbsp; &#128279; '+n.pairs+' pares</div>') : '';
+    var action = isCur
+      ? '<button class="btn btn-secondary" onclick="switchTab(\'lab\',document.getElementById(\'tb-lab\'))">Ver no Runner 3D</button>'
+      : '<button class="btn btn-secondary" onclick="openCampaign(\''+c.id+'\')">Abrir</button>';
+    html += '<div style="border:1px solid #1e4080;background:#0d1828;border-radius:8px;padding:14px">'
+      + '<div style="font-family:Consolas,monospace;color:#58a6ff;font-weight:700">'+c.id+(c.sigla?(' &middot; '+c.sigla):'')+badge+'</div>'
+      + '<div style="font-weight:600;margin-top:4px">'+(c.titulo||'&mdash;')+'</div>'
+      + (c.status?('<div style="font-size:.78em;color:#8b949e;margin-top:4px">'+c.status+'</div>'):'')
+      + counts
+      + '<div style="margin-top:10px">'+action+'</div>'
+      + '</div>';
+  });
+  html += '</div></div>';
+
+  try{
+    var rs = await fetch('/api/subprojects');
+    if(rs.ok){
+      var js = await rs.json();
+      var fut = js.futuros || {};
+      var keys = Object.keys(fut);
+      if(keys.length){
+        html += '<div class="card" style="margin-top:18px">'
+          + '<h3>&#128736; Subprojetos em desenvolvimento</h3>'
+          + '<p style="color:#8b949e;font-size:.85em">Planejados, ainda sem dados de docking/MD no registry &mdash; por isso nao aparecem como campanha executavel.</p>'
+          + '<ul style="line-height:1.6">';
+        keys.forEach(function(k){
+          html += '<li><strong>'+k+'</strong>: <span style="color:#8b949e">'+fut[k]+'</span></li>';
+        });
+        html += '</ul></div>';
+      }
+    }
+  }catch(e){}
+
+  host.innerHTML = html;
 }
 
 // ============================================================
@@ -4598,6 +4672,13 @@ $Py = "$env:USERPROFILE\\miniforge3\\envs\\datascience\\python.exe"
 #helpDocContent strong { color:#e8f4fa; }
 #helpDocContent a { color:var(--accent); }
 </style>
+
+<!-- ============================================================ -->
+<!--  ABA: Subprojetos  (in-app; substitui link target=_blank)    -->
+<!-- ============================================================ -->
+<div id="tab-subprojects" class="tab-panel">
+  <div id="subprojectsContent"><p style="color:#8b949e">Carregando subprojetos&hellip;</p></div>
+</div>
 
 <!-- ============================================================ -->
 <!--  ABA: Estrutura 3D & Runner  (Fase 5.3 / T-0019)             -->
