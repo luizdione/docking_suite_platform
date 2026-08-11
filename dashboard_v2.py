@@ -1427,16 +1427,85 @@ def run_all_figures():
 
 # ─── COMPOUND DATABASE ROUTES ─────────────────────────────────────
 
+def _compounds_from_registry(campaign_id):
+    """Adapta registry.list_ligands(campaign) -> formato que /compounds espera.
+
+    Usado para campanhas fora do layout legado do compound_db (SUB01). Enriquece
+    _has_pdbqt/_has_mol2/_dir a partir do disco quando os arquivos preparados de
+    fato existem (ex.: latrunculina_A do SUB04); caso contrario marca como pendente
+    -- honesto (fail-visible), nunca inventa arquivo inexistente. Mapeia o schema
+    2.0 do registry (mw_g_mol, topology.expected_active_torsions, prep.optimization)
+    para os campos flat que o frontend renderiza (mw, rotatable_bonds, optimization).
+    """
+    import registry as _reg
+
+    ldir_root = None
+    try:
+        import paths as _paths
+        ldir_root = _paths.data_root(campaign_id, warn_legacy=False) / "ligand"
+    except Exception:
+        ldir_root = None
+
+    out = []
+    for lig in _reg.list_ligands(campaign_id):
+        name = lig.get("name") or lig.get("display_name") or lig.get("id")
+        topo = lig.get("topology") or {}
+        prep = lig.get("prep") or {}
+        prov = lig.get("provenance") or {}
+        has_pdbqt = has_mol2 = False
+        found_dir = None
+        if ldir_root is not None:
+            for cand in (name, lig.get("id"), lig.get("name")):
+                if not cand:
+                    continue
+                try:
+                    d = ldir_root / str(cand)
+                    if d.exists():
+                        found_dir = str(d)
+                        has_pdbqt = any(d.glob("*.pdbqt"))
+                        has_mol2 = any(d.glob("*.mol2"))
+                        break
+                except Exception:
+                    pass
+        out.append({
+            "name": name,
+            "display_name": lig.get("display_name"),
+            "smiles": lig.get("smiles"),
+            "formula": lig.get("formula"),
+            "mw": lig.get("mw_g_mol"),
+            "heavy_atoms": lig.get("heavy_atoms"),
+            "rotatable_bonds": topo.get("expected_active_torsions"),
+            "charge": lig.get("charge"),
+            "optimization": prep.get("optimization"),
+            "date_added": prov.get("date_added"),
+            "notes": lig.get("notes"),
+            "class": lig.get("class"),
+            "_dir": found_dir,
+            "_has_pdbqt": has_pdbqt,
+            "_has_mol2": has_mol2,
+            "_source": "registry",
+        })
+    return out
+
+
 @app.route('/compounds')
 def list_compounds_route():
     _ensure_script_path()
+    campaign = request.args.get('campaign') or _default_campaign()
     try:
-        from compound_db import list_compounds, ensure_default_compound
-        ensure_default_compound()
-        compounds = list_compounds()
-        return jsonify({"compounds": compounds})
+        if campaign == _default_campaign():
+            # Layout legado (SUB01): fonte original preservada integralmente,
+            # inclusive _has_pdbqt/_has_mol2/_dir reais e ensure_default_compound().
+            from compound_db import list_compounds, ensure_default_compound
+            ensure_default_compound()
+            compounds = list_compounds()
+        else:
+            # Demais campanhas (ex.: SUB04 -- drogas do citoesqueleto): ligantes
+            # declarados no registry, que ja e a fonte de verdade multi-campanha.
+            compounds = _compounds_from_registry(campaign)
+        return jsonify({"compounds": compounds, "campaign": campaign})
     except Exception as e:
-        return jsonify({"compounds": [], "error": str(e)})
+        return jsonify({"compounds": [], "campaign": campaign, "error": str(e)})
 
 
 @app.route('/populate_library', methods=['POST'])

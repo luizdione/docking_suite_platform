@@ -2341,8 +2341,14 @@ async function populateNQLibrary(){
   }catch(e){ if(st) st.innerHTML='<span style="color:#ff6b6b">&#10060; '+e+'</span>'; }
 }
 
+function _compoundsURL(){
+  // Banco de compostos por campanha: SUB01 (layout legado) ou registry (SUB04+).
+  var id = (typeof BOOTSTRAP!=='undefined' && BOOTSTRAP && BOOTSTRAP.campaign_id) ? BOOTSTRAP.campaign_id : '';
+  return '/compounds' + (id ? ('?campaign='+encodeURIComponent(id)) : '');
+}
+
 async function loadCompounds() {
-  var r=await fetch('/compounds'), d=await r.json();
+  var r=await fetch(_compoundsURL()), d=await r.json();
   var compounds = d.compounds || [];
 
   // Update banner selector
@@ -2387,7 +2393,7 @@ function onCompoundChange() {
   if (!name) return;
   CURRENT_COMPOUND.name = name;
   // Update banner display
-  fetch('/compounds').then(function(r){return r.json();}).then(function(d){
+  fetch(_compoundsURL()).then(function(r){return r.json();}).then(function(d){
     var c = (d.compounds||[]).find(function(x){return x.name===name;});
     if (c) {
       CURRENT_COMPOUND.smiles = c.smiles || '';
