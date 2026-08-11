@@ -134,11 +134,13 @@ figcaption{font-size:12px;color:var(--text-muted);margin-top:8px;line-height:1.5
   <div class="header-inner">
     <img src="assets/logo-ifrj.png" alt="Logo IFRJ" onerror="this.style.display='none'">
     <div class="header-text" style="flex:1">
-      <div class="header-title">Docking Suite &mdash; <span>Pipeline Computacional Antiparasitário</span></div>
-      <div class="header-sub">&bull; <em>Trypanosoma cruzi</em> + <em>Leishmania amazonensis</em>
-        &bull; &#9879; Docking &bull; &#9889; MD &bull; &#128138; ADMET</div>
+      <div class="header-title" id="hdrTitle">Docking Suite &amp; Din&acirc;mica Molecular</div>
+      <div class="header-sub" id="hdrSub">&bull; &#9879; Docking &bull; &#9889; MD &bull; &#128138; ADMET</div>
     </div>
-    <div class="header-badge">&#127760; versão hospedada &middot; <b>somente leitura</b></div>
+    <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+      <a href="../index.html" class="header-badge" style="text-decoration:none;white-space:nowrap" title="Voltar e escolher outra campanha">&#9730; &larr; Campanhas</a>
+      <div class="header-badge">&#127760; hospedado &middot; <b>somente leitura</b></div>
+    </div>
   </div>
 </header>
 
@@ -292,6 +294,7 @@ function figHTML(f){ return f&&f.rel?`<img class="fig" src="${esc(f.rel)}" alt="
 
 async function loadConfig(){
   try{CFG=await jget('config.json');}catch(e){CFG={};}
+  var _ht=$('#hdrTitle'); if(_ht && CFG.title) _ht.textContent=CFG.title;
   const c=CFG.compound||{};
   $('#cbName').textContent=c.name||'2-SCN-NQ'; $('#heroTitle').textContent=c.name||'2-SCN-NQ';
   $('#cbMeta').innerHTML=`<b>${esc(c.formula||'')}</b> · MW <b>${num(c.mw)}</b> g/mol`;
