@@ -392,12 +392,27 @@
       "reference_pdb": "2Q0U",
       "reference_ligand_resname": "LAB",
       "box_size_A": [
-        25.0,
-        25.0,
-        25.0
+        22.6,
+        23.8,
+        25.4
       ],
       "box_policy": "xtal_bbox_plus_padding",
-      "notes": "Fenda do nucleotideo. A fonte NAO computou tabela de conservacao por residuo nem pLDDT por sitio para este bolso (diferente dos outros 3 sitios, todos com binding_sites.json/receptors_qc.json dedicados). Referencia = 2Q0U (latrunculina B, melhor resolucao); 1ESV (latrunculina A, 2.0 A) e co-cristal alternativo -- ver pairs/*__latrunculina-a.json e *__latrunculina-b.json. box_size_A e PLACEHOLDER, nao medido na fonte."
+      "notes": "Fenda do nucleotideo. A fonte NAO computou tabela de conservacao por residuo nem pLDDT por sitio para este bolso (diferente dos outros 3 sitios, todos com binding_sites.json/receptors_qc.json dedicados). Referencia = 2Q0U (latrunculina B, melhor resolucao); 1ESV (latrunculina A, 2.0 A) e co-cristal alternativo -- ver pairs/*__latrunculina-a.json e *__latrunculina-b.json. box_size_A e PLACEHOLDER, nao medido na fonte.",
+      "box_center_A": [
+        -8.707,
+        -9.827,
+        -8.119
+      ],
+      "box_center_frame": "target",
+      "superposition_rmsd_A": 2.42,
+      "n_ca_matched": 350,
+      "geometric_validation": {
+        "frac_contact_4.5A": 1.0,
+        "immersion_mean_A": 2.95,
+        "immersion_min_A": 0.45,
+        "method": "site_derivation.geometric_validation",
+        "note": "Centro por superposicao estrutural (target_frame, receptor AlphaFold intocado); validado GEOMETRICAMENTE (pose de referencia enterrada no bolso). Redock rigido NAO reproduz a pose em modelo AlphaFold apo (limitacao documentada) -- para pose exata usar docking flexivel/template holo."
+      }
     }
   },
   "default_site": "citocalasina_D",
