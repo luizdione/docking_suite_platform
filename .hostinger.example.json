@@ -1,0 +1,9 @@
+{
+  "_comment": "Copie para .hostinger.json (gitignored) e preencha. hPanel -> Files -> FTP Accounts da o host/usuario/senha. Para FTPS use port 21; para SFTP (planos com SSH) protocol=sftp e port 22.",
+  "protocol": "ftps",
+  "host": "ftp.SEUDOMINIO.com",
+  "port": 21,
+  "user": "uXXXXXXXXX",
+  "password": "SUA_SENHA_FTP",
+  "remote_dir": "public_html/docking"
+}

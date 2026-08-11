@@ -93,3 +93,6 @@ docking_hostinger*.zip
 
 # --- Dados/resultados: NAO versionar no repo de codigo (ficam em disco/OneDrive) ---
 docking_project/
+
+# --- Credencial de deploy Hostinger (NUNCA versionar) ---
+.hostinger.json
