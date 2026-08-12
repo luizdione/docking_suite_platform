@@ -463,6 +463,24 @@ def validate_all():
                 "para modelo predito (o revisor vai perguntar)"
             )
 
+        # Estado oligomerico do RECEPTOR (ex.: pentamero de F-actina). Ate agora
+        # structure.assembly / n_protomers_required existiam nos JSON mas NUNCA eram
+        # validados nem lidos (campos mortos). Um receptor oligomerico que nao declara
+        # quantos protomeros tem esconde do runner/relatorio a natureza do modelo.
+        n_prot = struct.get("n_protomers_required")
+        if n_prot is not None:
+            if not isinstance(n_prot, int) or isinstance(n_prot, bool) or n_prot < 1:
+                errors.append(
+                    f"{ctx}: structure.n_protomers_required deve ser int >= 1 (got {n_prot!r})")
+            elif n_prot > 1 and not struct.get("assembly"):
+                errors.append(
+                    f"{ctx}: n_protomers_required={n_prot} exige structure.assembly descrito "
+                    "(ex.: 'F-actin filament (5-mer)') -- nao deixar o estado oligomerico implicito")
+        if struct.get("assembly") is not None and not isinstance(struct.get("assembly"), str):
+            errors.append(
+                f"{ctx}: structure.assembly deve ser string|null "
+                f"(got {type(struct.get('assembly')).__name__})")
+
         chem = t.get("chemistry") or {}
         cof_source = chem.get("cofactor_source")
         if cof_source not in (None, "crystal", "transferred", "none"):
@@ -636,6 +654,31 @@ def validate_all():
         for kind, prot_id in (p.get("protocols") or {}).items():
             if prot_id not in known_protocols:
                 errors.append(f"{ctx}: protocolo '{prot_id}' (etapa {kind}) nao existe")
+
+        # Vocabulario de CONTROLE (matriz de cross-docking de especificidade). Um par
+        # de controle negativo (droga sem sitio no alvo, ex.: colchicina x actina) TEM
+        # de dizer isso EXPLICITAMENTE -- senao "afinidade fraca" fica indistinguivel de
+        # "controle que funcionou". expected_binding coerente com o tipo (fail-loud).
+        ctrl = p.get("control")
+        if ctrl is not None:
+            if not isinstance(ctrl, dict):
+                errors.append(f"{ctx}: control deve ser objeto (got {type(ctrl).__name__})")
+            else:
+                ctype = ctrl.get("type")
+                if ctype not in ("positive", "negative", None):
+                    errors.append(
+                        f"{ctx}: control.type invalido ({ctype!r}); esperado positive|negative|null")
+                if ctype in ("positive", "negative"):
+                    exp = ctrl.get("expected_binding")
+                    if not isinstance(exp, bool):
+                        errors.append(f"{ctx}: control.type={ctype!r} exige expected_binding booleano")
+                    elif (ctype == "positive") != exp:
+                        errors.append(
+                            f"{ctx}: control incoerente -- type={ctype!r} mas expected_binding={exp} "
+                            "(positivo=>true, negativo=>false)")
+                    if not ctrl.get("rationale"):
+                        errors.append(
+                            f"{ctx}: control.type={ctype!r} exige rationale (por que liga/nao liga)")
 
     errors.extend(_validate_with_jsonschema())
     return errors

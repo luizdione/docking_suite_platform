@@ -319,3 +319,76 @@ def geometric_validation(target_cif, reference_pdb, reference_ligand_resname,
     else:
         out["verdict"] = "blocked_superposition"  # nem local ajusta -> divergencia real
     return out
+
+
+def validate_embedded_ligand(receptor_file, ligand_resname, contact_A=4.5,
+                             min_frac_contact=0.8, max_mean_A=4.0, padding_A=8.0,
+                             min_box_A=22.5):
+    """Valida um sitio cujo RECEPTOR JA CONTEM o ligante na pose nativa -- ex.: o
+    pentamero de F-actina com jasplaquinolida (9UE) embutida (threading sobre 7Q8C no
+    frame do 7PM3). Diferente de geometric_validation, aqui NAO ha superposicao: o
+    ligante ja esta no referencial do receptor. Multi-cadeia por construcao (usa TODAS
+    as cadeias do receptor), o que resolve o sitio INTER-PROTOMERICO que a superposicao
+    de cadeia unica nao alcanca.
+
+    Se ha varias copias do ligante (o 5-mer tem 3 copias de 9UE, uma por juncao),
+    escolhe a MAIS IMERSA -- a copia CENTRAL, totalmente enterrada; nao a de borda,
+    parcialmente exposta (foi a borda ~36% exposta que fez o TRIMERO ser rejeitado a
+    favor do pentamero). Devolve o centro/box dessa copia.
+
+    Metrica identica a geometric_validation: fracao de atomos pesados do ligante a
+    <contact_A de um atomo do receptor, e distancia media. Veredito center_ok/
+    weak_immersion. Fail-loud (RuntimeError) se o ligante nao existe no arquivo --
+    nunca inventar centro."""
+    from scipy.spatial import cKDTree
+    from Bio.PDB import PDBParser, MMCIFParser
+    p = str(receptor_file)
+    parser = MMCIFParser(QUIET=True) if p.lower().endswith((".cif", ".mmcif")) else PDBParser(QUIET=True)
+    struct = parser.get_structure("rec", p)
+
+    lig_copies = {}           # (chain_id, resseq) -> [heavy atoms]
+    rec_atoms = []            # atomos pesados do receptor (tudo menos o proprio ligante)
+    target = ligand_resname.strip().upper()
+    for model in struct:
+        for chain in model:
+            for res in chain:
+                is_lig = res.get_resname().strip().upper() == target
+                heavy = [a for a in res.get_atoms() if a.element.strip().upper() != "H"]
+                if is_lig:
+                    if heavy:
+                        lig_copies[(chain.id, res.id[1])] = heavy
+                else:
+                    rec_atoms.extend(a.get_coord() for a in heavy)
+        break                 # so o 1o modelo
+    if not lig_copies:
+        raise RuntimeError(
+            f"ligante '{ligand_resname}' nao encontrado em {receptor_file} -- nao inventar centro")
+    if not rec_atoms:
+        raise RuntimeError(f"receptor {receptor_file} sem atomos (fora o ligante)")
+
+    tree = cKDTree(np.array(rec_atoms))
+    best = None
+    for (cid, rseq), atoms in lig_copies.items():
+        coords = np.array([a.get_coord() for a in atoms])
+        d, _ = tree.query(coords)
+        frac = float((d < contact_A).mean())
+        mean_d = float(d.mean())
+        ext = coords.max(axis=0) - coords.min(axis=0)
+        box = np.maximum(ext + 2 * padding_A, min_box_A)
+        rec = {
+            "copy_chain": cid, "copy_resseq": int(rseq), "n_ligand_heavy": len(atoms),
+            "frac_contact": round(frac, 2), "immersion_mean_A": round(mean_d, 2),
+            "immersion_min_A": round(float(d.min()), 2),
+            "box_center_A": [round(float(x), 3) for x in coords.mean(axis=0)],
+            "box_size_A": [round(float(x), 1) for x in box],
+            "_score": (frac, -mean_d),
+        }
+        if best is None or rec["_score"] > best["_score"]:
+            best = rec
+    best.pop("_score")
+    best["n_ligand_copies"] = len(lig_copies)
+    best["reference_ligand_resname"] = target
+    best["box_center_frame"] = "receptor_native"
+    best["verdict"] = ("center_ok" if (best["frac_contact"] >= min_frac_contact
+                       and best["immersion_mean_A"] < max_mean_A) else "weak_immersion")
+    return best

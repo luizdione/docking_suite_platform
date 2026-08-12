@@ -1,0 +1,41 @@
+{
+  "schema_version": "2.0",
+  "campaign": "SUB04",
+  "target": "Hs_ACTB",
+  "ligand": "colchicina",
+  "site": "citocalasina_D",
+  "role": "counter_target",
+  "assembly_state": {
+    "required": "monomer",
+    "site_topology": "fenda SD1/SD3 (actina humana, monomero)",
+    "rationale": "Colchicina x actina humana (contra-alvo humano) -- controle negativo de especificidade."
+  },
+  "cofactor_requirement": {
+    "required": [],
+    "rationale": "n/a (controle negativo)."
+  },
+  "experimental_kd": [],
+  "engines": {
+    "primary_pose": "vina_exh32",
+    "affinity_estimator_reliable": false,
+    "affinity_estimator_note": "Vina DeltaG nao discrimina; leitura = imersao/pose."
+  },
+  "validation": {},
+  "control": {
+    "type": "negative",
+    "expected_binding": false,
+    "expected_signal": "pose sem imersao no bolso / redock nao reproduz sitio / DeltaG indistinguivel de decoy",
+    "rationale": "Colchicina x actina humana (contra-alvo humano) -- controle negativo de especificidade."
+  },
+  "docking_prospective": {},
+  "protocols": {},
+  "status": {
+    "docking": "docking do controle negativo pendente (Fase 7.2)"
+  },
+  "provenance": {
+    "mode": "authored",
+    "reproducible": true,
+    "generated_from": "RCSB 1SA0 + ChEMBL CHEMBL107; desenho de controle de especificidade",
+    "generator": "sessao 2026-08-12 (plano tidy-purring-cupcake)"
+  }
+}

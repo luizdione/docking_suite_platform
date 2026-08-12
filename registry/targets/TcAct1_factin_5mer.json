@@ -1,0 +1,71 @@
+{
+  "schema_version": "2.0",
+  "id": "TcAct1_factin_5mer",
+  "aliases": [
+    "TcAct1_5mer"
+  ],
+  "name": "Actina 1 de Trypanosoma cruzi (cepa Dm28c) -- filamento F-actina (pentamero, 5-mer)",
+  "organism": "Trypanosoma cruzi",
+  "category": "parasite",
+  "ortholog_of": "TcAct1",
+  "structure": {
+    "source": "local",
+    "pdb_id": null,
+    "assembly": "F-actin filament (5-mer), threaded 7Q8C (L. major) on 7PM3 frame",
+    "n_protomers_required": 5,
+    "local_file": "docking_project/SUB04/models/factin/TcAct1_factin_5mer_9UE.pdb",
+    "confidence": {},
+    "resolution_A": null,
+    "cofactor_copies": {}
+  },
+  "chemistry": {
+    "keep_cofactors": [],
+    "essential_cofactors": [],
+    "cofactor_source": "none",
+    "nonstandard_residues": [],
+    "protonation_pH": 7.4
+  },
+  "sites": {
+    "jasplaquinolida": {
+      "definition": "explicit_center",
+      "reference_pdb": "7PM3",
+      "reference_ligand_resname": "9UE",
+      "box_center_A": [
+        171.457,
+        164.826,
+        150.572
+      ],
+      "box_center_frame": "receptor_native",
+      "box_size_A": [
+        26.7,
+        29.0,
+        22.8
+      ],
+      "box_policy": "native_ligand_bbox_plus_padding",
+      "site_topology": "interprotomer (juncao de 3 protomeros do filamento)",
+      "geometric_validation": {
+        "frac_contact_4.5A": 0.79,
+        "immersion_mean_A": 3.43,
+        "immersion_min_A": 1.01,
+        "n_ligand_copies": 3,
+        "chosen_copy": "X401",
+        "verdict": "weak_immersion",
+        "method": "site_derivation.validate_embedded_ligand",
+        "note": "Centro = posicao NATIVA da copia mais imersa (central) da jasplaquinolida (9UE) no pentamero -- NAO derivado/superposto, valido por construcao. A imersao (frac/dist media) e ANOTACAO DE QUALIDADE do bolso, nao gate do centro. Contraste com o MONOMERO deste alvo (frac ~0.2-0.3, bolso ausente) confirma o achado 'estado oligomerico como determinante de ligacao'. Vina DeltaG nao discrimina sitio e redock rigido de jasplaquinolida falha (achados estabelecidos) -- a leitura e imersao/pose, nao ranking de score. ATENCAO: frac 0.79 < 0.8 (limitrofe): o modelo threaded deste paralogo deixa a juncao um pouco mais aberta; bolso ainda real (vs monomero), centro nativo valido."
+      },
+      "notes": "Sitio inter-protomerico da jasplaquinolida no PENTAMERO. Modelo por threading estrutural (build_factin_complexes.py no projeto-fonte colaboracoes/tcactina) -- HIPOTESE: actina de tripanossomatideo e majoritariamente monomerica in vivo; tratar como modelo de trabalho. Template geometrico 7Q8C (L. major 2.72 A), referencial 7PM3 (RMSD 1.69 A). O receptor (local_file) JA esta no frame do 9UE embutido -- box_center_A aplica-se diretamente a ele."
+    }
+  },
+  "default_site": "jasplaquinolida",
+  "notes": "Receptor oligomerico (pentamero de F-actina) do paralogo TcAct1, para o sitio inter-protomerico dos ligantes de FILAMENTO (jasplaquinolida). Faloidina NAO e docada (referencia de sitio/controle positivo). Complementa o alvo monomerico 'TcAct1' (mesmo organismo), onde os ligantes de filamento dao imersao fraca -- o contraste mono x penta e o resultado.",
+  "literature": "Pospich 2020 Structure PMID 32084355; Pospich 2021 eLife (7PM3).",
+  "provenance": {
+    "mode": "ingested_model",
+    "reproducible": false,
+    "generated_from": "colaboracoes/tcactina/in_silico/drogas_citoesqueleto/models/factin/TcAct1_factin_5mer_9UE.pdb",
+    "generator": "scratchpad/author_pentamers.py + site_derivation.validate_embedded_ligand",
+    "original_script": "build_factin_complexes.py (projeto-fonte tcactina, nao versionado aqui)"
+  },
+  "n_protomers": 5,
+  "uniprot": "Q4CYQ8"
+}

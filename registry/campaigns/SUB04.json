@@ -14,7 +14,13 @@
     "TcAct2",
     "TcAct3",
     "TcAct4",
-    "Hs_ACTB"
+    "Hs_ACTB",
+    "TcAct1_factin_5mer",
+    "TcAct2_factin_5mer",
+    "TcAct3_factin_5mer",
+    "TcAct4_factin_5mer",
+    "Hs_ACTB_factin_5mer",
+    "tubulin_ab"
   ],
   "primary_targets": [
     "TcAct1",
@@ -22,7 +28,16 @@
     "TcAct3",
     "TcAct4"
   ],
-  "counter_targets": [],
+  "oligomer_targets": [
+    "TcAct1_factin_5mer",
+    "TcAct2_factin_5mer",
+    "TcAct3_factin_5mer",
+    "TcAct4_factin_5mer",
+    "Hs_ACTB_factin_5mer"
+  ],
+  "counter_targets": [
+    "tubulin_ab"
+  ],
   "human_reference_targets": [
     "Hs_ACTB"
   ],
@@ -30,7 +45,8 @@
     "citocalasina-d",
     "jasplaquinolida",
     "latrunculina-a",
-    "latrunculina-b"
+    "latrunculina-b",
+    "colchicina"
   ],
   "default_ligand": "citocalasina-d",
   "protocols": {

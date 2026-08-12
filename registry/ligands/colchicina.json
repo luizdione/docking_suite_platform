@@ -1,0 +1,50 @@
+{
+  "schema_version": "2.0",
+  "id": "colchicina",
+  "name": "colchicina",
+  "display_name": "COLCHICINE",
+  "smiles": "COc1cc2c(c(OC)c1OC)-c1ccc(OC)c(=O)cc1[C@@H](NC(C)=O)CC2",
+  "formula": "C22H25NO6",
+  "mw_g_mol": 399.44,
+  "heavy_atoms": 29,
+  "charge": 0,
+  "class": "ligante de tubulina (sitio da colchicina) -- CONTROLE NEGATIVO para actina",
+  "chemotype_tags": [
+    "tubulin_binder",
+    "colchicine_site",
+    "negative_control"
+  ],
+  "topology": {
+    "is_macrocycle": false,
+    "largest_ring_size": 7,
+    "ring_sizes": [
+      7,
+      7,
+      6
+    ],
+    "n_rings": 3,
+    "expected_active_torsions": 5
+  },
+  "prep": {
+    "optimization": "MMFF94",
+    "protonation": null,
+    "pdbqt": {
+      "tool": "meeko",
+      "rigid_macrocycles": false
+    },
+    "gates": []
+  },
+  "notes": "Farmaco de MICROTUBULO (liga o sitio da colchicina na interface intradimero alfa/beta da tubulina). Papel no estudo: CONTROLE NEGATIVO de especificidade -- NAO deve ligar actina (monomero nem pentamero). Dados de afinidade limpos contra o DIMERO alfa/beta ISOLADO (Kd 58 nM-3.7 uM, ChEMBL CHEMBL107), molecula rigida/drug-like (5 torsoes, 0 violacoes de Ro5, QED 0.83) -- melhor controle de docking que o taxol (que so tem Kd no microtubulo montado e infla score por volume). CCD do analogo no co-cristal 1SA0 = CN2 (DAMA-colchicina); aqui docamos a colchicina livre.",
+  "ccd": null,
+  "reference_pdb": "1SA0",
+  "reference_ligand_resname": "CN2",
+  "reference_resolution_A": 3.58,
+  "chembl_id": "CHEMBL107",
+  "inchikey": "IAKHMKGGTNLKSZ-INIZCTEOSA-N",
+  "provenance": {
+    "mode": "authored",
+    "reproducible": true,
+    "generated_from": "ChEMBL CHEMBL107 (compound_search) + RCSB 1SA0",
+    "generator": "sessao 2026-08-12 (plano tidy-purring-cupcake)"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "schema_version": "2.0",
+  "campaign": "SUB04",
+  "target": "TcAct1_factin_5mer",
+  "ligand": "jasplaquinolida",
+  "site": "jasplaquinolida",
+  "role": "primary_target",
+  "assembly_state": {
+    "required": "filament",
+    "min_protomers": 5,
+    "site_topology": "interprotomer (juncao de 3 protomeros; modelo pentamero)",
+    "rationale": "Jasplaquinolida liga a juncao inter-protomerica da F-actina; sitio inexistente no monomero. Receptor = pentamero threaded (7Q8C on 7PM3)."
+  },
+  "cofactor_requirement": {
+    "required": [],
+    "rationale": "Nao modelado nesta ingestao."
+  },
+  "experimental_kd": [
+    {
+      "value": 0.015,
+      "unit": "uM",
+      "type": "Kd",
+      "state": "F-ACTINA (competitiva com faloidina)",
+      "comparable_to_monomer_prediction": false,
+      "pmid": "8195116",
+      "doi": null,
+      "citation": "Bubb et al. (1994) J Biol Chem 269:14869-71"
+    }
+  ],
+  "engines": {
+    "primary_pose": "structural_transfer_threading",
+    "secondary_pose": "vina_exh32",
+    "affinity_estimator_reliable": false,
+    "affinity_estimator_note": "Vina DeltaG nao discrimina sitio (achado estabelecido)."
+  },
+  "validation": {
+    "geometric_immersion": {
+      "method": "site_derivation.validate_embedded_ligand",
+      "note": "Bolso inter-protomerico VALIDADO no pentamero (imersao da pose nativa do 9UE): center_ok em 4/5 alvos, TcAct1 marginal (frac 0.79). Contraste com o monomero (frac ~0.2-0.3) confirma 'estado oligomerico como determinante'. Redock rigido de jasplaquinolida FALHA (top1 10.5 A) -- leitura por imersao/pose, nao score."
+    }
+  },
+  "docking_prospective": {},
+  "protocols": {},
+  "status": {
+    "docking": "sitio validado geometricamente; docking Vina prospectivo pendente (Fase 7.2)",
+    "note": "Par do braco de OLIGOMERO (nao e controle). Ver alvo TcAct1_factin_5mer."
+  },
+  "provenance": {
+    "mode": "authored",
+    "reproducible": true,
+    "generated_from": "colaboracoes/tcactina models/factin + site_derivation.validate_embedded_ligand",
+    "generator": "sessao 2026-08-12 (plano tidy-purring-cupcake)"
+  }
+}

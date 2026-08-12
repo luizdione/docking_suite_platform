@@ -1,0 +1,67 @@
+{
+  "schema_version": "2.0",
+  "campaign": "SUB04",
+  "target": "tubulin_ab",
+  "ligand": "colchicina",
+  "site": "colchicina",
+  "role": "counter_target",
+  "assembly_state": {
+    "required": "dimer",
+    "min_protomers": 2,
+    "site_topology": "interface intradimero alfa/beta",
+    "rationale": "Sitio da colchicina na interface alfa/beta do heterodimero de tubulina."
+  },
+  "cofactor_requirement": {
+    "required": [
+      "GTP",
+      "GDP",
+      "MG"
+    ],
+    "rationale": "Cofatores do co-cristal 1SA0."
+  },
+  "experimental_kd": [
+    {
+      "value": 0.058,
+      "unit": "uM",
+      "type": "Kd",
+      "state": "heterodimero alfa/beta-tubulina isolado (ITC)",
+      "comparable_to_monomer_prediction": true,
+      "pmid": null,
+      "doi": null,
+      "citation": "ChEMBL CHEMBL107: Kd 58 nM (ITC, dimero) a ~3.7 uM (espectrofluorimetria)."
+    }
+  ],
+  "engines": {
+    "primary_pose": "vina_exh32",
+    "affinity_estimator_reliable": false,
+    "affinity_estimator_note": "Leitura do controle = redock RMSD + ocupacao de sitio, nao DeltaG."
+  },
+  "validation": {
+    "redock_gate": [
+      {
+        "reference_pdb": "1SA0",
+        "reference_ligand_resname": "CN2",
+        "expected": "reproduzir a pose do sitio da colchicina (RMSD baixo)",
+        "passed": null,
+        "rmsd_function": "CalcRMS"
+      }
+    ]
+  },
+  "control": {
+    "type": "positive",
+    "expected_binding": true,
+    "expected_signal": "redock reproduz a pose da colchicina (RMSD baixo); pose imersa no sitio",
+    "rationale": "Braco POSITIVO: colchicina liga o sitio da colchicina da tubulina (1SA0). Ancora a especificidade -- se este falhar, o pipeline de docking esta quebrado."
+  },
+  "docking_prospective": {},
+  "protocols": {},
+  "status": {
+    "docking": "redock do controle positivo pendente (Fase 7.2)"
+  },
+  "provenance": {
+    "mode": "authored",
+    "reproducible": true,
+    "generated_from": "RCSB 1SA0 + ChEMBL CHEMBL107; desenho de controle de especificidade",
+    "generator": "sessao 2026-08-12 (plano tidy-purring-cupcake)"
+  }
+}
