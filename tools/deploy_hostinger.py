@@ -52,6 +52,12 @@ def load_cfg():
     cfg.setdefault("protocol", "ftps")
     cfg.setdefault("port", 21 if cfg["protocol"] == "ftps" else 22)
     cfg.setdefault("remote_dir", "public_html/docking")
+    # Sanitiza o host: aceita colado com esquema/barra (ftp://host/, sftp://host).
+    h = str(cfg.get("host", "")).strip()
+    for pre in ("ftps://", "ftp://", "sftp://", "ssh://", "https://", "http://"):
+        if h.lower().startswith(pre):
+            h = h[len(pre):]
+    cfg["host"] = h.strip("/").split("/")[0]
     missing = [k for k in ("host", "user", "password") if not cfg.get(k)]
     if missing:
         sys.exit(f"[erro] credenciais faltando: {missing}. Crie .hostinger.json "
