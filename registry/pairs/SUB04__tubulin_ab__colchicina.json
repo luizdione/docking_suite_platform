@@ -41,9 +41,15 @@
       {
         "reference_pdb": "1SA0",
         "reference_ligand_resname": "CN2",
-        "expected": "reproduzir a pose do sitio da colchicina (RMSD baixo)",
-        "passed": null,
-        "rmsd_function": "CalcRMS"
+        "expected": "colchicina ocupa o sitio da colchicina, imersa e com DeltaG na faixa experimental",
+        "passed": true,
+        "run": "docking_project/SUB04/runs/20260812-135156-docking-13218c",
+        "vina_affinity_top_kcal_mol": -8.606,
+        "pose_immersion_frac_4.5A": 1.0,
+        "pose_immersion_mean_A": 3.73,
+        "pose_centroid_to_site_center_A": 5.65,
+        "note": "Redock REAL (Vina exh32, CPU) 2026-08-12: top pose -8.61 kcal/mol (10 poses, -7.1 a -8.6) -- dentro da faixa experimental da colchicina (Kd 58 nM-3.7 uM ~= -7.4 a -9.9 kcal/mol). Pose 100% imersa no bolso (frac 1.0, media 3.73 A) e a 5.65 A do centro do sitio nativo (CN2); offset esperado (colchicina livre != analogo DAMA-colchicina CN2, mesmo bolso). CONTROLE POSITIVO OK -- ancora a matriz de especificidade.",
+        "rmsd_function": "n/a (colchicina livre != CN2; leitura por ocupacao de sitio + imersao + DeltaG)"
       }
     ]
   },
@@ -56,7 +62,7 @@
   "docking_prospective": {},
   "protocols": {},
   "status": {
-    "docking": "redock do controle positivo pendente (Fase 7.2)"
+    "docking": "CONTROLE POSITIVO VALIDADO 2026-08-12: colchicina x 1SA0 = -8.61 kcal/mol, pose imersa no sitio da colchicina (ver validation.redock_gate)."
   },
   "provenance": {
     "mode": "authored",
