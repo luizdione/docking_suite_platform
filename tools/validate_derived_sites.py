@@ -53,7 +53,7 @@ def main():
     args = ap.parse_args()
     DL_DIR.mkdir(exist_ok=True)
 
-    rows, ok, weak, blocked = [], 0, 0, 0
+    rows, ok, local, weak, blocked = [], 0, 0, 0, 0
     print(f"{'ALVO':9}{'SITIO':22}{'ref':6}{'supRMSD':>8}{'imersao':>9}{'contato':>8}  veredito")
     for tid, sname, site, cif in _iter_derived(args.campaign):
         rec = {"target": tid, "site": sname, "ref": site.get("reference_pdb")}
@@ -72,6 +72,8 @@ def main():
         v = g.get("verdict")
         if v == "center_ok":
             ok += 1
+        elif v == "center_ok_local":
+            local += 1
         elif v == "weak_immersion":
             weak += 1
         else:
@@ -84,13 +86,15 @@ def main():
             print(f"{tid:9}{sname:22}{str(rec['ref']):6}{g.get('superposition_rmsd_A',''):>8}"
                   f"{'':>9}{'':>8}  {v}")
 
-    print(f"\ncenter_ok: {ok}   imersao_fraca: {weak}   bloqueado: {blocked}   total: {len(rows)}")
+    print(f"\ncenter_ok: {ok}   center_ok_local: {local}   imersao_fraca: {weak}   "
+          f"bloqueado: {blocked}   total: {len(rows)}")
 
     if args.write:
         written = 0
         for r in rows:
-            if r.get("verdict") != "center_ok":
+            if r.get("verdict") not in ("center_ok", "center_ok_local"):
                 continue
+            is_local = r["verdict"] == "center_ok_local"
             path = registry.REGISTRY_DIR / "targets" / f"{r['target']}.json"
             obj = json.loads(path.read_text(encoding="utf-8"))
             s = obj["sites"][r["site"]]
@@ -99,21 +103,40 @@ def main():
             s["box_center_frame"] = "target"
             s["superposition_rmsd_A"] = r["superposition_rmsd_A"]
             s["n_ca_matched"] = r["n_ca_matched"]
-            s["geometric_validation"] = {
+            s["superposition_mode"] = r.get("superposition_mode", "global")
+            gv = {
                 "frac_contact_4.5A": r["frac_contact"],
                 "immersion_mean_A": r["immersion_mean_A"],
                 "immersion_min_A": r["immersion_min_A"],
                 "method": "site_derivation.geometric_validation",
-                "note": ("Centro por superposicao estrutural (target_frame, receptor "
-                         "AlphaFold intocado); validado GEOMETRICAMENTE (pose de "
-                         "referencia enterrada no bolso). Redock rigido NAO reproduz a "
-                         "pose em modelo AlphaFold apo (limitacao documentada) -- para "
-                         "pose exata usar docking flexivel/template holo."),
             }
+            if is_local:
+                gv["superposition_mode"] = "local_pocket"
+                gv["local_rmsd_A"] = r.get("local_rmsd_A")
+                gv["n_ca_local"] = r.get("n_ca_local")
+                gv["note"] = (
+                    "RESGATADO por superposicao LOCAL do bolso: a dobra GLOBAL diverge "
+                    f"(RMSD global {r['superposition_rmsd_A']} A > 3 A, paralogo com "
+                    "insercoes fora do sitio), mas o bolso e localmente conservado "
+                    f"(RMSD local {r.get('local_rmsd_A')} A sobre {r.get('n_ca_local')} "
+                    "CAs) e a pose de referencia continua IMERSA nos atomos reais do "
+                    "modelo (target_frame, receptor AlphaFold intocado). Redock rigido "
+                    "NAO reproduz pose em modelo apo -- para pose exata usar docking "
+                    "flexivel/template holo.")
+            else:
+                gv["superposition_mode"] = "global"
+                gv["note"] = (
+                    "Centro por superposicao estrutural GLOBAL (target_frame, receptor "
+                    "AlphaFold intocado); validado GEOMETRICAMENTE (pose de referencia "
+                    "enterrada no bolso). Redock rigido NAO reproduz a pose em modelo "
+                    "AlphaFold apo (limitacao documentada) -- para pose exata usar "
+                    "docking flexivel/template holo.")
+            s["geometric_validation"] = gv
             path.write_text(json.dumps(obj, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
             written += 1
-        print(f"\nPERSISTIDO: {written} sitios (box_center_A target_frame). "
-              f"Rode 'python registry.py' e os gates. Os demais seguem fail-loud.")
+        print(f"\nPERSISTIDO: {written} sitios (box_center_A target_frame; {local} por "
+              f"superposicao local). Rode 'python registry.py' e os gates. "
+              f"Os demais seguem fail-loud.")
     else:
         print("\nDRY-RUN: nada escrito. Use --write para persistir os center_ok.")
 

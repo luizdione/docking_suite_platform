@@ -39,9 +39,9 @@
       "reference_pdb": "3EKS",
       "reference_ligand_resname": "HET CY9 copia na cadeia A (94 % enterrada, 1 protomeros ['A']); copias no arquivo: 1",
       "box_size_A": [
-        25.0,
-        25.0,
-        25.0
+        26.2,
+        25.7,
+        22.5
       ],
       "box_policy": "xtal_bbox_plus_padding",
       "cutoff_A": 4.5,
@@ -108,16 +108,35 @@
           "target_residue": "G"
         }
       ],
-      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 3EKS. 8 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2)."
+      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 3EKS. 8 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2).",
+      "box_center_A": [
+        -14.862,
+        -10.063,
+        6.956
+      ],
+      "box_center_frame": "target",
+      "superposition_rmsd_A": 3.441,
+      "n_ca_matched": 361,
+      "superposition_mode": "local_pocket",
+      "geometric_validation": {
+        "frac_contact_4.5A": 1.0,
+        "immersion_mean_A": 2.35,
+        "immersion_min_A": 0.53,
+        "method": "site_derivation.geometric_validation",
+        "superposition_mode": "local_pocket",
+        "local_rmsd_A": 1.916,
+        "n_ca_local": 68,
+        "note": "RESGATADO por superposicao LOCAL do bolso: a dobra GLOBAL diverge (RMSD global 3.441 A > 3 A, paralogo com insercoes fora do sitio), mas o bolso e localmente conservado (RMSD local 1.916 A sobre 68 CAs) e a pose de referencia continua IMERSA nos atomos reais do modelo (target_frame, receptor AlphaFold intocado). Redock rigido NAO reproduz pose em modelo apo -- para pose exata usar docking flexivel/template holo."
+      }
     },
     "citocalasina_D_Fform": {
       "definition": "derived_from_reference_complex",
       "reference_pdb": "9L2N",
       "reference_ligand_resname": "HET CY9 copia na cadeia A (91 % enterrada, 2 protomeros ['A', 'B']); copias no arquivo: 1",
       "box_size_A": [
-        25.0,
-        25.0,
-        25.0
+        27.1,
+        25.9,
+        22.5
       ],
       "box_policy": "xtal_bbox_plus_padding",
       "cutoff_A": 4.5,
@@ -191,7 +210,26 @@
           "target_residue": "M"
         }
       ],
-      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 9L2N. 9 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2)."
+      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 9L2N. 9 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2).",
+      "box_center_A": [
+        -15.206,
+        -10.322,
+        6.355
+      ],
+      "box_center_frame": "target",
+      "superposition_rmsd_A": 3.517,
+      "n_ca_matched": 350,
+      "superposition_mode": "local_pocket",
+      "geometric_validation": {
+        "frac_contact_4.5A": 0.89,
+        "immersion_mean_A": 2.67,
+        "immersion_min_A": 0.32,
+        "method": "site_derivation.geometric_validation",
+        "superposition_mode": "local_pocket",
+        "local_rmsd_A": 1.829,
+        "n_ca_local": 66,
+        "note": "RESGATADO por superposicao LOCAL do bolso: a dobra GLOBAL diverge (RMSD global 3.517 A > 3 A, paralogo com insercoes fora do sitio), mas o bolso e localmente conservado (RMSD local 1.829 A sobre 66 CAs) e a pose de referencia continua IMERSA nos atomos reais do modelo (target_frame, receptor AlphaFold intocado). Redock rigido NAO reproduz pose em modelo apo -- para pose exata usar docking flexivel/template holo."
+      }
     },
     "jasplaquinolida": {
       "definition": "derived_from_reference_complex",

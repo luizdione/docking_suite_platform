@@ -411,8 +411,10 @@
         "immersion_mean_A": 2.95,
         "immersion_min_A": 0.45,
         "method": "site_derivation.geometric_validation",
-        "note": "Centro por superposicao estrutural (target_frame, receptor AlphaFold intocado); validado GEOMETRICAMENTE (pose de referencia enterrada no bolso). Redock rigido NAO reproduz a pose em modelo AlphaFold apo (limitacao documentada) -- para pose exata usar docking flexivel/template holo."
-      }
+        "superposition_mode": "global",
+        "note": "Centro por superposicao estrutural GLOBAL (target_frame, receptor AlphaFold intocado); validado GEOMETRICAMENTE (pose de referencia enterrada no bolso). Redock rigido NAO reproduz a pose em modelo AlphaFold apo (limitacao documentada) -- para pose exata usar docking flexivel/template holo."
+      },
+      "superposition_mode": "global"
     }
   },
   "default_site": "citocalasina_D",

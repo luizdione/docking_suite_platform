@@ -268,8 +268,10 @@
         "immersion_mean_A": 2.11,
         "immersion_min_A": 0.46,
         "method": "site_derivation.geometric_validation",
-        "note": "Centro por superposicao estrutural (target_frame, receptor AlphaFold intocado); validado GEOMETRICAMENTE (pose de referencia enterrada no bolso). Redock rigido NAO reproduz a pose em modelo AlphaFold apo (limitacao documentada) -- para pose exata usar docking flexivel/template holo."
-      }
+        "superposition_mode": "global",
+        "note": "Centro por superposicao estrutural GLOBAL (target_frame, receptor AlphaFold intocado); validado GEOMETRICAMENTE (pose de referencia enterrada no bolso). Redock rigido NAO reproduz a pose em modelo AlphaFold apo (limitacao documentada) -- para pose exata usar docking flexivel/template holo."
+      },
+      "superposition_mode": "global"
     },
     "jasplaquinolida": {
       "definition": "derived_from_reference_complex",
@@ -447,8 +449,10 @@
         "immersion_mean_A": 2.75,
         "immersion_min_A": 1.01,
         "method": "site_derivation.geometric_validation",
-        "note": "Centro por superposicao estrutural (target_frame, receptor AlphaFold intocado); validado GEOMETRICAMENTE (pose de referencia enterrada no bolso). Redock rigido NAO reproduz a pose em modelo AlphaFold apo (limitacao documentada) -- para pose exata usar docking flexivel/template holo."
-      }
+        "superposition_mode": "global",
+        "note": "Centro por superposicao estrutural GLOBAL (target_frame, receptor AlphaFold intocado); validado GEOMETRICAMENTE (pose de referencia enterrada no bolso). Redock rigido NAO reproduz a pose em modelo AlphaFold apo (limitacao documentada) -- para pose exata usar docking flexivel/template holo."
+      },
+      "superposition_mode": "global"
     }
   },
   "default_site": "citocalasina_D",
