@@ -12,9 +12,12 @@ Discrimina bolso presente x ausente -- ex.: jasplaquinolida (liga FILAMENTO) da
 imersao fraca num modelo MONOMERICO, biologicamente correto.
 
 DRY-RUN por padrao (so relata). --write persiste box_center_A (target_frame),
-box_size_A e as metricas nos sitios com veredito 'center_ok', com proveniencia
-honesta. Sitios sem veredito 'center_ok' seguem SEM box_center_A -> fail-loud no
-runner (nunca centro-de-massa em silencio).
+box_size_A e as metricas nos sitios com veredito 'center_ok'/'center_ok_local', com
+proveniencia honesta. Sitios sem centro seguem SEM box_center_A -> fail-loud no
+runner (nunca centro-de-massa em silencio), MAS ganham um bloco 'derivation_status'
+que documenta POR QUE foram bloqueados (weak_immersion = liga o FILAMENTO, nao o
+monomero; blocked_superposition = divergencia ESTRUTURAL real do bolso) -- fail-loud
+autoexplicativo e auditavel, sem afrouxar o gate.
 
 Uso:
     python tools/validate_derived_sites.py --campaign SUB04           # relatorio
@@ -90,53 +93,92 @@ def main():
           f"bloqueado: {blocked}   total: {len(rows)}")
 
     if args.write:
-        written = 0
+        written, documented = 0, 0
         for r in rows:
-            if r.get("verdict") not in ("center_ok", "center_ok_local"):
-                continue
-            is_local = r["verdict"] == "center_ok_local"
+            v = r.get("verdict")
             path = registry.REGISTRY_DIR / "targets" / f"{r['target']}.json"
-            obj = json.loads(path.read_text(encoding="utf-8"))
-            s = obj["sites"][r["site"]]
-            s["box_center_A"] = r["box_center_A_target_frame"]
-            s["box_size_A"] = r["box_size_A"]
-            s["box_center_frame"] = "target"
-            s["superposition_rmsd_A"] = r["superposition_rmsd_A"]
-            s["n_ca_matched"] = r["n_ca_matched"]
-            s["superposition_mode"] = r.get("superposition_mode", "global")
-            gv = {
-                "frac_contact_4.5A": r["frac_contact"],
-                "immersion_mean_A": r["immersion_mean_A"],
-                "immersion_min_A": r["immersion_min_A"],
-                "method": "site_derivation.geometric_validation",
-            }
-            if is_local:
-                gv["superposition_mode"] = "local_pocket"
-                gv["local_rmsd_A"] = r.get("local_rmsd_A")
-                gv["n_ca_local"] = r.get("n_ca_local")
-                gv["note"] = (
-                    "RESGATADO por superposicao LOCAL do bolso: a dobra GLOBAL diverge "
-                    f"(RMSD global {r['superposition_rmsd_A']} A > 3 A, paralogo com "
-                    "insercoes fora do sitio), mas o bolso e localmente conservado "
-                    f"(RMSD local {r.get('local_rmsd_A')} A sobre {r.get('n_ca_local')} "
-                    "CAs) e a pose de referencia continua IMERSA nos atomos reais do "
-                    "modelo (target_frame, receptor AlphaFold intocado). Redock rigido "
-                    "NAO reproduz pose em modelo apo -- para pose exata usar docking "
-                    "flexivel/template holo.")
-            else:
-                gv["superposition_mode"] = "global"
-                gv["note"] = (
-                    "Centro por superposicao estrutural GLOBAL (target_frame, receptor "
-                    "AlphaFold intocado); validado GEOMETRICAMENTE (pose de referencia "
-                    "enterrada no bolso). Redock rigido NAO reproduz a pose em modelo "
-                    "AlphaFold apo (limitacao documentada) -- para pose exata usar "
-                    "docking flexivel/template holo.")
-            s["geometric_validation"] = gv
-            path.write_text(json.dumps(obj, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-            written += 1
-        print(f"\nPERSISTIDO: {written} sitios (box_center_A target_frame; {local} por "
-              f"superposicao local). Rode 'python registry.py' e os gates. "
-              f"Os demais seguem fail-loud.")
+            if v in ("center_ok", "center_ok_local"):
+                is_local = v == "center_ok_local"
+                obj = json.loads(path.read_text(encoding="utf-8"))
+                s = obj["sites"][r["site"]]
+                s["box_center_A"] = r["box_center_A_target_frame"]
+                s["box_size_A"] = r["box_size_A"]
+                s["box_center_frame"] = "target"
+                s["superposition_rmsd_A"] = r["superposition_rmsd_A"]
+                s["n_ca_matched"] = r["n_ca_matched"]
+                s["superposition_mode"] = r.get("superposition_mode", "global")
+                gv = {
+                    "frac_contact_4.5A": r["frac_contact"],
+                    "immersion_mean_A": r["immersion_mean_A"],
+                    "immersion_min_A": r["immersion_min_A"],
+                    "method": "site_derivation.geometric_validation",
+                }
+                if is_local:
+                    gv["superposition_mode"] = "local_pocket"
+                    gv["local_rmsd_A"] = r.get("local_rmsd_A")
+                    gv["n_ca_local"] = r.get("n_ca_local")
+                    gv["note"] = (
+                        "RESGATADO por superposicao LOCAL do bolso: a dobra GLOBAL diverge "
+                        f"(RMSD global {r['superposition_rmsd_A']} A > 3 A, paralogo com "
+                        "insercoes fora do sitio), mas o bolso e localmente conservado "
+                        f"(RMSD local {r.get('local_rmsd_A')} A sobre {r.get('n_ca_local')} "
+                        "CAs) e a pose de referencia continua IMERSA nos atomos reais do "
+                        "modelo (target_frame, receptor AlphaFold intocado). Redock rigido "
+                        "NAO reproduz pose em modelo apo -- para pose exata usar docking "
+                        "flexivel/template holo.")
+                else:
+                    gv["superposition_mode"] = "global"
+                    gv["note"] = (
+                        "Centro por superposicao estrutural GLOBAL (target_frame, receptor "
+                        "AlphaFold intocado); validado GEOMETRICAMENTE (pose de referencia "
+                        "enterrada no bolso). Redock rigido NAO reproduz a pose em modelo "
+                        "AlphaFold apo (limitacao documentada) -- para pose exata usar "
+                        "docking flexivel/template holo.")
+                s["geometric_validation"] = gv
+                s.pop("derivation_status", None)   # aprovado agora: limpa status de bloqueio antigo
+                path.write_text(json.dumps(obj, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+                written += 1
+            elif v in ("weak_immersion", "blocked_superposition"):
+                # SEM box_center_A (fail-loud preservado), mas documenta POR QUE bloqueou
+                obj = json.loads(path.read_text(encoding="utf-8"))
+                s = obj["sites"][r["site"]]
+                ds = {
+                    "verdict": v,
+                    "has_center": False,
+                    "method": "site_derivation.geometric_validation",
+                    "evaluated_pocket_r_A": 12.0,
+                    "superposition_rmsd_A": r.get("superposition_rmsd_A"),
+                    "local_rmsd_A": r.get("local_rmsd_A"),
+                    "n_ca_local": r.get("n_ca_local"),
+                    "immersion_mean_A": r.get("immersion_mean_A"),
+                    "frac_contact_4.5A": r.get("frac_contact"),
+                }
+                if v == "weak_immersion":
+                    ds["reason"] = (
+                        "SEM box_center_A (fail-loud proposital): a pose de referencia "
+                        "transformada NAO imerge no bolso do modelo MONOMERICO "
+                        f"(frac_contact {r.get('frac_contact')} < 0.8; imersao media "
+                        f"{r.get('immersion_mean_A')} A). Padrao de ligante que ocupa a "
+                        "INTERFACE do FILAMENTO (ex.: jasplaquinolida/faloidina), nao o "
+                        "monomero -- biologicamente correto. Para docar, usar o braco "
+                        "oligomerico (*_factin_5mer), nao este monomero.")
+                else:
+                    ds["reason"] = (
+                        "SEM box_center_A (fail-loud proposital): divergencia ESTRUTURAL do "
+                        f"bolso -- nem a superposicao GLOBAL (RMSD {r.get('superposition_rmsd_A')}"
+                        f" A) nem a LOCAL do bolso (RMSD local {r.get('local_rmsd_A')} A > 2.5) "
+                        "ajustam a referencia ao modelo do paralogo; a divergencia esta NOS "
+                        "residuos de contato (o RMSD local piora ao apertar o raio do bolso), "
+                        "consistente com 'divergent_residues_vs_consensus'. Transferencia de "
+                        "centro por homologia INADEQUADA aqui: para docar, usar deteccao de "
+                        "bolso ab initio (fpocket/P2Rank) ou blind/flexivel, nao este pipeline.")
+                s["derivation_status"] = ds
+                path.write_text(json.dumps(obj, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+                documented += 1
+            # blocked_no_cif / blocked:<Exception>: erro transitorio de dados -> nao persistir
+        print(f"\nPERSISTIDO: {written} sitios com box_center_A ({local} por superposicao "
+              f"local). DOCUMENTADO: {documented} sitios sem centro com 'derivation_status' "
+              f"(fail-loud autoexplicativo). Rode 'python registry.py' e os gates.")
     else:
         print("\nDRY-RUN: nada escrito. Use --write para persistir os center_ok.")
 

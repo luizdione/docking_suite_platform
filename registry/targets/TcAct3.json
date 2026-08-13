@@ -136,7 +136,19 @@
           "target_residue": "S"
         }
       ],
-      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 3EKS. 12 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2)."
+      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 3EKS. 12 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2).",
+      "derivation_status": {
+        "verdict": "blocked_superposition",
+        "has_center": false,
+        "method": "site_derivation.geometric_validation",
+        "evaluated_pocket_r_A": 12.0,
+        "superposition_rmsd_A": 4.03,
+        "local_rmsd_A": 3.486,
+        "n_ca_local": 68,
+        "immersion_mean_A": 2.26,
+        "frac_contact_4.5A": 0.95,
+        "reason": "SEM box_center_A (fail-loud proposital): divergencia ESTRUTURAL do bolso -- nem a superposicao GLOBAL (RMSD 4.03 A) nem a LOCAL do bolso (RMSD local 3.486 A > 2.5) ajustam a referencia ao modelo do paralogo; a divergencia esta NOS residuos de contato (o RMSD local piora ao apertar o raio do bolso), consistente com 'divergent_residues_vs_consensus'. Transferencia de centro por homologia INADEQUADA aqui: para docar, usar deteccao de bolso ab initio (fpocket/P2Rank) ou blind/flexivel, nao este pipeline."
+      }
     },
     "citocalasina_D_Fform": {
       "definition": "derived_from_reference_complex",
@@ -347,7 +359,19 @@
           "target_residue": "N"
         }
       ],
-      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 7PM3. 8 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2)."
+      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 7PM3. 8 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2).",
+      "derivation_status": {
+        "verdict": "weak_immersion",
+        "has_center": false,
+        "method": "site_derivation.geometric_validation",
+        "evaluated_pocket_r_A": 12.0,
+        "superposition_rmsd_A": 3.411,
+        "local_rmsd_A": 0.98,
+        "n_ca_local": 34,
+        "immersion_mean_A": 5.91,
+        "frac_contact_4.5A": 0.45,
+        "reason": "SEM box_center_A (fail-loud proposital): a pose de referencia transformada NAO imerge no bolso do modelo MONOMERICO (frac_contact 0.45 < 0.8; imersao media 5.91 A). Padrao de ligante que ocupa a INTERFACE do FILAMENTO (ex.: jasplaquinolida/faloidina), nao o monomero -- biologicamente correto. Para docar, usar o braco oligomerico (*_factin_5mer), nao este monomero."
+      }
     },
     "faloidina": {
       "definition": "derived_from_reference_complex",
@@ -423,7 +447,19 @@
           "target_residue": "D"
         }
       ],
-      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 7BTI. 8 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2)."
+      "notes": "Sitio derivado de contatos <= 4.5 A do ligante no co-cristal 7BTI. 8 residuo(s) divergem do consenso multi-especie neste alvo. box_size_A e PLACEHOLDER (convencao da plataforma, nao medido na fonte) -- recalcular a partir do ligante real antes de rodar docking de verdade (Fase 7.2).",
+      "derivation_status": {
+        "verdict": "weak_immersion",
+        "has_center": false,
+        "method": "site_derivation.geometric_validation",
+        "evaluated_pocket_r_A": 12.0,
+        "superposition_rmsd_A": 3.591,
+        "local_rmsd_A": 1.095,
+        "n_ca_local": 39,
+        "immersion_mean_A": 5.3,
+        "frac_contact_4.5A": 0.44,
+        "reason": "SEM box_center_A (fail-loud proposital): a pose de referencia transformada NAO imerge no bolso do modelo MONOMERICO (frac_contact 0.44 < 0.8; imersao media 5.3 A). Padrao de ligante que ocupa a INTERFACE do FILAMENTO (ex.: jasplaquinolida/faloidina), nao o monomero -- biologicamente correto. Para docar, usar o braco oligomerico (*_factin_5mer), nao este monomero."
+      }
     },
     "latrunculina": {
       "definition": "derived_from_reference_complex",
