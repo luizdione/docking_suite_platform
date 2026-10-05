@@ -506,7 +506,7 @@ def binding_mode_status_route():
     import json as _json, datetime as _dt
     # Diretorio do kit (override por env NQ_KIT_REDOCK; default no projeto do paper).
     kit = os.environ.get("NQ_KIT_REDOCK") or (
-        r"C:\Users\luizd\OneDrive\Data_Science\Projetos\2-SNC-NQ"
+        r"C:\Users\luizd\OneDrive\Data_Science\Projetos\2-snc-nq2"
         r"\montagem_resultados\fig13_3d_kit\redock")
     kitp = Path(kit)
 

@@ -46,7 +46,7 @@ PY    = r"C:\Users\luizd\miniforge3\envs\datascience\python.exe"
 ENVDIR = r"C:\Users\luizd\miniforge3\envs\datascience"
 DOCK  = Path(r"C:\Users\luizd\OneDrive\Data_Science\Projetos\docking")
 MDSIM = DOCK / "md_simulation.py"
-KIT   = Path(r"C:\Users\luizd\OneDrive\Data_Science\Projetos\2-SNC-NQ"
+KIT   = Path(r"C:\Users\luizd\OneDrive\Data_Science\Projetos\2-snc-nq2"
              r"\montagem_resultados\fig13_3d_kit")
 ABM   = KIT / "analyze_binding_mode.py"
 WORK  = DOCK / "docking_project" / "figures" / "md_clean"

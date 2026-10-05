@@ -237,7 +237,7 @@ Sempre priorize profundidade científica, integração de evidências, interpret
 
 > Regras de infraestrutura e processo para quem trabalha **neste repositório** (a plataforma
 > computacional, par do manuscrito SUB01 / ACS Infectious Diseases). Não confundir esta raiz
-> (`Projetos/docking`) com a do paper (`Projetos/2-SNC-NQ`). Parâmetros científicos e narrativa
+> (`Projetos/docking`) com a do paper (`Projetos/2-snc-nq2`; era `2-SNC-NQ` até 2026-10-02). Parâmetros científicos e narrativa
 > mecanística ficam em `docs/PROTOCOLO_CIENTIFICO.md` e `README.md`.
 
 ## 1. GPU compartilhada com o LILO/Ollama — regra inegociável

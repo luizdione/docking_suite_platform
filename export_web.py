@@ -34,7 +34,7 @@ VIEWER_DIR = SCRIPT_DIR / "web" / "viewer"
 
 # --- Projeto do paper (fonte de verdade cientifica) --------------------------
 # Default historico do SUB01; build_viewer() resolve por campanha (ver _paper_figs_dir).
-PAPER_DIR = Path(os.environ.get("NQ_PAPER_DIR", r"C:\Users\luizd\OneDrive\Data_Science\Projetos\2-SNC-NQ"))
+PAPER_DIR = Path(os.environ.get("NQ_PAPER_DIR", r"C:\Users\luizd\OneDrive\Data_Science\Projetos\2-snc-nq2"))
 PAPER_FIGS_DIR = PAPER_DIR / "PAPER" / "figures"
 SUBMISSION_PDF_CANDIDATES = [
     Path(r"C:\Users\luizd\OneDrive\Data_Science\Projetos\artigos_submissao\naftoquinona_2SCN-NQ\2scnnq_acs_submission.pdf"),

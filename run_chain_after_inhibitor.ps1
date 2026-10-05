@@ -14,7 +14,7 @@ Rodar como ADMIN (para o power-cap):
 $DOCK   = "C:\Users\luizd\OneDrive\Data_Science\Projetos\docking"
 $Py     = "$env:USERPROFILE\miniforge3\envs\datascience\python.exe"
 $SUMMARY= "$DOCK\docking_project\figures\md_clean\md_TcTR_inhibitor_rmsd_summary.json"
-$PIPE   = "C:\Users\luizd\OneDrive\Data_Science\Projetos\2-SNC-NQ\montagem_resultados\fig13_3d_kit\post_50ns_pipeline.py"
+$PIPE   = "C:\Users\luizd\OneDrive\Data_Science\Projetos\2-snc-nq2\montagem_resultados\fig13_3d_kit\post_50ns_pipeline.py"
 $LIG_SUB= "$DOCK\docking_project\figures\smoke_test_fad\lig_TcTR_fadsite.pdb"
 $LOG    = "$DOCK\chain_log.txt"
 

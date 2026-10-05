@@ -176,7 +176,7 @@ def verify_admet(campaign, ligand):
 
 def _kit_dir():
     kit = os.environ.get("NQ_KIT_REDOCK") or (
-        r"C:\Users\luizd\OneDrive\Data_Science\Projetos\2-SNC-NQ"
+        r"C:\Users\luizd\OneDrive\Data_Science\Projetos\2-snc-nq2"
         r"\montagem_resultados\fig13_3d_kit\redock")
     return Path(kit)
 
